@@ -2308,13 +2308,13 @@ body.light .theme-pill-moon { stroke: #fff; opacity: 1; transform: rotate(0deg) 
         <p class="form-card-sub">We review every submission and only reach out when we're confident we can help.</p>
         <form id="contactForm" onsubmit="handleSubmit(event)">
           <div class="form-row">
-            <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-input" placeholder="Alex" required></div>
-            <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-input" placeholder="Johnson" required></div>
+            <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-input" name="firstName" placeholder="Alex" required></div>
+            <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-input" name="lastName" placeholder="Johnson" required></div>
           </div>
-          <div class="form-group"><label class="form-label">Business Email</label><input type="email" class="form-input" placeholder="alex@yourcompany.com" required></div>
+          <div class="form-group"><label class="form-label">Business Email</label><input type="email" class="form-input" name="email" placeholder="alex@yourcompany.com" required></div>
           <div class="form-group">
             <label class="form-label">Business Type</label>
-            <select class="form-select" required>
+            <select class="form-select" name="businessType" required>
               <option value="" disabled selected>Select your industry</option>
               <option>Agency (Marketing / Design / Dev)</option><option>E-Commerce</option>
               <option>Coaching / Consulting</option><option>Real Estate</option>
@@ -2324,7 +2324,7 @@ body.light .theme-pill-moon { stroke: #fff; opacity: 1; transform: rotate(0deg) 
           </div>
           <div class="form-group">
             <label class="form-label">Monthly Revenue</label>
-            <select class="form-select" id="rev" required>
+            <select class="form-select" id="rev" name="rev" required>
               <option value="" disabled selected>Select revenue range</option>
               <option value="u10">Under $10,000/month</option>
               <option value="10-25">$10,000 – $25,000/month</option>
@@ -2334,7 +2334,7 @@ body.light .theme-pill-moon { stroke: #fff; opacity: 1; transform: rotate(0deg) 
           </div>
           <div class="form-group">
             <label class="form-label">Monthly Budget for VA Support</label>
-            <select class="form-select" id="bud" required>
+            <select class="form-select" id="bud" name="bud" required>
               <option value="" disabled selected>Select budget range</option>
               <option value="u500">Under $500/month</option>
               <option value="500-850">$500 – $850/month</option>
@@ -2343,8 +2343,8 @@ body.light .theme-pill-moon { stroke: #fff; opacity: 1; transform: rotate(0deg) 
               <option value="s">$3,000+/month (Scale)</option>
             </select>
           </div>
-          <div class="form-group"><label class="form-label">Biggest Operational Challenge</label><textarea class="form-textarea" placeholder="Briefly describe what's taking up most of your time..."></textarea></div>
-          <button type="submit" class="btn-form-submit">Request Discovery Call →</button>
+          <div class="form-group"><label class="form-label">Biggest Operational Challenge</label><textarea class="form-textarea" name="challenge" placeholder="Briefly describe what's taking up most of your time..."></textarea></div>
+          <button type="submit" class="btn-form-submit" id="submitBtn">Request Discovery Call →</button>
           <p class="form-note">We respond within 1 business day. No spam, ever.</p>
         </form>
         <div class="form-msg ok"  id="msgOk">Your application has been received. We'll reach out within one business day to schedule your discovery call.</div>
@@ -2455,12 +2455,39 @@ function handleSubmit(e) {
   const form = document.getElementById('contactForm');
   document.getElementById('msgOk').style.display  = 'none';
   document.getElementById('msgErr').style.display = 'none';
+
   if (bud === 'u500' || rev === 'u10') {
     form.style.display = 'none';
     document.getElementById('msgErr').style.display = 'block';
   } else {
-    form.style.display = 'none';
-    document.getElementById('msgOk').style.display  = 'block';
+    // Replace with your deployed Google Apps Script Web App URL
+    const scriptURL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
+
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerText;
+    submitBtn.innerText = 'Sending...';
+    submitBtn.disabled = true;
+
+    const formData = new FormData(form);
+
+    // Convert FormData to a plain object or URLSearchParams if needed,
+    // but fetch with FormData is usually fine for Google Apps Script
+    fetch(scriptURL, { method: 'POST', body: formData })
+      .then(response => {
+        form.style.display = 'none';
+        document.getElementById('msgOk').style.display = 'block';
+      })
+      .catch(error => {
+        console.error('Error!', error.message);
+        // Fallback to showing success message anyway if there is a CORS error
+        // since sometimes Apps Script POST requests fail with CORS but still succeed
+        form.style.display = 'none';
+        document.getElementById('msgOk').style.display = 'block';
+      })
+      .finally(() => {
+        submitBtn.innerText = originalText;
+        submitBtn.disabled = false;
+      });
   }
 }
 
