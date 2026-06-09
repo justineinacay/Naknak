@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>the job collectives™ — Building your team beyond borders.</title>
@@ -1474,7 +1475,6 @@ body.light .theme-pill-moon { stroke: #fff; opacity: 1; transform: rotate(0deg) 
     <li><a href="#how">How It Works</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#portal" style="color:var(--teal) !important;">Portal</a></li>
-    <li><a href="#jobs">Jobs</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
 
@@ -2308,13 +2308,13 @@ body.light .theme-pill-moon { stroke: #fff; opacity: 1; transform: rotate(0deg) 
         <p class="form-card-sub">We review every submission and only reach out when we're confident we can help.</p>
         <form id="contactForm" onsubmit="handleSubmit(event)">
           <div class="form-row">
-            <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-input" name="firstName" placeholder="Alex" required></div>
-            <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-input" name="lastName" placeholder="Johnson" required></div>
+            <div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-input" placeholder="Alex" required></div>
+            <div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-input" placeholder="Johnson" required></div>
           </div>
-          <div class="form-group"><label class="form-label">Business Email</label><input type="email" class="form-input" name="email" placeholder="alex@yourcompany.com" required></div>
+          <div class="form-group"><label class="form-label">Business Email</label><input type="email" class="form-input" placeholder="alex@yourcompany.com" required></div>
           <div class="form-group">
             <label class="form-label">Business Type</label>
-            <select class="form-select" name="businessType" required>
+            <select class="form-select" required>
               <option value="" disabled selected>Select your industry</option>
               <option>Agency (Marketing / Design / Dev)</option><option>E-Commerce</option>
               <option>Coaching / Consulting</option><option>Real Estate</option>
@@ -2324,7 +2324,7 @@ body.light .theme-pill-moon { stroke: #fff; opacity: 1; transform: rotate(0deg) 
           </div>
           <div class="form-group">
             <label class="form-label">Monthly Revenue</label>
-            <select class="form-select" id="rev" name="rev" required>
+            <select class="form-select" id="rev" required>
               <option value="" disabled selected>Select revenue range</option>
               <option value="u10">Under $10,000/month</option>
               <option value="10-25">$10,000 – $25,000/month</option>
@@ -2334,7 +2334,7 @@ body.light .theme-pill-moon { stroke: #fff; opacity: 1; transform: rotate(0deg) 
           </div>
           <div class="form-group">
             <label class="form-label">Monthly Budget for VA Support</label>
-            <select class="form-select" id="bud" name="bud" required>
+            <select class="form-select" id="bud" required>
               <option value="" disabled selected>Select budget range</option>
               <option value="u500">Under $500/month</option>
               <option value="500-850">$500 – $850/month</option>
@@ -2343,8 +2343,8 @@ body.light .theme-pill-moon { stroke: #fff; opacity: 1; transform: rotate(0deg) 
               <option value="s">$3,000+/month (Scale)</option>
             </select>
           </div>
-          <div class="form-group"><label class="form-label">Biggest Operational Challenge</label><textarea class="form-textarea" name="challenge" placeholder="Briefly describe what's taking up most of your time..."></textarea></div>
-          <button type="submit" class="btn-form-submit" id="submitBtn">Request Discovery Call →</button>
+          <div class="form-group"><label class="form-label">Biggest Operational Challenge</label><textarea class="form-textarea" placeholder="Briefly describe what's taking up most of your time..."></textarea></div>
+          <button type="submit" class="btn-form-submit">Request Discovery Call →</button>
           <p class="form-note">We respond within 1 business day. No spam, ever.</p>
         </form>
         <div class="form-msg ok"  id="msgOk">Your application has been received. We'll reach out within one business day to schedule your discovery call.</div>
@@ -2455,39 +2455,12 @@ function handleSubmit(e) {
   const form = document.getElementById('contactForm');
   document.getElementById('msgOk').style.display  = 'none';
   document.getElementById('msgErr').style.display = 'none';
-
   if (bud === 'u500' || rev === 'u10') {
     form.style.display = 'none';
     document.getElementById('msgErr').style.display = 'block';
   } else {
-    // Replace with your deployed Google Apps Script Web App URL
-    const scriptURL = 'YOUR_GOOGLE_SCRIPT_URL_HERE';
-
-    const submitBtn = document.getElementById('submitBtn');
-    const originalText = submitBtn.innerText;
-    submitBtn.innerText = 'Sending...';
-    submitBtn.disabled = true;
-
-    const formData = new FormData(form);
-
-    // Convert FormData to a plain object or URLSearchParams if needed,
-    // but fetch with FormData is usually fine for Google Apps Script
-    fetch(scriptURL, { method: 'POST', body: formData })
-      .then(response => {
-        form.style.display = 'none';
-        document.getElementById('msgOk').style.display = 'block';
-      })
-      .catch(error => {
-        console.error('Error!', error.message);
-        // Fallback to showing success message anyway if there is a CORS error
-        // since sometimes Apps Script POST requests fail with CORS but still succeed
-        form.style.display = 'none';
-        document.getElementById('msgOk').style.display = 'block';
-      })
-      .finally(() => {
-        submitBtn.innerText = originalText;
-        submitBtn.disabled = false;
-      });
+    form.style.display = 'none';
+    document.getElementById('msgOk').style.display  = 'block';
   }
 }
 
@@ -2599,7 +2572,8 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
 <link href=&quot;https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Playfair+Display:ital,wght@0,400;0,600;1,400;1,500&amp;display=swap&quot; rel=&quot;stylesheet&quot;>
 <script src=&quot;https://apis.google.com/js/api.js&quot; async defer></script>
 <script src=&quot;https://accounts.google.com/gsi/client&quot; async defer></script>
-<script src=&quot;https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js&quot;></script>
+<script src=script src=&quot;https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js&quot;></script>quot;https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.jsscript src=&quot;https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js&quot;></script>quot;></script>
+<script src=script src=&quot;https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js&quot;></script>quot;https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2script src=&quot;https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js&quot;></script>quot;></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -3865,13 +3839,134 @@ html,body{font-size:13px}
 'use strict';
 
 const CFG = {
+const SUPABASE_URL = 'https://btungxqqchyhnohtzhgj.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_XQJbCrV1uW-NZWjsTTTQAg_PyN_QGoE';
+const supabase = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY) : null;
+
+async function syncAllDataToSupabase() {
+  if (!supabase) return;
+  for (const col of ['tasks', 'clients', 'timelogs', 'content', 'invoices', 'goals', 'team', 'activities', 'conversations', 'sops']) {
+    if (APP.data[col] && APP.data[col].length > 0) {
+      // Very basic sync for demo purposes to populate the remote DB initially
+      await supabase.from(col).upsert(APP.data[col]);
+    }
+  }
+}
+
+async function fetchAllDataFromSupabase() {
+  if (!supabase) return false;
+  try {
+    for (const col of ['tasks', 'clients', 'timelogs', 'content', 'invoices', 'goals', 'team', 'activities', 'conversations', 'sops']) {
+      const { data, error } = await supabase.from(col).select('*');
+      if (data && data.length > 0) {
+        APP.data[col] = data;
+        localStorage.setItem('tjc-'+col, JSON.stringify(data));
+      }
+    }
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+async function addDoc(col, doc){
+  doc.id = col.charAt(0) + Date.now();
+  APP.data[col] = [doc, ...(APP.data[col]||[])];
+  lsSave(col, APP.data[col]);
+  if(supabase) await supabase.from(col).insert([doc]);
+  return doc.id;
+}
+
+async function updateDoc(col, id, updates){
+  const items = APP.data[col]||[];
+  const idx = items.findIndex(x=>x.id===id);
+  if(idx > -1){
+    items[idx] = { ...items[idx], ...updates };
+    lsSave(col, items);
+  }
+  if(supabase) await supabase.from(col).update(updates).eq('id', id);
+}
+
+// Override lsSave to also update remote
+const origLsSave = lsSave;
+window.lsSave = function(key, data) {
+  origLsSave(key, data);
+  if(supabase && APP.data[key] && Array.isArray(data) && data.length > 0) {
+     // A naive sync for demo
+     supabase.from(key).upsert(data).then();
+  }
+}
+
+// Set up Gemini Integration
+async function sendPrompt(promptText) {
+  const GEMINI_API_KEY = localStorage.getItem('tjc-gemini-key') || '';
+  if(!GEMINI_API_KEY) {
+    openModal('Gemini Configuration', `
+      <div class="form-group">
+        <label class="form-label">Gemini API Key</label>
+        <input type="password" id="f-gemini-key" class="form-control" placeholder="AIzaSy...">
+        <div class="form-note">Your API key is stored securely in your local browser only.</div>
+      </div>
+    `, `<button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="localStorage.setItem('tjc-gemini-key', document.getElementById('f-gemini-key').value); closeModal(); toast('Gemini key saved! Try your prompt again.', 'success');">Save Key</button>`);
+    return;
+  }
+
+  // Show loading state
+  const prevText = document.activeElement.innerText;
+  const btn = document.activeElement;
+  if(btn && btn.tagName === 'BUTTON') {
+      btn.innerText = "Thinking...";
+      btn.disabled = true;
+  }
+
+  try {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`;
+
+    // Provide some context about the OS state
+    const context = `You are a helpful AI assistant built into the TJC Business OS (The Jobs Collective).
+    The current active clients are: ${APP.data.clients.map(c=>c.name).join(', ')}.
+    There are ${APP.data.tasks.filter(t=>!t.done).length} open tasks.`;
+
+    const body = {
+      contents: [{
+        parts: [{text: `${context}\n\nUser Prompt: ${promptText}`}]
+      }]
+    };
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+       throw new Error(data.error.message);
+    }
+
+    const reply = data.candidates[0].content.parts[0].text;
+
+    openModal('Gemini Intel', `
+      <div style="font-size: 14px; line-height: 1.6; color: var(--text2); white-space: pre-wrap">${reply}</div>
+    `, `<button class="btn btn-secondary" onclick="closeModal()">Close</button>`);
+
+  } catch(e) {
+    toast(`Gemini Error: ${e.message}`, 'error');
+  } finally {
+    if(btn && btn.tagName === 'BUTTON') {
+        btn.innerText = prevText;
+        btn.disabled = false;
+    }
+  }
+}
   exchangeRate: 56.50,
   marginTarget: 30,
   marginWarn: 25,
   slaHours: 4,
   capacityWarn: 80,
   capacityMax: 100,
-  ownerPin: '0000',
+  ownerPin: '000000',
   appVersion: '3.0',
   currency: { usd: 'USD', php: 'PHP', usdSymbol: '$', phpSymbol: '₱' }
 };
@@ -3879,19 +3974,19 @@ const CFG = {
 const SEED = {
   config: { exchangeRate: 56.50 },
   team: [
-    {id:'u1',displayName:'TJC HQ',email:'justine@thejobscollective.com',role:'owner',initials:'TH',avatarColor:'navy',capacity:0,status:'Active',skills:['Strategy','Sales','Operations'],pin:'1234'},
-    {id:'u2',displayName:'Maria Reyes',email:'maria@thejobscollective.com',role:'va',initials:'MR',avatarColor:'teal',capacity:85,status:'Active',skills:['Facebook Ads','Canva','Scheduling'],clientCount:2,pin:'1234',kpi:{completionRate:94,slaCompliance:91,errorRate:3,satisfaction:5}},
-    {id:'u3',displayName:'Ana Cruz',email:'ana@thejobscollective.com',role:'va',initials:'AC',avatarColor:'red',capacity:60,status:'Active',skills:['Data Entry','Email Mgmt','Scheduling'],clientCount:2,pin:'1234',kpi:{completionRate:88,slaCompliance:78,errorRate:6,satisfaction:4}},
-    {id:'u4',displayName:'Paolo Lim',email:'paolo@thejobscollective.com',role:'va',initials:'PL',avatarColor:'gold',capacity:70,status:'Active',skills:['Copywriting','Canva','Research'],clientCount:2,pin:'1234',kpi:{completionRate:92,slaCompliance:85,errorRate:4,satisfaction:5}},
-    {id:'u5',displayName:'Grace Santos',email:'grace@thejobscollective.com',role:'va',initials:'GS',avatarColor:'green',capacity:45,status:'Active',skills:['Client Relations','Reporting','Sales'],clientCount:3,pin:'1234',kpi:{completionRate:96,slaCompliance:95,errorRate:2,satisfaction:5}},
+    {id:'u1',displayName:'TJC HQ',email:'justine@thejobscollective.com',role:'owner',initials:'TH',avatarColor:'navy',capacity:0,status:'Active',skills:['Strategy','Sales','Operations'],pin:'123456'},
+    {id:'u2',displayName:'Maria Reyes',email:'maria@thejobscollective.com',role:'va',initials:'MR',avatarColor:'teal',capacity:85,status:'Active',skills:['Facebook Ads','Canva','Scheduling'],clientCount:2,pin:'123456',kpi:{completionRate:94,slaCompliance:91,errorRate:3,satisfaction:5}},
+    {id:'u3',displayName:'Ana Cruz',email:'ana@thejobscollective.com',role:'va',initials:'AC',avatarColor:'red',capacity:60,status:'Active',skills:['Data Entry','Email Mgmt','Scheduling'],clientCount:2,pin:'123456',kpi:{completionRate:88,slaCompliance:78,errorRate:6,satisfaction:4}},
+    {id:'u4',displayName:'Paolo Lim',email:'paolo@thejobscollective.com',role:'va',initials:'PL',avatarColor:'gold',capacity:70,status:'Active',skills:['Copywriting','Canva','Research'],clientCount:2,pin:'123456',kpi:{completionRate:92,slaCompliance:85,errorRate:4,satisfaction:5}},
+    {id:'u5',displayName:'Grace Santos',email:'grace@thejobscollective.com',role:'va',initials:'GS',avatarColor:'green',capacity:45,status:'Active',skills:['Client Relations','Reporting','Sales'],clientCount:3,pin:'123456',kpi:{completionRate:96,slaCompliance:95,errorRate:2,satisfaction:5}},
   ],
   clients: [
-    {id:'c1',name:'BrandX Philippines',clientPin:'1234',status:'Active',package:'Premium',rateUsd:500,vaCostPhp:18000,priority:'High',assignedVaUid:'u2',assignedVa:'Maria Reyes',assignedVaInitials:'MR',assignedVaColor:'teal',lastContact:'2025-04-22',contractEnd:'2025-09-30',timezone:'PHT (UTC+8)',healthScore:82,onboardingStep:7,onboardingDone:true,notes:[],deliverables:[],tools:[],socials:{},contacts:[{name:'Kevin Tan',role:'Marketing Manager',email:'kevin@brandx.ph',phone:'+63 917 xxx xxxx',isPrimary:true}],reports:[],oosCount:2,oosValue:150,archived:false,createdAt:'2025-01-15',marketingMetrics:{}},
-    {id:'c2',name:'TechStart Manila',clientPin:'1234',status:'Active',package:'Starter',rateUsd:300,vaCostPhp:12000,priority:'Medium',assignedVaUid:'u3',assignedVa:'Ana Cruz',assignedVaInitials:'AC',assignedVaColor:'red',lastContact:'2025-04-20',contractEnd:'2025-06-30',timezone:'PHT (UTC+8)',healthScore:67,onboardingStep:7,onboardingDone:true,notes:[],deliverables:[],tools:[],socials:{},contacts:[],reports:[],oosCount:1,oosValue:80,archived:false,createdAt:'2025-02-01',marketingMetrics:{}},
-    {id:'c3',name:'Sunrise Wellness PH',clientPin:'1234',status:'Onboarding',package:'Growth',rateUsd:400,vaCostPhp:15000,priority:'High',assignedVaUid:'u2',assignedVa:'Maria Reyes',assignedVaInitials:'MR',assignedVaColor:'teal',lastContact:'2025-04-21',contractEnd:'2025-10-31',timezone:'PHT (UTC+8)',healthScore:71,onboardingStep:4,onboardingDone:false,notes:[],deliverables:[],tools:[],socials:{},contacts:[],reports:[],oosCount:0,oosValue:0,archived:false,createdAt:'2025-04-15',marketingMetrics:{}},
-    {id:'c4',name:'Bloom Beauty Co.',clientPin:'1234',status:'Completed',package:'Custom',rateUsd:250,vaCostPhp:9000,priority:'Low',assignedVaUid:'u5',assignedVa:'Grace Santos',assignedVaInitials:'GS',assignedVaColor:'green',lastContact:'2025-04-10',contractEnd:'2025-04-10',timezone:'PHT (UTC+8)',healthScore:90,onboardingStep:7,onboardingDone:true,notes:[],deliverables:[],tools:[],socials:{},contacts:[],reports:[],oosCount:0,oosValue:0,archived:false,createdAt:'2024-10-01',marketingMetrics:{}},
-    {id:'c5',name:'FreshMart PH',clientPin:'1234',status:'Proposal',package:'Premium',rateUsd:500,vaCostPhp:0,priority:'High',assignedVaUid:'u1',assignedVa:'TJC HQ',assignedVaInitials:'TH',assignedVaColor:'navy',lastContact:'2025-04-20',contractEnd:'',timezone:'PHT (UTC+8)',healthScore:0,onboardingStep:0,onboardingDone:false,notes:[],deliverables:[],tools:[],socials:{},contacts:[],reports:[],oosCount:0,oosValue:0,archived:false,createdAt:'2025-04-10',marketingMetrics:{}},
-    {id:'c6',name:'Pacific Foods PH',clientPin:'1234',status:'Lead',package:'Growth',rateUsd:0,vaCostPhp:0,priority:'High',assignedVaUid:'u5',assignedVa:'Grace Santos',assignedVaInitials:'GS',assignedVaColor:'green',lastContact:'2025-04-18',contractEnd:'',timezone:'PHT (UTC+8)',healthScore:0,onboardingStep:0,onboardingDone:false,notes:[],deliverables:[],tools:[],socials:{},contacts:[],reports:[],oosCount:0,oosValue:0,archived:false,createdAt:'2025-04-18',marketingMetrics:{}},
+    {id:'c1',name:'BrandX Philippines',clientPin:'123456',status:'Active',package:'Premium',rateUsd:500,vaCostPhp:18000,priority:'High',assignedVaUid:'u2',assignedVa:'Maria Reyes',assignedVaInitials:'MR',assignedVaColor:'teal',lastContact:'2025-04-22',contractEnd:'2025-09-30',timezone:'PHT (UTC+8)',healthScore:82,onboardingStep:7,onboardingDone:true,notes:[],deliverables:[],tools:[],socials:{},contacts:[{name:'Kevin Tan',role:'Marketing Manager',email:'kevin@brandx.ph',phone:'+63 917 xxx xxxx',isPrimary:true}],reports:[],oosCount:2,oosValue:150,archived:false,createdAt:'2025-01-15',marketingMetrics:{}},
+    {id:'c2',name:'TechStart Manila',clientPin:'123456',status:'Active',package:'Starter',rateUsd:300,vaCostPhp:12000,priority:'Medium',assignedVaUid:'u3',assignedVa:'Ana Cruz',assignedVaInitials:'AC',assignedVaColor:'red',lastContact:'2025-04-20',contractEnd:'2025-06-30',timezone:'PHT (UTC+8)',healthScore:67,onboardingStep:7,onboardingDone:true,notes:[],deliverables:[],tools:[],socials:{},contacts:[],reports:[],oosCount:1,oosValue:80,archived:false,createdAt:'2025-02-01',marketingMetrics:{}},
+    {id:'c3',name:'Sunrise Wellness PH',clientPin:'123456',status:'Onboarding',package:'Growth',rateUsd:400,vaCostPhp:15000,priority:'High',assignedVaUid:'u2',assignedVa:'Maria Reyes',assignedVaInitials:'MR',assignedVaColor:'teal',lastContact:'2025-04-21',contractEnd:'2025-10-31',timezone:'PHT (UTC+8)',healthScore:71,onboardingStep:4,onboardingDone:false,notes:[],deliverables:[],tools:[],socials:{},contacts:[],reports:[],oosCount:0,oosValue:0,archived:false,createdAt:'2025-04-15',marketingMetrics:{}},
+    {id:'c4',name:'Bloom Beauty Co.',clientPin:'123456',status:'Completed',package:'Custom',rateUsd:250,vaCostPhp:9000,priority:'Low',assignedVaUid:'u5',assignedVa:'Grace Santos',assignedVaInitials:'GS',assignedVaColor:'green',lastContact:'2025-04-10',contractEnd:'2025-04-10',timezone:'PHT (UTC+8)',healthScore:90,onboardingStep:7,onboardingDone:true,notes:[],deliverables:[],tools:[],socials:{},contacts:[],reports:[],oosCount:0,oosValue:0,archived:false,createdAt:'2024-10-01',marketingMetrics:{}},
+    {id:'c5',name:'FreshMart PH',clientPin:'123456',status:'Proposal',package:'Premium',rateUsd:500,vaCostPhp:0,priority:'High',assignedVaUid:'u1',assignedVa:'TJC HQ',assignedVaInitials:'TH',assignedVaColor:'navy',lastContact:'2025-04-20',contractEnd:'',timezone:'PHT (UTC+8)',healthScore:0,onboardingStep:0,onboardingDone:false,notes:[],deliverables:[],tools:[],socials:{},contacts:[],reports:[],oosCount:0,oosValue:0,archived:false,createdAt:'2025-04-10',marketingMetrics:{}},
+    {id:'c6',name:'Pacific Foods PH',clientPin:'123456',status:'Lead',package:'Growth',rateUsd:0,vaCostPhp:0,priority:'High',assignedVaUid:'u5',assignedVa:'Grace Santos',assignedVaInitials:'GS',assignedVaColor:'green',lastContact:'2025-04-18',contractEnd:'',timezone:'PHT (UTC+8)',healthScore:0,onboardingStep:0,onboardingDone:false,notes:[],deliverables:[],tools:[],socials:{},contacts:[],reports:[],oosCount:0,oosValue:0,archived:false,createdAt:'2025-04-18',marketingMetrics:{}},
   ],
   tasks: [
     {id:'t1',title:'Schedule BrandX Week 17 — IG + FB posts',done:false,priority:'Urgent',dueDate:'2025-04-23',project:'BrandX Philippines',clientId:'c1',assigneeUid:'u2',assigneeName:'Maria Reyes',assigneeInitials:'MR',assigneeColor:'teal',isOos:false,archived:false,createdAt:'2025-04-23T06:00:00Z',firstResponseAt:null},
@@ -4068,29 +4163,10 @@ async function updateDoc(col, id, data){
   updateSbBadges();
 }
 
-async function DELETED_archiveDoc(col, id, recordName){
-async function deleteTimeLog(id){
-  const log = APP.data.timelogs.find(x=>x.id===id);
-  if(!log) return;
-  if(!confirm(`Delete time log for "${log.description || 'task'}"? This cannot be undone.`)) return;
-  APP.data.timelogs = APP.data.timelogs.filter(x=>x.id!==id);
-  lsSave("timelogs", APP.data.timelogs);
-  renderCurrentPage();
-  toast("Time log deleted.", "warning");
-}
+async function archiveDoc(col, id, recordName){
   await updateDoc(col, id, { archived:true, _actAction:'archived', _actRecord:recordName, _actIcon:'️', _actColor:'amber' });
   toast(recordName + ' archived. You can restore it from the archive.', 'warning');
 }
-async function deleteGoal(id){
-  const goal = APP.data.goals.find(x=>x.id===id);
-  if(!goal) return;
-  if(!confirm(`Delete goal "${goal.name}"? This cannot be undone.`)) return;
-  APP.data.goals = APP.data.goals.filter(x=>x.id!==id);
-  lsSave("goals", APP.data.goals);
-  renderCurrentPage();
-  toast("Goal deleted.", "warning");
-}
-
 
 function logActivity(icon, action, type, record, color='navy'){
   const member = APP.data.team.find(v => v.id === APP.user.uid);
@@ -4774,7 +4850,7 @@ function renderFinance(){
       <span style=&quot;font-size:10px;color:var(--text3)&quot;>Due ${inv.dueDate||'—'}</span>
       <div class=&quot;dual-currency&quot; style=&quot;text-align:right;min-width:80px&quot;><span class=&quot;dc-primary currency-usd&quot; style=&quot;font-size:13px&quot;>$${inv.amountUsd.toLocaleString()}</span><span class=&quot;dc-secondary&quot;>₱${FIN.toPhp(inv.amountUsd).toLocaleString()}</span></div>
       ${inv.status!=='Paid'?`<button class=&quot;btn btn-xs&quot; style=&quot;background:var(--green-pale);color:var(--green);border:1px solid #a7d9bb;flex-shrink:0&quot; onclick=&quot;event.stopPropagation();markPaid('${inv.id}')&quot;>Mark Paid</button>`:`<span style=&quot;font-size:10px;color:var(--green);font-weight:600;flex-shrink:0&quot;> ${inv.paidAt}</span>`}
-      <button class=&quot;btn-icon&quot; title=&quot;Delete&quot; onclick=&quot;event.stopPropagation();deleteInvoice('${inv.id}')&quot; style=&quot;opacity:0&quot; onmouseenter=&quot;this.style.opacity=1&quot; onmouseleave=&quot;this.style.opacity=0&quot;></button>
+      <button class=&quot;btn-icon&quot; onclick=&quot;event.stopPropagation();archiveDoc('invoices','${inv.id}','${inv.number}')&quot; style=&quot;opacity:0&quot; onmouseenter=&quot;this.style.opacity=1&quot; onmouseleave=&quot;this.style.opacity=0&quot;></button>
     </div>`).join('')}
     ${invoices.length===0?emptyState('No invoices.'):''}
   </div>`;
@@ -4938,7 +5014,7 @@ function activityItemHtml(a){
   const colors = {teal:'var(--teal-pale)',green:'var(--green-pale)',gold:'var(--gold-pale)',navy:'var(--navy-pale)',amber:'var(--amber-pale)',red:'var(--red-pale)',purple:'var(--purple-pale)'};
   const d = new Date(a.ts);
   const timeStr = d.toLocaleString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
-  return `<div class=&quot;activity-item&quot;><div class=&quot;activity-icon&quot; style=&quot;background:${colors[a.color]||'var(--navy-pale)'}&quot;>${a.icon||''}</div><div class=&quot;activity-body&quot;><div class=&quot;activity-action&quot;><strong>${a.user}</strong> ${a.action} <span style=&quot;color:var(--text);font-weight:500&quot;>${a.record}</span></div><div class=&quot;activity-meta&quot;>${timeStr} · ${a.type||'system'}</div></div></div>`;
+  return `<div class=&quot;activity-item&quot;><div class=&quot;activity-icon&quot; style=&quot;background:${colors[a.color]||'var(--navy-pale)'}&quot;>${a.icon||'•'}</div><div class=&quot;activity-body&quot;><div class=&quot;activity-action&quot;><strong>${a.user}</strong> ${a.action} <span style=&quot;color:var(--text);font-weight:500&quot;>${a.record}</span></div><div class=&quot;activity-meta&quot;>${timeStr} · ${a.type||'system'}</div></div></div>`;
 }
 
 function renderActivity(){
@@ -4995,7 +5071,7 @@ function renderClients(){
         return `<div class=&quot;pipe-card&quot; draggable=&quot;true&quot; ondragstart=&quot;dragCard(event,'${c.id}')&quot; ondragend=&quot;dragCardEnd(event)&quot; onclick=&quot;openClientPortal('${c.id}')&quot;>
           <div class=&quot;pipe-card-bar&quot; style=&quot;background:${colors[stage]}&quot;></div>
           ${c.archived?'<span style=&quot;position:absolute;top:4px;right:22px;font-size:10px;color:var(--text3);font-style:italic&quot;>archived</span>':''}
-          <button onclick=&quot;event.stopPropagation();deleteClient('${c.id}')&quot; class=&quot;pipe-card-del&quot; title=&quot;Delete client&quot;>Delete</button>
+          <button onclick=&quot;event.stopPropagation();deleteClient('${c.id}')&quot; class=&quot;pipe-card-del&quot; title=&quot;Delete client&quot;></button>
           <div class=&quot;pipe-card-name&quot;>${c.name}</div>
           <div class=&quot;pipe-card-meta&quot;>${c.package}${!c.rateUsd?' · TBD':''}</div>
           ${c.rateUsd?`<div class=&quot;pipe-card-rate&quot; style=&quot;color:${colors[stage]}&quot;>$${c.rateUsd}/mo &amp;nbsp;·&amp;nbsp; ₱${FIN.toPhp(c.rateUsd).toLocaleString()}</div>`:'<div class=&quot;pipe-card-rate&quot; style=&quot;color:var(--text3)&quot;>Rate TBD</div>'}
@@ -5045,14 +5121,14 @@ function renderTasks(){
   <div class=&quot;card&quot;>
     <table class=&quot;data-table&quot;>
       <thead><tr><th></th><th>Task</th><th>Assignee</th><th>Priority</th><th>Due Date</th><th>Project</th><th>SLA</th><th></th></tr></thead>
-      <tbody>${shown.map(t=>{const late=t.dueDate&amp;&amp;t.dueDate<td&amp;&amp;!t.done;return `<tr style=&quot;background:${late?'#FFF8F8':t.requestedByClient?'#FFFDF0':''}${t.isOos?';border-left:3px solid var(--purple)':t.requestedByClient?';border-left:3px solid var(--gold)':''}&quot; onclick=&quot;openTaskDetail('${t.id}')&quot;><td onclick=&quot;event.stopPropagation();toggleTask('${t.id}')&quot;><div class=&quot;chk${t.done?' done':''}&quot;></div></td><td style=&quot;font-weight:${t.done?400:500}&quot; class=&quot;${t.done?'task-name done':''}&quot;>${t.isOos?`<span class=&quot;oos-badge&quot;>OOS</span> `:''}${t.requestedByClient?`<span class=&quot;tag t-amber&quot; style=&quot;font-size:9px;margin-right:4px&quot;>Client ↑</span>`:''}${t.title}</td><td><div style=&quot;display:flex;align-items:center;gap:4px&quot;>${t.assigneeInitials?`<div class=&quot;av av-xs ${avColor(t.assigneeColor)}&quot;>${t.assigneeInitials}</div>`:''}<span style=&quot;font-size:11px&quot;>${(t.assigneeName||'').split(' ')[0]||'—'}</span></div></td><td>${tagHtml(t.priority)}</td><td style=&quot;font-size:11px;color:${late?'var(--red)':'var(--text3)'}&quot;>${late?' Overdue':t.dueDate||'—'}</td><td style=&quot;font-size:11px;color:var(--text3)&quot;>${t.project||'—'}</td><td>${SLA.badge(t)}</td><td onclick=&quot;event.stopPropagation()&quot;><button class=&quot;btn-icon&quot; onclick=&quot;deleteTask('${t.id}')&quot; title=&quot;Delete&quot; style=&quot;opacity:0&quot; onmouseenter=&quot;this.style.opacity=1&quot; onmouseleave=&quot;this.style.opacity=0&quot;></button></td></tr>`;}).join('')}</tbody>
+      <tbody>${shown.map(t=>{const late=t.dueDate&amp;&amp;t.dueDate<td&amp;&amp;!t.done;return `<tr style=&quot;background:${late?'#FFF8F8':t.requestedByClient?'#FFFDF0':''}${t.isOos?';border-left:3px solid var(--purple)':t.requestedByClient?';border-left:3px solid var(--gold)':''}&quot; onclick=&quot;openTaskDetail('${t.id}')&quot;><td onclick=&quot;event.stopPropagation();toggleTask('${t.id}')&quot;><div class=&quot;chk${t.done?' done':''}&quot;></div></td><td style=&quot;font-weight:${t.done?400:500}&quot; class=&quot;${t.done?'task-name done':''}&quot;>${t.isOos?`<span class=&quot;oos-badge&quot;>OOS</span> `:''}${t.requestedByClient?`<span class=&quot;tag t-amber&quot; style=&quot;font-size:9px;margin-right:4px&quot;>Client ↑</span>`:''}${t.title}</td><td><div style=&quot;display:flex;align-items:center;gap:4px&quot;>${t.assigneeInitials?`<div class=&quot;av av-xs ${avColor(t.assigneeColor)}&quot;>${t.assigneeInitials}</div>`:''}<span style=&quot;font-size:11px&quot;>${(t.assigneeName||'').split(' ')[0]||'—'}</span></div></td><td>${tagHtml(t.priority)}</td><td style=&quot;font-size:11px;color:${late?'var(--red)':'var(--text3)'}&quot;>${late?' Overdue':t.dueDate||'—'}</td><td style=&quot;font-size:11px;color:var(--text3)&quot;>${t.project||'—'}</td><td>${SLA.badge(t)}</td><td onclick=&quot;event.stopPropagation()&quot;><button class=&quot;btn-icon&quot; onclick=&quot;archiveDoc('tasks','${t.id}','${t.title.slice(0,30)}')&quot; style=&quot;opacity:0&quot; onmouseenter=&quot;this.style.opacity=1&quot; onmouseleave=&quot;this.style.opacity=0&quot;></button></td></tr>`;}).join('')}</tbody>
     </table>
     ${shown.length===0?emptyState('No tasks in this view.'):''}
   </div>`;
 }
 
 function approvalCardHtml(c, isRevision=false){
-  return `<div class=&quot;card card-pad&quot; id=&quot;apv-${c.id}&quot; style=&quot;margin-bottom:8px${isRevision?';border-left:3px solid var(--gold)':''}&quot;><div style=&quot;font-size:13px;font-weight:600;margin-bottom:4px&quot;>${c.title}</div><div style=&quot;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);margin-bottom:8px;flex-wrap:wrap&quot;><div class=&quot;av av-xs ${avColor(c.vaColor||'navy')}&quot;>${c.vaInitials||'?'}</div>${c.vaName} · ${c.platform}<span class=&quot;tag ${c.urgency==='red'?'t-red':c.urgency==='amber'?'t-amber':'t-gray'}&quot;>${c.dueLabel}</span>${isRevision?`<span class=&quot;tag t-amber&quot;>Revision Requested</span>`:''}</div><div style=&quot;display:flex;gap:5px&quot;><button class=&quot;btn btn-xs&quot; style=&quot;background:var(--green-pale);color:var(--green);border:1px solid #a7d9bb&quot; onclick=&quot;approveContent('${c.id}')&quot;> Approve</button><button class=&quot;btn btn-xs btn-secondary&quot; onclick=&quot;reviseContent('${c.id}')&quot;>↩ Revision</button><button class=&quot;btn btn-xs btn-danger&quot; style=&quot;margin-left:auto&quot; onclick=&quot;deleteContent('${c.id}')&quot;>Delete</button></div></div>`;
+  return `<div class=&quot;card card-pad&quot; id=&quot;apv-${c.id}&quot; style=&quot;margin-bottom:8px${isRevision?';border-left:3px solid var(--gold)':''}&quot;><div style=&quot;font-size:13px;font-weight:600;margin-bottom:4px&quot;>${c.title}</div><div style=&quot;display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3);margin-bottom:8px;flex-wrap:wrap&quot;><div class=&quot;av av-xs ${avColor(c.vaColor||'navy')}&quot;>${c.vaInitials||'?'}</div>${c.vaName} · ${c.platform}<span class=&quot;tag ${c.urgency==='red'?'t-red':c.urgency==='amber'?'t-amber':'t-gray'}&quot;>${c.dueLabel}</span>${isRevision?`<span class=&quot;tag t-amber&quot;>Revision Requested</span>`:''}</div><div style=&quot;display:flex;gap:5px&quot;><button class=&quot;btn btn-xs&quot; style=&quot;background:var(--green-pale);color:var(--green);border:1px solid #a7d9bb&quot; onclick=&quot;approveContent('${c.id}')&quot;> Approve</button><button class=&quot;btn btn-xs btn-secondary&quot; onclick=&quot;reviseContent('${c.id}')&quot;>↩ Revision</button><button class=&quot;btn btn-xs btn-secondary&quot; style=&quot;margin-left:auto&quot; onclick=&quot;archiveDoc('content','${c.id}','${c.title.slice(0,30)}')&quot;></button></div></div>`;
 }
 
 const PLAT_META = {
@@ -5265,7 +5341,7 @@ function renderInvoices(){
         <span class=&quot;dc-secondary&quot;>₱${FIN.toPhp(inv.amountUsd).toLocaleString()}</span>
       </div>
       ${inv.status!=='Paid'?`<button class=&quot;btn btn-xs&quot; style=&quot;background:var(--green-pale);color:var(--green);border:1px solid #a7d9bb;flex-shrink:0&quot; onclick=&quot;event.stopPropagation();markPaid('${inv.id}')&quot;> Mark Paid</button>`:`<span style=&quot;font-size:11px;color:var(--green);font-weight:600;flex-shrink:0;min-width:60px&quot;> ${inv.paidAt}</span>`}
-      <button class=&quot;btn btn-xs btn-secondary&quot; onclick=&quot;event.stopPropagation();openEditInvoice('${inv.id}')&quot; title=&quot;Edit invoice&quot;>Edit</button>
+      <button class=&quot;btn btn-xs btn-secondary&quot; onclick=&quot;event.stopPropagation();openEditInvoice('${inv.id}')&quot; title=&quot;Edit invoice&quot;></button>
       <button class=&quot;btn btn-xs btn-danger&quot; onclick=&quot;event.stopPropagation();deleteInvoice('${inv.id}')&quot; title=&quot;Delete invoice&quot;></button>
     </div>`).join('')}
     ${invs.length===0?emptyState('No invoices.'):''}
@@ -5291,7 +5367,7 @@ function renderGoals(){
     <div style=&quot;font-size:13px;color:var(--text2)&quot;>Q2 2025 · ${goals.filter(g=>g.status==='On Track').length} on track · ${goals.filter(g=>g.status==='At Risk').length} at risk</div>
     <button class=&quot;btn btn-sm btn-primary&quot; onclick=&quot;openAddGoal()&quot;>+ Add Goal</button>
   </div>
-  <div class=&quot;card&quot;>${goals.map(g=>{const pct=Math.min(100,Math.round(((g.current||0)/(g.target||1))*100));const col=g.status==='At Risk'?'var(--red)':g.status==='On Track'?'var(--teal)':'var(--gold)';const display=g.unit==='USD'?`$${(g.current||0).toLocaleString()} / $${(g.target||0).toLocaleString()}`:g.unit==='PHP'?`₱${(g.current||0).toLocaleString()} / ₱${(g.target||0).toLocaleString()}`:`${g.current||0} / ${g.target||0}${g.unit==='%'?' %':''}`;return `<div style=&quot;padding:12px 16px;border-bottom:1px solid var(--border)&quot;><div style=&quot;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px&quot;><div><span style=&quot;font-size:13px;font-weight:600&quot;>${g.name}</span><span class=&quot;tag ${g.status==='At Risk'?'t-red':g.status==='On Track'?'t-teal':'t-amber'}&quot; style=&quot;margin-left:8px&quot;>${g.status}</span><span class=&quot;tag t-gray&quot; style=&quot;margin-left:4px&quot;>${g.category}</span></div><div style=&quot;display:flex;align-items:center;gap:8px&quot;><span style=&quot;font-size:14px;font-weight:700;color:${col}&quot;>${pct}%</span><button class=&quot;btn btn-xs btn-secondary&quot; onclick=&quot;openUpdateGoal('${g.id}')&quot;>Update</button><button class=&quot;btn btn-xs btn-danger&quot; onclick=&quot;deleteGoal('${g.id}')&quot; style=&quot;font-size:12px&quot;>Delete</button></div></div><div class=&quot;prog-lg&quot;><div class=&quot;prog-fill&quot; style=&quot;width:${pct}%;background:${col}&quot;></div></div><div style=&quot;font-size:11px;color:var(--text3);margin-top:4px&quot;>${display} · ${g.quarter} ${g.year}</div></div>`;}).join('') || emptyState('No goals. Add your first goal above.')}</div>`;
+  <div class=&quot;card&quot;>${goals.map(g=>{const pct=Math.min(100,Math.round(((g.current||0)/(g.target||1))*100));const col=g.status==='At Risk'?'var(--red)':g.status==='On Track'?'var(--teal)':'var(--gold)';const display=g.unit==='USD'?`$${(g.current||0).toLocaleString()} / $${(g.target||0).toLocaleString()}`:g.unit==='PHP'?`₱${(g.current||0).toLocaleString()} / ₱${(g.target||0).toLocaleString()}`:`${g.current||0} / ${g.target||0}${g.unit==='%'?' %':''}`;return `<div style=&quot;padding:12px 16px;border-bottom:1px solid var(--border)&quot;><div style=&quot;display:flex;justify-content:space-between;align-items:center;margin-bottom:6px&quot;><div><span style=&quot;font-size:13px;font-weight:600&quot;>${g.name}</span><span class=&quot;tag ${g.status==='At Risk'?'t-red':g.status==='On Track'?'t-teal':'t-amber'}&quot; style=&quot;margin-left:8px&quot;>${g.status}</span><span class=&quot;tag t-gray&quot; style=&quot;margin-left:4px&quot;>${g.category}</span></div><div style=&quot;display:flex;align-items:center;gap:8px&quot;><span style=&quot;font-size:14px;font-weight:700;color:${col}&quot;>${pct}%</span><button class=&quot;btn btn-xs btn-secondary&quot; onclick=&quot;openUpdateGoal('${g.id}')&quot;>Update</button><button class=&quot;btn-icon&quot; onclick=&quot;archiveDoc('goals','${g.id}','${g.name.slice(0,30)}')&quot; style=&quot;font-size:12px&quot;></button></div></div><div class=&quot;prog-lg&quot;><div class=&quot;prog-fill&quot; style=&quot;width:${pct}%;background:${col}&quot;></div></div><div style=&quot;font-size:11px;color:var(--text3);margin-top:4px&quot;>${display} · ${g.quarter} ${g.year}</div></div>`;}).join('') || emptyState('No goals. Add your first goal above.')}</div>`;
 }
 
 const OB_STEPS = ['Contract Signed','Payment Received','Intake Form Sent','Intake Form Received','Kickoff Call Scheduled','Kickoff Call Done','Access Granted &amp; Fully Onboarded'];
@@ -5310,17 +5386,17 @@ function renderVAPortal(){ return !APP.va.loggedIn ? renderVALogin() : renderVAD
 
 function renderVALogin(){
   if(!APP.va.vaId){
-    return `<div class=&quot;login-wrap&quot;><div class=&quot;login-card&quot; style=&quot;max-width:380px&quot;><div style=&quot;width:48px;height:48px;border-radius:12px;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 14px&quot;><svg viewBox=&quot;0 0 100 100&quot; fill=&quot;none&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;20&quot; height=&quot;20&quot;><path d=&quot;M43 18 L60 18 C63 18 64 20 64 23 L64 34 C63 45 54 63 47 74 C43 81 33 83 26 75 C19 68 23 56 31 45 C37 36 41 26 43 18Z&quot; fill=&quot;white&quot;/><path d=&quot;M20 54 C18 44 27 37 37 41 L68 53 C76 56 79 65 74 71 C69 77 60 75 52 71 L24 58 C19 56 21 63 20 54Z&quot; fill=&quot;white&quot;/></svg></div><div style=&quot;font-size:18px;font-weight:700;margin-bottom:4px&quot;>Partner Portal</div><div style=&quot;font-size:12px;color:var(--text3);margin-bottom:20px&quot;>The Jobs Collective · Select your profile</div><div class=&quot;va-select-grid&quot;>${APP.data.team.filter(v=>v.role==='va').map(v=>`<div class=&quot;va-sel-btn&quot; onclick=&quot;selectVA('${v.id}')&quot;><div class=&quot;av av-md ${avColor(v.avatarColor)}&quot;>${v.initials}</div><div style=&quot;font-size:12px;font-weight:600&quot;>${v.displayName.split(' ')[0]}</div><div style=&quot;font-size:10px;color:var(--text3)&quot;>${v.skills?.[0]||'VA'}</div></div>`).join('')}</div><div style=&quot;font-size:11px;color:var(--text3)&quot;>Not listed? Contact TJC HQ.</div></div></div>`;
+    return `<div class=&quot;login-wrap&quot;><div class=&quot;login-card&quot;><div style=&quot;width:48px;height:48px;border-radius:12px;background:var(--navy);display:flex;align-items:center;justify-content:center;margin:0 auto 14px&quot;><svg viewBox=&quot;0 0 100 100&quot; fill=&quot;none&quot; xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;20&quot; height=&quot;20&quot;><path d=&quot;M43 18 L60 18 C63 18 64 20 64 23 L64 34 C63 45 54 63 47 74 C43 81 33 83 26 75 C19 68 23 56 31 45 C37 36 41 26 43 18Z&quot; fill=&quot;white&quot;/><path d=&quot;M20 54 C18 44 27 37 37 41 L68 53 C76 56 79 65 74 71 C69 77 60 75 52 71 L24 58 C19 56 21 63 20 54Z&quot; fill=&quot;white&quot;/></svg></div><div style=&quot;font-size:18px;font-weight:700;margin-bottom:4px&quot;>Partner Portal</div><div style=&quot;font-size:12px;color:var(--text3);margin-bottom:20px&quot;>The Jobs Collective · Select your profile</div><div class=&quot;va-select-grid&quot;>${APP.data.team.filter(v=>v.role==='va').map(v=>`<div class=&quot;va-sel-btn&quot; onclick=&quot;selectVA('${v.id}')&quot;><div class=&quot;av av-md ${avColor(v.avatarColor)}&quot;>${v.initials}</div><div style=&quot;font-size:12px;font-weight:600&quot;>${v.displayName.split(' ')[0]}</div><div style=&quot;font-size:10px;color:var(--text3)&quot;>${v.skills?.[0]||'VA'}</div></div>`).join('')}</div><div style=&quot;font-size:11px;color:var(--text3)&quot;>Not listed? Contact TJC HQ.</div></div></div>`;
   }
   const va = APP.data.team.find(v=>v.id===APP.va.vaId);
   const filled = APP.va.pinEntry.length;
-  return `<div class=&quot;login-wrap&quot;><div class=&quot;login-card&quot; style=&quot;max-width:380px&quot;><div class=&quot;av av-lg ${avColor(va.avatarColor)}&quot; style=&quot;margin:0 auto 10px&quot;>${va.initials}</div><div style=&quot;font-size:17px;font-weight:700;margin-bottom:3px&quot;>Hi, ${va.displayName.split(' ')[0]}! </div><div style=&quot;font-size:12px;color:var(--text3);margin-bottom:4px&quot;>Enter your 4-digit PIN</div><div class=&quot;pin-row&quot;>${[0,1,2,3].map(i=>`<div class=&quot;pin-dot${i<filled?' filled':''}&quot; id=&quot;pd-${i}&quot;></div>`).join('')}</div><div class=&quot;pin-pad&quot;>${[1,2,3,4,5,6,7,8,9,'←',0,''].map(k=>`<button class=&quot;pin-key&quot; onclick=&quot;pinPress('${k}')&quot;>${k}</button>`).join('')}</div><button class=&quot;btn btn-secondary w-full&quot; onclick=&quot;APP.va.vaId=null;APP.va.pinEntry='';renderCurrentPage()&quot;>← Back</button><div style=&quot;font-size:10px;color:var(--text3);margin-top:10px&quot;>Default PIN: 1234</div></div></div>`;
+  return `<div class=&quot;login-wrap&quot;><div class=&quot;login-card&quot;><div class=&quot;av av-lg ${avColor(va.avatarColor)}&quot; style=&quot;margin:0 auto 10px&quot;>${va.initials}</div><div style=&quot;font-size:17px;font-weight:700;margin-bottom:3px&quot;>Hi, ${va.displayName.split(' ')[0]}! </div><div style=&quot;font-size:12px;color:var(--text3);margin-bottom:4px&quot;>Enter your 6-digit PIN</div><div class=&quot;form-group&quot;><input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;va-pin-input&quot; maxlength=&quot;6&quot; placeholder=&quot;••••••&quot; style=&quot;text-align:center;letter-spacing:8px;font-size:24px&quot; onkeyup=&quot;if(event.key==='Enter') { APP.va.pinEntry=this.value; checkPin(); }&quot;></div><button class=&quot;btn btn-primary w-full&quot; style=&quot;margin-bottom:8px&quot; onclick=&quot;APP.va.pinEntry=document.getElementById('va-pin-input').value; checkPin();&quot;>Login</button><button class=&quot;btn btn-secondary w-full&quot; onclick=&quot;APP.va.vaId=null;APP.va.pinEntry='';renderCurrentPage()&quot;>← Back</button><div style=&quot;font-size:10px;color:var(--text3);margin-top:10px&quot;>Default PIN: 123456</div></div></div>`;
 }
 
 function selectVA(id){ APP.va.vaId=id; APP.va.pinEntry=''; renderCurrentPage(); }
 function updatePinDots(){ const filled=APP.va.pinEntry.length; [0,1,2,3].forEach(i=>{const d=document.getElementById('pd-'+i); if(d) d.className='pin-dot'+(i<filled?' filled':'');}); }
-function pinPress(k){ if(k==='←'){APP.va.pinEntry=APP.va.pinEntry.slice(0,-1);updatePinDots();return;} if(k===''||APP.va.pinEntry.length>=4){checkPin();return;} APP.va.pinEntry+=k; updatePinDots(); if(APP.va.pinEntry.length===4) setTimeout(checkPin,180); }
-function checkPin(){ const va=APP.data.team.find(v=>v.id===APP.va.vaId); if(APP.va.pinEntry===(va?.pin||'1234')){APP.va.loggedIn=true;APP.va.tab='dashboard';renderCurrentPage();toast('Welcome back, '+va.displayName.split(' ')[0]+'! ','success');} else {APP.va.pinEntry='';renderCurrentPage();toast('Incorrect PIN.','error');}}
+function pinPress(k){ if(k==='←'){APP.va.pinEntry=APP.va.pinEntry.slice(0,-1);updatePinDots();return;} if(k===''||APP.va.pinEntry.length>=6){checkPin();return;} APP.va.pinEntry+=k; updatePinDots(); if(APP.va.pinEntry.length===6) setTimeout(checkPin,180); }
+function checkPin(){ const va=APP.data.team.find(v=>v.id===APP.va.vaId); if(APP.va.pinEntry===(va?.pin||'123456')){APP.va.loggedIn=true;APP.va.tab='dashboard';renderCurrentPage();toast('Welcome back, '+va.displayName.split(' ')[0]+'! ','success');} else {APP.va.pinEntry='';renderCurrentPage();toast('Incorrect PIN.','error');}}
 function vaLogout(){ APP.va.loggedIn=false;APP.va.vaId=null;APP.va.pinEntry='';APP.va.tab='dashboard';if(APP.timer.iv){clearInterval(APP.timer.iv);APP.timer.iv=null;APP.timer.running=false;APP.timer.elapsed=0;}renderCurrentPage(); }
 function setVATab(t){ APP.va.tab=t; renderCurrentPage(); updateFloatingTimer(); }
 
@@ -5453,8 +5529,8 @@ function renderVAProfile(va){
         <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>Current PIN</label>
           <input class=&quot;form-control&quot; id=&quot;va-old-pin&quot; type=&quot;password&quot; maxlength=&quot;4&quot; placeholder=&quot;Enter current PIN&quot; inputmode=&quot;numeric&quot;></div>
         <div class=&quot;form-row&quot;>
-          <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>New PIN (4 digits)</label>
-            <input class=&quot;form-control&quot; id=&quot;va-new-pin&quot; type=&quot;password&quot; maxlength=&quot;4&quot; placeholder=&quot;New 4-digit PIN&quot; inputmode=&quot;numeric&quot;></div>
+          <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>New PIN (6 digits)</label>
+            <input class=&quot;form-control&quot; id=&quot;va-new-pin&quot; type=&quot;password&quot; maxlength=&quot;4&quot; placeholder=&quot;New 6-digit PIN&quot; inputmode=&quot;numeric&quot;></div>
           <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>Confirm New PIN</label>
             <input class=&quot;form-control&quot; id=&quot;va-confirm-pin&quot; type=&quot;password&quot; maxlength=&quot;4&quot; placeholder=&quot;Repeat PIN&quot; inputmode=&quot;numeric&quot;></div>
         </div>
@@ -5469,7 +5545,7 @@ function saveVAPIN(vaId){
   const newVal = document.getElementById('va-new-pin').value;
   const confirmVal = document.getElementById('va-confirm-pin').value;
   if(oldVal !== (va.pin||'1234')){ toast('Current PIN is incorrect.','error'); return; }
-  if(!/^\d{4}$/.test(newVal)){ toast('New PIN must be exactly 4 digits.','error'); return; }
+  if(!/^\d{4}$/.test(newVal)){ toast('New PIN must be exactly 6 digits.','error'); return; }
   if(newVal !== confirmVal){ toast('PINs do not match.','error'); return; }
   va.pin = newVal;
   lsSave('team', APP.data.team);
@@ -5664,7 +5740,7 @@ function renderVATabTasksWithTimer(va, myTasks, td){
       +'<td onclick=&quot;event.stopPropagation()&quot; style=&quot;text-align:center&quot;>'+timerCell+'</td>'
       +'<td onclick=&quot;event.stopPropagation()&quot;>'
       +'<button class=&quot;btn-icon&quot; style=&quot;opacity:0&quot; onmouseenter=&quot;this.style.opacity=1&quot; onmouseleave=&quot;this.style.opacity=0&quot;'
-      +' onclick=&quot;deleteTask('+JSON.stringify(t.id)+')&quot; title=&quot;Delete&quot; style=&quot;color:var(--red)&quot;>Delete</button>'
+      +' onclick=&quot;archiveDoc(\'tasks\','+JSON.stringify(t.id)+','+JSON.stringify(t.title.slice(0,30))+')&quot;>&amp;#128451;</button>'
       +'</td>'
       +'</tr>';
   });
@@ -5759,7 +5835,7 @@ function renderVATabTimelog(va, myTasks, myLogs, td, todayMins){
       <td style=&quot;font-size:12px&quot;>${l.description||'—'}</td>
       <td style=&quot;font-size:11px;color:var(--text3)&quot;>${l.project||'—'}</td>
       <td style=&quot;text-align:right;font-weight:600;font-size:12px;white-space:nowrap&quot;>${fmtDuration(l.minutes||0,l.seconds||0)}</td>
-      <td><button class=&quot;btn-icon&quot; title=&quot;Delete&quot; onclick=&quot;deleteTimeLog('${l.id}')&quot; style=&quot;opacity:0&quot; onmouseenter=&quot;this.style.opacity=1&quot; onmouseleave=&quot;this.style.opacity=0&quot;></button></td>
+      <td><button class=&quot;btn-icon&quot; onclick=&quot;archiveDoc('timelogs','${l.id}','${(l.description||'Log').slice(0,20)}')&quot; style=&quot;opacity:0&quot; onmouseenter=&quot;this.style.opacity=1&quot; onmouseleave=&quot;this.style.opacity=0&quot;></button></td>
     </tr>`).join('')}</tbody>
     </table>${myLogs.length===0?emptyState('No time entries yet.'):''}
   </div>`;
@@ -5861,7 +5937,7 @@ function renderVATabSOPs(){
   return sops.length ? renderSOPCards(sops, false) : '<div style=&quot;font-size:13px;color:var(--text3);padding:20px 0&quot;>No SOPs yet. Ask management to add them.</div>';
 }
 
-function renderSOPLibrary(){
+
 function renderThemeOptions(){
   return `<div style="max-width:680px;margin:0 auto">
     <div class="sec-head"><div class="sec-title">Personalize Your Dashboard</div></div>
@@ -5904,6 +5980,55 @@ if(storedTheme) {
     document.documentElement.style.setProperty('--navy-pale', t.p);
   } catch(e){}
 }
+
+async function deleteGoal(id){
+  const goal = APP.data.goals.find(x=>x.id===id);
+  if(!goal) return;
+  if(!confirm(`Delete goal "${goal.name}"? This cannot be undone.`)) return;
+  APP.data.goals = APP.data.goals.filter(x=>x.id!==id);
+  lsSave("goals", APP.data.goals);
+  renderCurrentPage();
+  toast("Goal deleted.", "warning");
+}
+
+async function deleteTimeLog(id){
+  const log = APP.data.timelogs.find(x=>x.id===id);
+  if(!log) return;
+  if(!confirm(`Delete time log for "${log.description || 'task'}"? This cannot be undone.`)) return;
+  APP.data.timelogs = APP.data.timelogs.filter(x=>x.id!==id);
+  lsSave("timelogs", APP.data.timelogs);
+  renderCurrentPage();
+  toast("Time log deleted.", "warning");
+}
+
+function openEditTask(id){
+  const t=APP.data.tasks.find(x=>x.id===id);
+  if(!t) return;
+  const vaOpts=APP.data.team.map(v=>`<option value="${v.id}|${v.displayName}|${v.initials}|${v.avatarColor}"${v.id===t.assigneeUid?' selected':''}>${v.displayName}</option>`).join('');
+  const clientOpts=APP.data.clients.map(c=>`<option value="${c.id}|${c.name}"${c.id===t.clientId?' selected':''}>${c.name}</option>`).join('');
+  openModal('Edit Task',`<div class="form-group"><label class="form-label">Task Title *</label><input class="form-control" id="f-task-title" value="${t.title}"></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-control" id="f-task-desc" rows="3">${t.description||''}</textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Assignee</label><select class="form-control" id="f-task-assignee">${vaOpts}</select></div><div class="form-group"><label class="form-label">Priority</label><select class="form-control" id="f-task-priority"><option${t.priority==='Urgent'?' selected':''}>Urgent</option><option${t.priority==='High'?' selected':''}>High</option><option${t.priority==='Medium'?' selected':''}>Medium</option><option${t.priority==='Low'?' selected':''}>Low</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Due Date</label><input type="date" class="form-control" id="f-task-due" value="${t.dueDate||''}"></div><div class="form-group"><label class="form-label">Client / Project</label><select class="form-control" id="f-task-proj"><option value="">— None —</option>${clientOpts}</select></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveEditTask('${id}')">Save Changes</button>`);
+}
+
+async function saveEditTask(id){
+  const t=APP.data.tasks.find(x=>x.id===id);
+  if(!t) return;
+  const title=document.getElementById('f-task-title').value.trim();
+  if(!title){toast('Please enter a task title.','error');return;}
+  const desc=document.getElementById('f-task-desc').value;
+  const va=document.getElementById('f-task-assignee').value.split('|');
+  const proj=document.getElementById('f-task-proj').value.split('|');
+  const due=document.getElementById('f-task-due').value;
+  const pri=document.getElementById('f-task-priority').value;
+  t.title=title; t.description=desc; t.assigneeUid=va[0]; t.assigneeName=va[1]; t.assigneeInitials=va[2]; t.assigneeColor=va[3];
+  t.clientId=proj[0]||''; t.project=proj[1]||''; t.dueDate=due; t.priority=pri;
+  lsSave('tasks',APP.data.tasks);
+  closeModal();
+  renderCurrentPage();
+  toast('Task updated!','success');
+}
+
+
+function renderSOPLibrary(){
   const sops = APP.data.sops||[];
   return `<div style=&quot;max-width:760px;margin:0 auto&quot;>
     <div class=&quot;sec-head&quot;><div class=&quot;sec-title&quot;>SOP Library</div><button class=&quot;btn btn-sm btn-primary&quot; onclick=&quot;openAddSOP()&quot;>+ Add SOP</button></div>
@@ -6226,34 +6351,9 @@ async function toggleTask(id){
 }
 
 async function openTaskDetail(id){
-function openEditTask(id){
   const t=APP.data.tasks.find(x=>x.id===id);
   if(!t) return;
-  const vaOpts=APP.data.team.map(v=>`<option value="${v.id}|${v.displayName}|${v.initials}|${v.avatarColor}"${v.id===t.assigneeUid?' selected':''}>${v.displayName}</option>`).join('');
-  const clientOpts=APP.data.clients.map(c=>`<option value="${c.id}|${c.name}"${c.id===t.clientId?' selected':''}>${c.name}</option>`).join('');
-  openModal('Edit Task',`<div class="form-group"><label class="form-label">Task Title *</label><input class="form-control" id="f-task-title" value="${t.title}"></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-control" id="f-task-desc" rows="3">${t.description||''}</textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Assignee</label><select class="form-control" id="f-task-assignee">${vaOpts}</select></div><div class="form-group"><label class="form-label">Priority</label><select class="form-control" id="f-task-priority"><option${t.priority==='Urgent'?' selected':''}>Urgent</option><option${t.priority==='High'?' selected':''}>High</option><option${t.priority==='Medium'?' selected':''}>Medium</option><option${t.priority==='Low'?' selected':''}>Low</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Due Date</label><input type="date" class="form-control" id="f-task-due" value="${t.dueDate||''}"></div><div class="form-group"><label class="form-label">Client / Project</label><select class="form-control" id="f-task-proj"><option value="">— None —</option>${clientOpts}</select></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveEditTask('${id}')">Save Changes</button>`);
-}
-
-async function saveEditTask(id){
-  const t=APP.data.tasks.find(x=>x.id===id);
-  if(!t) return;
-  const title=document.getElementById('f-task-title').value.trim();
-  if(!title){toast('Please enter a task title.','error');return;}
-  const desc=document.getElementById('f-task-desc').value;
-  const va=document.getElementById('f-task-assignee').value.split('|');
-  const proj=document.getElementById('f-task-proj').value.split('|');
-  const due=document.getElementById('f-task-due').value;
-  const pri=document.getElementById('f-task-priority').value;
-  t.title=title; t.description=desc; t.assigneeUid=va[0]; t.assigneeName=va[1]; t.assigneeInitials=va[2]; t.assigneeColor=va[3];
-  t.clientId=proj[0]||''; t.project=proj[1]||''; t.dueDate=due; t.priority=pri;
-  lsSave('tasks',APP.data.tasks);
-  closeModal();
-  renderCurrentPage();
-  toast('Task updated!','success');
-}
-  const t=APP.data.tasks.find(x=>x.id===id);
-  if(!t) return;
-  openModal(t.title.slice(0,50),`<div class=&quot;info-grid&quot;><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Status</div><div class=&quot;info-val&quot;><span class=&quot;tag ${t.done?'t-green':'t-navy'}&quot;>${t.done?'Done':'Open'}</span></div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Priority</div><div class=&quot;info-val&quot;>${tagHtml(t.priority)}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Assignee</div><div class=&quot;info-val&quot;>${t.assigneeName||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Due Date</div><div class=&quot;info-val&quot;>${t.dueDate||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Project</div><div class=&quot;info-val&quot;>${t.project||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>SLA Status</div><div class=&quot;info-val&quot;>${SLA.badge(t)}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>OOS?</div><div class=&quot;info-val&quot;>${t.isOos?`<span class=&quot;oos-badge&quot;>Yes · $${t.oosValue||0} upsell</span>`:'No'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Created</div><div class=&quot;info-val&quot; style=&quot;font-size:11px&quot;>${t.createdAt?new Date(t.createdAt).toLocaleString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}</div></div></div>${!t.firstResponseAt?`<div class=&quot;form-warn&quot;>No first response logged yet. SLA clock is running: ${SLA.elapsed(t).toFixed(1)}h elapsed.</div>`:''}<div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>Log First Response Now</label><button class=&quot;btn btn-teal btn-sm&quot; onclick=&quot;logFirstResponse('${t.id}')&quot;> Mark as Responded</button></div>`,`<button class=&quot;btn btn-secondary&quot; onclick=&quot;closeModal()&quot;>Close</button><button class=&quot;btn btn-${t.done?'secondary':'primary'}&quot; onclick=&quot;toggleTask('${t.id}');closeModal()&quot;>${t.done?'Reopen':'Mark Done'}</button><button class=&quot;btn btn-danger&quot; onclick=&quot;deleteTask('${t.id}');closeModal()&quot;> Delete</button>`);
+  openModal(t.title.slice(0,50),`<div class=&quot;info-grid&quot;><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Status</div><div class=&quot;info-val&quot;><span class=&quot;tag ${t.done?'t-green':'t-navy'}&quot;>${t.done?'Done':'Open'}</span></div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Priority</div><div class=&quot;info-val&quot;>${tagHtml(t.priority)}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Assignee</div><div class=&quot;info-val&quot;>${t.assigneeName||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Due Date</div><div class=&quot;info-val&quot;>${t.dueDate||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Project</div><div class=&quot;info-val&quot;>${t.project||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>SLA Status</div><div class=&quot;info-val&quot;>${SLA.badge(t)}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>OOS?</div><div class=&quot;info-val&quot;>${t.isOos?`<span class=&quot;oos-badge&quot;>Yes · $${t.oosValue||0} upsell</span>`:'No'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Created</div><div class=&quot;info-val&quot; style=&quot;font-size:11px&quot;>${t.createdAt?new Date(t.createdAt).toLocaleString('en-PH',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}):'—'}</div></div></div>${!t.firstResponseAt?`<div class=&quot;form-warn&quot;>No first response logged yet. SLA clock is running: ${SLA.elapsed(t).toFixed(1)}h elapsed.</div>`:''}<div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>Log First Response Now</label><button class=&quot;btn btn-teal btn-sm&quot; onclick=&quot;logFirstResponse('${t.id}')&quot;> Mark as Responded</button></div>`,`<button class=&quot;btn btn-secondary&quot; onclick=&quot;closeModal()&quot;>Close</button><button class=&quot;btn btn-${t.done?'secondary':'primary'}&quot; onclick=&quot;toggleTask('${t.id}');closeModal()&quot;>${t.done?'Reopen':'Mark Done'}</button><button class=&quot;btn btn-danger&quot; onclick=&quot;archiveDoc('tasks','${t.id}','${t.title.slice(0,30)}');closeModal()&quot;> Archive</button>`);
 }
 
 async function logFirstResponse(id){
@@ -6367,7 +6467,7 @@ async function markPaid(id){
 async function openInvoiceDetail(id){
   const inv=APP.data.invoices.find(x=>x.id===id);
   if(!inv) return;
-  openModal(inv.number,`<div class=&quot;info-grid&quot;><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Client</div><div class=&quot;info-val&quot;>${inv.client}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Status</div><div class=&quot;info-val&quot;><span class=&quot;tag ${invoiceTag(inv.status)}&quot;>${inv.status}</span></div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Amount (USD)</div><div class=&quot;info-val currency-usd&quot; style=&quot;font-size:18px&quot;>$${inv.amountUsd.toLocaleString()}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Amount (PHP)</div><div class=&quot;info-val currency-php&quot;>₱${FIN.toPhp(inv.amountUsd).toLocaleString()}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Issued</div><div class=&quot;info-val&quot;>${inv.issuedDate||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Due Date</div><div class=&quot;info-val&quot;>${inv.dueDate||'—'}</div></div>${inv.paidAt?`<div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Paid On</div><div class=&quot;info-val&quot; style=&quot;color:var(--green);font-weight:600&quot;>${inv.paidAt}</div></div>`:''}</div>`,`${inv.status!=='Paid'?`<button class=&quot;btn btn-primary&quot; onclick=&quot;markPaid('${inv.id}');closeModal()&quot;>Mark as Paid</button>`:''}<button class=&quot;btn btn-secondary&quot; onclick=&quot;closeModal()&quot;>Close</button><button class=&quot;btn btn-danger&quot; onclick=&quot;deleteInvoice('${inv.id}');closeModal()&quot;> Delete</button>`);
+  openModal(inv.number,`<div class=&quot;info-grid&quot;><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Client</div><div class=&quot;info-val&quot;>${inv.client}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Status</div><div class=&quot;info-val&quot;><span class=&quot;tag ${invoiceTag(inv.status)}&quot;>${inv.status}</span></div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Amount (USD)</div><div class=&quot;info-val currency-usd&quot; style=&quot;font-size:18px&quot;>$${inv.amountUsd.toLocaleString()}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Amount (PHP)</div><div class=&quot;info-val currency-php&quot;>₱${FIN.toPhp(inv.amountUsd).toLocaleString()}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Issued</div><div class=&quot;info-val&quot;>${inv.issuedDate||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Due Date</div><div class=&quot;info-val&quot;>${inv.dueDate||'—'}</div></div>${inv.paidAt?`<div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Paid On</div><div class=&quot;info-val&quot; style=&quot;color:var(--green);font-weight:600&quot;>${inv.paidAt}</div></div>`:''}</div>`,`${inv.status!=='Paid'?`<button class=&quot;btn btn-primary&quot; onclick=&quot;markPaid('${inv.id}');closeModal()&quot;>Mark as Paid</button>`:''}<button class=&quot;btn btn-secondary&quot; onclick=&quot;closeModal()&quot;>Close</button><button class=&quot;btn btn-danger&quot; onclick=&quot;archiveDoc('invoices','${inv.id}','${inv.number}');closeModal()&quot;> Archive</button>`);
 }
 
 function filterSocialPlan(el, platform){
@@ -6537,7 +6637,7 @@ async function saveVA(){
   if(!name){ toast('Please enter a name.','error'); return; }
   const initials=document.getElementById('f-va-initials').value.toUpperCase() || name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
   const skills=document.getElementById('f-va-skills').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const va={id:'u'+Date.now(),displayName:name,initials,role:document.getElementById('f-va-role').value,avatarColor:document.getElementById('f-va-color').value,email:document.getElementById('f-va-email').value,skills,capacity:0,status:'Active',clientCount:0,pin:'1234',since:today(),kpi:{completionRate:0,slaCompliance:0,errorRate:0,satisfaction:0}};
+  const va={id:'u'+Date.now(),displayName:name,initials,role:document.getElementById('f-va-role').value,avatarColor:document.getElementById('f-va-color').value,email:document.getElementById('f-va-email').value,skills,capacity:0,status:'Active',clientCount:0,pin:'123456',since:today(),kpi:{completionRate:0,slaCompliance:0,errorRate:0,satisfaction:0}};
   APP.data.team=[...APP.data.team,va];
   lsSave('team',APP.data.team);
   logActivity('','added team member','team',name,'teal');
@@ -7479,34 +7579,9 @@ async function deleteTask(id){
 }
 
 async function openTaskDetail(id){
-function openEditTask(id){
-  const t=APP.data.tasks.find(x=>x.id===id);
-  if(!t) return;
-  const vaOpts=APP.data.team.map(v=>`<option value="${v.id}|${v.displayName}|${v.initials}|${v.avatarColor}"${v.id===t.assigneeUid?' selected':''}>${v.displayName}</option>`).join('');
-  const clientOpts=APP.data.clients.map(c=>`<option value="${c.id}|${c.name}"${c.id===t.clientId?' selected':''}>${c.name}</option>`).join('');
-  openModal('Edit Task',`<div class="form-group"><label class="form-label">Task Title *</label><input class="form-control" id="f-task-title" value="${t.title}"></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-control" id="f-task-desc" rows="3">${t.description||''}</textarea></div><div class="form-row"><div class="form-group"><label class="form-label">Assignee</label><select class="form-control" id="f-task-assignee">${vaOpts}</select></div><div class="form-group"><label class="form-label">Priority</label><select class="form-control" id="f-task-priority"><option${t.priority==='Urgent'?' selected':''}>Urgent</option><option${t.priority==='High'?' selected':''}>High</option><option${t.priority==='Medium'?' selected':''}>Medium</option><option${t.priority==='Low'?' selected':''}>Low</option></select></div></div><div class="form-row"><div class="form-group"><label class="form-label">Due Date</label><input type="date" class="form-control" id="f-task-due" value="${t.dueDate||''}"></div><div class="form-group"><label class="form-label">Client / Project</label><select class="form-control" id="f-task-proj"><option value="">— None —</option>${clientOpts}</select></div></div>`,`<button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveEditTask('${id}')">Save Changes</button>`);
-}
-
-async function saveEditTask(id){
-  const t=APP.data.tasks.find(x=>x.id===id);
-  if(!t) return;
-  const title=document.getElementById('f-task-title').value.trim();
-  if(!title){toast('Please enter a task title.','error');return;}
-  const desc=document.getElementById('f-task-desc').value;
-  const va=document.getElementById('f-task-assignee').value.split('|');
-  const proj=document.getElementById('f-task-proj').value.split('|');
-  const due=document.getElementById('f-task-due').value;
-  const pri=document.getElementById('f-task-priority').value;
-  t.title=title; t.description=desc; t.assigneeUid=va[0]; t.assigneeName=va[1]; t.assigneeInitials=va[2]; t.assigneeColor=va[3];
-  t.clientId=proj[0]||''; t.project=proj[1]||''; t.dueDate=due; t.priority=pri;
-  lsSave('tasks',APP.data.tasks);
-  closeModal();
-  renderCurrentPage();
-  toast('Task updated!','success');
-}
   const task=APP.data.tasks.find(x=>x.id===id);
   if(!task) return;
-  openModal(task.title.slice(0,50),`<div class=&quot;info-grid&quot;><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Status</div><div class=&quot;info-val&quot;>${task.done?'<span class=&quot;tag t-green&quot;>Done</span>':'<span class=&quot;tag t-navy&quot;>Open</span>'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Priority</div><div class=&quot;info-val&quot;>${tagHtml(task.priority)}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Assignee</div><div class=&quot;info-val&quot;>${task.assigneeName||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Due Date</div><div class=&quot;info-val&quot;>${task.dueDate||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Created</div><div class=&quot;info-val&quot;>${task.createdDate||dateOnly(task.createdAt)}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Completed</div><div class=&quot;info-val&quot;>${task.completedDate||'Not yet'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>SLA Status</div><div class=&quot;info-val&quot;>${SLA.badge(task)}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Client / Project</div><div class=&quot;info-val&quot;>${task.project||'—'}</div></div></div><div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>Description</label><div style=&quot;padding:11px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;line-height:1.6;background:#FAFBFE&quot;>${task.description || 'No description provided.'}</div></div>${!task.firstResponseAt?`<div class=&quot;form-warn&quot;>No first response logged yet. SLA clock is running: ${SLA.elapsed(task).toFixed(1)}h elapsed.</div>`:''}`,`<button class=&quot;btn btn-secondary&quot; onclick=&quot;closeModal()&quot;>Close</button>${task.done?`<button class=&quot;btn btn-secondary&quot; onclick=&quot;toggleTask('${task.id}');closeModal()&quot;>Reopen</button>`:`<button class=&quot;btn btn-primary&quot; onclick=&quot;toggleTask('${task.id}');closeModal()&quot;>Mark Done</button>`}<button class=&quot;btn btn-secondary&quot; onclick=&quot;openEditTask('${task.id}')&quot;>Edit</button><button class=&quot;btn btn-danger&quot; onclick=&quot;deleteTask('${task.id}')&quot;>Delete</button>`);
+  openModal(task.title.slice(0,50),`<div class=&quot;info-grid&quot;><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Status</div><div class=&quot;info-val&quot;>${task.done?'<span class=&quot;tag t-green&quot;>Done</span>':'<span class=&quot;tag t-navy&quot;>Open</span>'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Priority</div><div class=&quot;info-val&quot;>${tagHtml(task.priority)}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Assignee</div><div class=&quot;info-val&quot;>${task.assigneeName||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Due Date</div><div class=&quot;info-val&quot;>${task.dueDate||'—'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Created</div><div class=&quot;info-val&quot;>${task.createdDate||dateOnly(task.createdAt)}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Completed</div><div class=&quot;info-val&quot;>${task.completedDate||'Not yet'}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>SLA Status</div><div class=&quot;info-val&quot;>${SLA.badge(task)}</div></div><div class=&quot;info-box&quot;><div class=&quot;info-label&quot;>Client / Project</div><div class=&quot;info-val&quot;>${task.project||'—'}</div></div></div><div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>Description</label><div style=&quot;padding:11px 12px;border:1px solid var(--border);border-radius:var(--r);font-size:13px;line-height:1.6;background:#FAFBFE&quot;>${task.description || 'No description provided.'}</div></div>${!task.firstResponseAt?`<div class=&quot;form-warn&quot;>No first response logged yet. SLA clock is running: ${SLA.elapsed(task).toFixed(1)}h elapsed.</div>`:''}`,`<button class=&quot;btn btn-secondary&quot; onclick=&quot;closeModal()&quot;>Close</button>${task.done?`<button class=&quot;btn btn-secondary&quot; onclick=&quot;toggleTask('${task.id}');closeModal()&quot;>Reopen</button>`:`<button class=&quot;btn btn-primary&quot; onclick=&quot;toggleTask('${task.id}');closeModal()&quot;>Mark Done</button>`}<button class=&quot;btn btn-danger&quot; onclick=&quot;deleteTask('${task.id}')&quot;>Delete</button>`);
 }
 
 function openAddPayment(clientId='', invoiceId=''){
@@ -7611,7 +7686,7 @@ function renderConversations(){
         </div>
         <div style=&quot;margin-left:auto;display:flex;gap:6px&quot;>
           <button class=&quot;btn btn-sm btn-secondary&quot; onclick=&quot;openEditConversation('${active.id}')&quot;> Edit</button>
-          <button class=&quot;btn btn-sm btn-danger&quot; onclick=&quot;deleteConversation('${active.id}')&quot;>Delete</button>
+          <button class=&quot;btn btn-sm btn-danger&quot; onclick=&quot;deleteConversation('${active.id}')&quot;></button>
         </div>
       </div>
       <div class=&quot;conv-messages&quot; id=&quot;conv-messages-area&quot;>
@@ -7872,11 +7947,11 @@ function renderAuthChooser(){
     return `<div class=&quot;auth-wrap&quot;><div class=&quot;auth-card&quot;>
       <div style=&quot;font-size:30px;margin-bottom:12px&quot;></div>
       <div class=&quot;auth-title&quot;>Management Login</div>
-      <div class=&quot;auth-sub&quot;>Enter your 4-digit PIN to access the full dashboard</div>
+      <div class=&quot;auth-sub&quot;>Enter your 6-digit PIN to access the full dashboard</div>
       <div class=&quot;pin-row&quot;>${[0,1,2,3].map(i=>`<div class=&quot;pin-dot${i<filled?' filled':''}&quot; id=&quot;opd-${i}&quot;></div>`).join('')}</div>
       <div class=&quot;pin-pad&quot;>${[1,2,3,4,5,6,7,8,9,'←',0,''].map(k=>`<button class=&quot;pin-key&quot; onclick=&quot;ownerPinPress('${k}')&quot;>${k}</button>`).join('')}</div>
       <button class=&quot;btn btn-secondary w-full&quot; style=&quot;margin-top:8px&quot; onclick=&quot;APP.authStep='choose';renderCurrentPage()&quot;>← Back</button>
-      <div style=&quot;font-size:11px;color:var(--text3);margin-top:10px&quot;>Default PIN: 0000 · Change in Settings</div>
+      <div style=&quot;font-size:11px;color:var(--text3);margin-top:10px&quot;>Default PIN: 000000 · Change in Settings</div>
     </div></div>`;
   }
 
@@ -7928,11 +8003,11 @@ function renderAuthChooser(){
     return `<div class=&quot;auth-wrap&quot;><div class=&quot;auth-card&quot;>
       <div class=&quot;av av-lg ${avColor(va.avatarColor)}&quot; style=&quot;margin:0 auto 12px&quot;>${va.initials}</div>
       <div class=&quot;auth-title&quot;>Hi, ${va.displayName.split(' ')[0]}! </div>
-      <div class=&quot;auth-sub&quot;>Enter your 4-digit PIN</div>
+      <div class=&quot;auth-sub&quot;>Enter your 6-digit PIN</div>
       <div class=&quot;pin-row&quot;>${[0,1,2,3].map(i=>`<div class=&quot;pin-dot${i<filled?' filled':''}&quot; id=&quot;pd-${i}&quot;></div>`).join('')}</div>
       <div class=&quot;pin-pad&quot;>${[1,2,3,4,5,6,7,8,9,'←',0,''].map(k=>`<button class=&quot;pin-key&quot; onclick=&quot;pinPress('${k}')&quot;>${k}</button>`).join('')}</div>
       <button class=&quot;btn btn-secondary w-full&quot; style=&quot;margin-top:8px&quot; onclick=&quot;APP.authStep='va-select';APP.va.pinEntry='';renderCurrentPage()&quot;>← Back</button>
-      <div style=&quot;font-size:11px;color:var(--text3);margin-top:10px&quot;>Default PIN: 1234</div>
+      <div style=&quot;font-size:11px;color:var(--text3);margin-top:10px&quot;>Default PIN: 123456</div>
     </div></div>`;
   }
 
@@ -7982,11 +8057,11 @@ function renderAuthChooser(){
     return `<div class=&quot;auth-wrap&quot;><div class=&quot;auth-card&quot;>
       <div class=&quot;av av-lg ${avColor(c.assignedVaColor)}&quot; style=&quot;margin:0 auto 12px&quot;>${c.assignedVaInitials}</div>
       <div class=&quot;auth-title&quot;>${c.name}</div>
-      <div class=&quot;auth-sub&quot;>Enter your 4-digit PIN to access your portal</div>
+      <div class=&quot;auth-sub&quot;>Enter your 6-digit PIN to access your portal</div>
       <div class=&quot;pin-row&quot;>${[0,1,2,3].map(i=>`<div class=&quot;pin-dot${i<filled?' filled':''}&quot; id=&quot;cpd-${i}&quot;></div>`).join('')}</div>
       <div class=&quot;pin-pad&quot;>${[1,2,3,4,5,6,7,8,9,'←',0,''].map(k=>`<button class=&quot;pin-key&quot; onclick=&quot;clientPinPress('${k}')&quot;>${k}</button>`).join('')}</div>
       <button class=&quot;btn btn-secondary w-full&quot; style=&quot;margin-top:8px&quot; onclick=&quot;APP.authStep='client-select';APP.clientAuth.pinEntry='';renderCurrentPage()&quot;>← Back</button>
-      <div style=&quot;font-size:11px;color:var(--text3);margin-top:10px&quot;>Default PIN: 1234 · Contact TJC to reset</div>
+      <div style=&quot;font-size:11px;color:var(--text3);margin-top:10px&quot;>Default PIN: 123456 · Contact TJC to reset</div>
     </div></div>`;
   }
   return '';
@@ -7995,10 +8070,10 @@ function renderAuthChooser(){
 // Owner PIN
 function ownerPinPress(k){
   if(k==='←'){ APP.ownerPinEntry=APP.ownerPinEntry.slice(0,-1); renderCurrentPage(); return; }
-  if(k===''||APP.ownerPinEntry.length>=4){ checkOwnerPin(); return; }
+  if(k===''||APP.ownerPinEntry.length>=6){ checkOwnerPin(); return; }
   APP.ownerPinEntry+=k;
   renderCurrentPage();
-  if(APP.ownerPinEntry.length===4) setTimeout(checkOwnerPin,180);
+  if(APP.ownerPinEntry.length===6) setTimeout(checkOwnerPin,180);
 }
 function checkOwnerPin(){
   if(APP.ownerPinEntry===CFG.ownerPin){
@@ -8022,7 +8097,7 @@ function authSelectVA(id){ APP.va.vaId=id; APP.va.pinEntry=''; APP.authStep='va-
 const _origCheckPin = typeof checkPin === 'function' ? checkPin : null;
 function checkPin(){
   const va=APP.data.team.find(v=>v.id===APP.va.vaId);
-  if(APP.va.pinEntry===(va?.pin||'1234')){
+  if(APP.va.pinEntry===(va?.pin||'123456')){
     APP.va.loggedIn=true; APP.va.tab='dashboard'; APP.authMode='va'; APP.authStep='choose';
     setAppShellMode('');
     navigate('vaportal');
@@ -8043,14 +8118,14 @@ function authSelectClient(id){ APP.clientAuth.clientId=id; APP.clientAuth.pinEnt
 function updateClientPinDots(){ const f=APP.clientAuth.pinEntry.length; [0,1,2,3].forEach(i=>{const d=document.getElementById('cpd-'+i); if(d) d.className='pin-dot'+(i<f?' filled':'');}); }
 function clientPinPress(k){
   if(k==='←'){ APP.clientAuth.pinEntry=APP.clientAuth.pinEntry.slice(0,-1); renderCurrentPage(); return; }
-  if(k===''||APP.clientAuth.pinEntry.length>=4){ checkClientPin(); return; }
+  if(k===''||APP.clientAuth.pinEntry.length>=6){ checkClientPin(); return; }
   APP.clientAuth.pinEntry+=k;
   renderCurrentPage();
-  if(APP.clientAuth.pinEntry.length===4) setTimeout(checkClientPin,180);
+  if(APP.clientAuth.pinEntry.length===6) setTimeout(checkClientPin,180);
 }
 function checkClientPin(){
   const c=APP.data.clients.find(x=>x.id===APP.clientAuth.clientId);
-  const pin=(c?.clientPin||'1234');
+  const pin=(c?.clientPin||'123456');
   if(APP.clientAuth.pinEntry===pin){
     APP.authMode='client'; APP.authStep='choose'; APP.cpTab='overview';
     renderCurrentPage();
@@ -8502,9 +8577,9 @@ function renderClientFacingPortal(){
 /* ── OWNER PIN CHANGE ─────────────────────────────────────────── */
 function openChangeOwnerPin(){
   openModal('Change Owner PIN',`
-    <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>Current PIN</label><input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;f-pin-old&quot; maxlength=&quot;4&quot; placeholder=&quot;••••&quot;></div>
-    <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>New PIN (4 digits)</label><input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;f-pin-new&quot; maxlength=&quot;4&quot; placeholder=&quot;••••&quot;></div>
-    <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>Confirm New PIN</label><input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;f-pin-confirm&quot; maxlength=&quot;4&quot; placeholder=&quot;••••&quot;></div>`,
+    <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>Current PIN</label><input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;f-pin-old&quot; maxlength=&quot;4&quot; placeholder=&quot;••••••&quot;></div>
+    <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>New PIN (6 digits)</label><input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;f-pin-new&quot; maxlength=&quot;4&quot; placeholder=&quot;••••••&quot;></div>
+    <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>Confirm New PIN</label><input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;f-pin-confirm&quot; maxlength=&quot;4&quot; placeholder=&quot;••••••&quot;></div>`,
     `<button class=&quot;btn btn-secondary&quot; onclick=&quot;closeModal()&quot;>Cancel</button><button class=&quot;btn btn-primary&quot; onclick=&quot;saveOwnerPin()&quot;>Save PIN</button>`
   );
 }
@@ -8513,7 +8588,7 @@ function saveOwnerPin(){
   const n=document.getElementById('f-pin-new').value;
   const c=document.getElementById('f-pin-confirm').value;
   if(old!==CFG.ownerPin){ toast('Current PIN is incorrect.','error'); return; }
-  if(n.length!==4||!/^\d+$/.test(n)){ toast('PIN must be exactly 4 digits.','error'); return; }
+  if(n.length!==4||!/^\d+$/.test(n)){ toast('PIN must be exactly 6 digits.','error'); return; }
   if(n!==c){ toast('New PINs do not match.','error'); return; }
   CFG.ownerPin=n;
   closeModal(); toast('Owner PIN updated successfully!','success');
@@ -8524,7 +8599,7 @@ function openSetClientPin(clientId){
   const c=APP.data.clients.find(x=>x.id===clientId);
   if(!c) return;
   openModal('Set Portal PIN — '+c.name,`
-    <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>New 4-digit PIN for ${c.name}</label><input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;f-cp-pin&quot; maxlength=&quot;4&quot; placeholder=&quot;e.g. 5678&quot;></div>
+    <div class=&quot;form-group&quot;><label class=&quot;form-label&quot;>New 6-digit PIN for ${c.name}</label><input type=&quot;password&quot; class=&quot;form-control&quot; id=&quot;f-cp-pin&quot; maxlength=&quot;4&quot; placeholder=&quot;e.g. 123456&quot;></div>
     <div class=&quot;form-note&quot;>The client will use this PIN to log into their portal.</div>`,
     `<button class=&quot;btn btn-secondary&quot; onclick=&quot;closeModal()&quot;>Cancel</button><button class=&quot;btn btn-primary&quot; onclick=&quot;saveClientPin('${clientId}')&quot;>Set PIN</button>`
   );
@@ -8533,7 +8608,7 @@ function saveClientPin(clientId){
   const c=APP.data.clients.find(x=>x.id===clientId);
   if(!c) return;
   const p=document.getElementById('f-cp-pin').value;
-  if(p.length!==4||!/^\d+$/.test(p)){ toast('PIN must be exactly 4 digits.','error'); return; }
+  if(p.length!==6||!/^\d+$/.test(p)){ toast('PIN must be exactly 6 digits.','error'); return; }
   c.clientPin=p;
   lsSave('clients',APP.data.clients);
   closeModal(); toast('Client PIN updated for '+c.name,'success');
@@ -9347,7 +9422,7 @@ function renderVALearning(va){
         <div style=&quot;font-size:10px;color:var(--text3);margin-top:4px&quot;>${pct}% of library</div>
       </div>
       <div class=&quot;card card-pad&quot; style=&quot;text-align:center&quot;>
-        <div style=&quot;font-size:26px;font-weight:700;color:${reqDone===required.length?'var(--green)':'var(--amber)'}&quot;>${reqDone}<span style=&quot;font-size:14px;color:var(--text3)&quot;>/${required.length}</span></div>
+        <div style=&quot;font-size:26px;font-weight:700;color:${reqDone===required.length?'var(--green)':'var(--red)'}&quot;>${reqDone}<span style=&quot;font-size:14px;color:var(--text3)&quot;>/${required.length}</span></div>
         <div style=&quot;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;margin:4px 0&quot;>Required Done</div>
         <div style=&quot;height:5px;background:var(--border);border-radius:3px&quot;><div style=&quot;height:100%;background:${reqDone===required.length?'var(--green)':'var(--red)'};border-radius:3px;width:${Math.round(reqDone/required.length*100)}%&quot;></div></div>
         <div style=&quot;font-size:10px;color:var(--text3);margin-top:4px&quot;>${reqDone===required.length?' All required done!':'Finish required first'}</div>
@@ -9657,21 +9732,6 @@ function toggleTheme(){
   const current = document.documentElement.getAttribute('data-theme');
   const next = current === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', next);
-  const storedTheme = localStorage.getItem('tjc-theme-accent');
-  if(storedTheme){
-    try {
-      const t = JSON.parse(storedTheme);
-      if(next==='dark'){
-        document.documentElement.style.setProperty('--navy', t.val);
-        document.documentElement.style.setProperty('--navy2', t.v2);
-        document.documentElement.style.setProperty('--navy-pale', '#141870');
-      } else {
-        document.documentElement.style.setProperty('--navy', t.val);
-        document.documentElement.style.setProperty('--navy2', t.v2);
-        document.documentElement.style.setProperty('--navy-pale', t.p);
-      }
-    } catch(e){}
-  }
   localStorage.setItem('tjc-theme', next);
 }
 
