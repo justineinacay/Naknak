@@ -89,6 +89,16 @@ button{cursor:pointer;}
 .sb-link.on{background:linear-gradient(135deg,var(--red-bright),var(--red-dark));color:#fff;box-shadow:0 6px 16px rgba(196,48,30,0.3);}
 .sb-link svg{flex-shrink:0;}
 .sb-footer{padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);}
+.sb-senior{display:flex;align-items:center;gap:11px;padding:11px 10px;margin-bottom:18px;background:var(--void2);border:1px solid rgba(255,255,255,0.08);border-radius:14px;}
+.sb-senior-avatar{position:relative;width:38px;height:38px;border-radius:19px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:16px;color:#fff;flex-shrink:0;}
+.sb-senior-pulse{position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-radius:50%;border:2px solid var(--void2);animation:pulseDot 2s infinite;}
+@keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:0.5;}}
+.sb-senior-txt{min-width:0;}
+.sb-senior-txt .nm{font-size:13px;font-weight:800;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sb-senior-txt .st{font-size:10.5px;font-weight:700;color:rgba(255,255,255,0.45);margin-top:1px;}
+.tb-sync-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green-bright);margin-right:6px;box-shadow:0 0 0 3px rgba(46,204,113,0.2);animation:pulseDot 2.2s infinite;}
+.panel-enter{animation:panelIn 0.32s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes panelIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 .sb-disconnect{width:100%;padding:10px;border-radius:10px;background:none;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.5);font-size:12px;font-weight:700;transition:all 0.15s;}
 .sb-disconnect:hover{border-color:var(--red-hot);color:var(--red-hot);}
 
@@ -124,7 +134,20 @@ button{cursor:pointer;}
 .sos-ack-btn{padding:11px 22px;border-radius:14px;background:#fff;border:none;color:var(--red-dark);font-weight:900;font-size:13.5px;white-space:nowrap;}
 
 /* ── STAT GRID ───────────────────────────────────────────────────────── */
+.hero-id-card{
+  display:flex;align-items:center;gap:18px;padding:22px 26px;border-radius:24px;margin-bottom:20px;
+  background:linear-gradient(135deg,var(--void) 0%,#2A1408 100%);
+  box-shadow:0 16px 40px rgba(30,10,2,0.22);transition:background 0.4s;
+}
+.hero-id-avatar{position:relative;width:58px;height:58px;border-radius:29px;background:rgba(255,255,255,0.16);border:2px solid rgba(255,255,255,0.25);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:24px;color:#fff;flex-shrink:0;}
+.hero-id-pulse{position:absolute;bottom:1px;right:1px;width:15px;height:15px;border-radius:50%;border:2.5px solid var(--void);animation:pulseDot 2s infinite;}
+.hero-id-body{flex:1;min-width:0;}
+.hero-id-name{font-family:var(--font-display);font-size:19px;font-weight:600;color:#fff;}
+.hero-id-status{font-size:12.5px;font-weight:700;color:rgba(255,255,255,0.6);margin-top:3px;}
+.hero-id-battery{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:13px;font-weight:700;color:rgba(255,255,255,0.85);background:rgba(255,255,255,0.1);padding:7px 12px;border-radius:12px;flex-shrink:0;}
 .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px;}
+.stat-bar{height:4px;border-radius:2px;background:var(--cream2);margin-top:10px;overflow:hidden;}
+.stat-bar-fill{height:100%;border-radius:2px;transition:width 0.5s ease;}
 @media (max-width:900px){ .stat-grid{grid-template-columns:1fr 1fr;} }
 .stat-card{background:#fff;border:1px solid var(--card-border);border-radius:18px;padding:18px 20px;}
 .stat-card .ic{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
@@ -159,7 +182,7 @@ button{cursor:pointer;}
 
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
 .form-row.single{grid-template-columns:1fr;}
-.form-field label{display:block;font-size:11.5px;font-weight:800;color:var(--ink3);margin-bottom:6px;letter-spacing:0.3px;}
+.form-field label{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;color:var(--ink3);margin-bottom:6px;letter-spacing:0.3px;}
 .form-field input,.form-field select,.form-field textarea{
   width:100%;padding:11px 13px;border-radius:11px;border:1.5px solid var(--card-border);
   font-size:13.5px;font-weight:700;color:var(--ink);outline:none;background:var(--cream);transition:border-color 0.15s;
@@ -171,6 +194,33 @@ button{cursor:pointer;}
 
 .chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
 .chip{display:flex;align-items:center;gap:6px;background:var(--cream2);border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;color:var(--ink2);}
+.chip-warn{background:rgba(196,48,30,0.09);color:var(--red-dark);}
+.chip-gold{background:rgba(192,112,16,0.09);color:var(--gold);}
+.chip-empty{font-size:12px;color:var(--ink3);font-weight:600;font-style:italic;padding:4px 0;}
+
+.profile-progress-ring{position:relative;width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background 0.4s;}
+.profile-progress-ring::before{content:"";position:absolute;inset:4px;background:#fff;border-radius:50%;}
+.profile-progress-ring span{position:relative;z-index:1;font-family:var(--font-mono);font-size:10.5px;font-weight:700;color:var(--ink2);}
+
+.quickid-preview{position:sticky;top:88px;}
+.profile-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start;}
+@media (max-width:960px){
+  .profile-layout{grid-template-columns:1fr;}
+  .quickid-preview{position:static;}
+}
+.quickid-preview-label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:var(--ink3);letter-spacing:1px;margin-bottom:10px;}
+.quickid-card{background:linear-gradient(165deg,var(--void) 0%,#2A1408 100%);border-radius:22px;padding:22px;box-shadow:0 16px 40px rgba(30,10,2,0.25);}
+.quickid-card-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.12);}
+.quickid-avatar{width:42px;height:42px;border-radius:21px;background:linear-gradient(145deg,var(--red-bright),var(--red-dark));display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:17px;color:#fff;flex-shrink:0;}
+.quickid-name{font-family:var(--font-display);font-size:15px;font-weight:600;color:#fff;}
+.quickid-sub{font-size:10.5px;color:rgba(255,255,255,0.45);font-weight:700;margin-top:1px;}
+.quickid-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:12.5px;}
+.quickid-row span{color:rgba(255,255,255,0.5);font-weight:700;}
+.quickid-row strong{color:#fff;font-weight:800;}
+.quickid-sect{font-size:10px;font-weight:800;color:rgba(255,255,255,0.4);letter-spacing:1px;margin:14px 0 8px;}
+.quickid-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.quickid-tags span{background:rgba(255,255,255,0.1);color:#fff;font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;}
+.quickid-tags em{color:rgba(255,255,255,0.35);font-size:12px;font-style:italic;}
 .chip button{background:none;border:none;color:var(--ink3);display:flex;}
 
 .vitals-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
@@ -221,7 +271,19 @@ const HH_KEY = "naknak_dash_household_v1";
 function genCode(){ const c="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let s=""; for(let i=0;i<6;i++) s+=c[Math.floor(Math.random()*c.length)]; return s; }
 function tNow(){ return new Date().toISOString(); }
 function fmtTime(iso){ try{ const d=new Date(iso); return d.toLocaleString('en-PH',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}); }catch(e){ return ''; } }
+function timeAgo(iso){
+  if(!iso) return "—";
+  try{
+    const s = Math.floor((Date.now() - new Date(iso).getTime())/1000);
+    if(s<10) return "ngayon lang";
+    if(s<60) return `${s}s ago`;
+    if(s<3600) return `${Math.floor(s/60)}m ago`;
+    if(s<86400) return `${Math.floor(s/3600)}h ago`;
+    return `${Math.floor(s/86400)}d ago`;
+  }catch(e){ return "—"; }
+}
 function nid(){ return Math.random().toString(36).slice(2,10); }
+function useTicker(ms){ const [,setT]=useState(0); useEffect(()=>{ const id=setInterval(()=>setT(x=>x+1), ms); return ()=>clearInterval(id); },[ms]); }
 
 function newSenior(name){
   return {
@@ -475,14 +537,17 @@ function Dashboard({ household, onDisconnect }) {
   const [state, setState] = useState(null);
   const [activeSid, setActiveSid] = useState(null);
   const [tab, setTab] = useState("overview");
+  const [lastSync, setLastSync] = useState(null);
   const revRef = useRef(0);
   const chanRef = useRef(null);
+  useTicker(5000);
 
   const pushState = useCallback(async (next) => {
     setState(next);
     const rev = Date.now(); revRef.current = rev;
     if(!supa) return;
     await supa.from("naknak_state").upsert({ household_id: household.householdId, state: next, rev, updated_at: new Date().toISOString() });
+    setLastSync(tNow());
   }, [household]);
 
   useEffect(() => {
@@ -490,11 +555,11 @@ function Dashboard({ household, onDisconnect }) {
     let mounted = true;
     (async () => {
       const { data } = await supa.from("naknak_state").select("state,rev").eq("household_id", household.householdId).maybeSingle();
-      if(mounted && data){ setState(data.state); revRef.current = data.rev; setActiveSid(data.state.activeSeniorId || data.state.seniors?.[0]?.id); }
+      if(mounted && data){ setState(data.state); revRef.current = data.rev; setActiveSid(data.state.activeSeniorId || data.state.seniors?.[0]?.id); setLastSync(tNow()); }
     })();
     chanRef.current = supa.channel("dash_"+household.householdId)
       .on("postgres_changes", { event:"*", schema:"public", table:"naknak_state", filter:"household_id=eq."+household.householdId },
-        (p) => { const row=p.new; if(row && row.rev>revRef.current){ revRef.current=row.rev; setState(row.state); } })
+        (p) => { const row=p.new; if(row && row.rev>revRef.current){ revRef.current=row.rev; setState(row.state); setLastSync(tNow()); } })
       .subscribe();
     return () => { mounted=false; if(chanRef.current) supa.removeChannel(chanRef.current); };
   }, [household]);
@@ -527,6 +592,16 @@ function Dashboard({ household, onDisconnect }) {
           <div className="txt"><div className="lbl">FAMILY CODE</div><div className="val">{household.pairCode}</div></div>
           <button className="icon-btn" style={{width:26,height:26,background:"rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.6)"}} onClick={()=>navigator.clipboard&&navigator.clipboard.writeText(household.pairCode)}><Icon name="copy" size={13}/></button>
         </div>
+        <div className="sb-senior">
+          <div className="sb-senior-avatar" style={{background:senior.status==="sos"?"var(--red-hot)":"var(--red-bright)"}}>
+            {(senior.nickname||senior.name||"?")[0]}
+            <span className="sb-senior-pulse" style={{background:senior.status==="sos"?"var(--red-hot)":"var(--green-bright)"}}></span>
+          </div>
+          <div className="sb-senior-txt">
+            <div className="nm">{senior.nickname||senior.name}</div>
+            <div className="st">{senior.status==="sos"?"SOS Active":senior.checkedIn?"Ayos · "+timeAgo(senior.lastCheckin):"Walang check-in"}</div>
+          </div>
+        </div>
         <div className="sb-nav">
           {NAV.map(([id,label,icon])=>(
             <button key={id} className={"sb-link"+(tab===id?" on":"")} onClick={()=>setTab(id)}>
@@ -543,7 +618,7 @@ function Dashboard({ household, onDisconnect }) {
         <div className="topbar">
           <div className="tb-title">
             <h1>{NAV.find(n=>n[0]===tab)?.[1]}</h1>
-            <p>{seniors.length} {seniors.length===1?"senior":"mga senior"} · Naka-sync</p>
+            <p><span className="tb-sync-dot"></span>{seniors.length} {seniors.length===1?"senior":"mga senior"} · Na-sync {timeAgo(lastSync)}</p>
           </div>
           <div style={{display:"flex",alignItems:"center",gap:10}}>
             <div className="senior-tabs">
@@ -566,14 +641,14 @@ function Dashboard({ household, onDisconnect }) {
               <button className="sos-ack-btn" onClick={ackSOS}>Acknowledge</button>
             </div>
           )}
-          {tab==="overview" && <OverviewPanel senior={senior}/>}
-          {tab==="meds" && <MedsPanel senior={senior} patch={patch}/>}
-          {tab==="contacts" && <ContactsPanel senior={senior} patch={patch}/>}
-          {tab==="safezone" && <SafeZonePanel senior={senior} patch={patch}/>}
-          {tab==="vitals" && <VitalsPanel senior={senior} patch={patch}/>}
-          {tab==="notes" && <NotesPanel senior={senior} patch={patch}/>}
-          {tab==="profile" && <ProfilePanel senior={senior} patch={patch}/>}
-          {tab==="devices" && <DevicesPanel household={household}/>}
+          {tab==="overview" && <div key="overview" className="panel-enter"><OverviewPanel senior={senior}/></div>}
+          {tab==="meds" && <div key="meds" className="panel-enter"><MedsPanel senior={senior} patch={patch}/></div>}
+          {tab==="contacts" && <div key="contacts" className="panel-enter"><ContactsPanel senior={senior} patch={patch}/></div>}
+          {tab==="safezone" && <div key="safezone" className="panel-enter"><SafeZonePanel senior={senior} patch={patch}/></div>}
+          {tab==="vitals" && <div key="vitals" className="panel-enter"><VitalsPanel senior={senior} patch={patch}/></div>}
+          {tab==="notes" && <div key="notes" className="panel-enter"><NotesPanel senior={senior} patch={patch}/></div>}
+          {tab==="profile" && <div key="profile" className="panel-enter"><ProfilePanel senior={senior} patch={patch}/></div>}
+          {tab==="devices" && <div key="devices" className="panel-enter"><DevicesPanel household={household}/></div>}
         </div>
       </div>
     </div>
@@ -582,28 +657,51 @@ function Dashboard({ household, onDisconnect }) {
 
 /* ── OVERVIEW ────────────────────────────────────────────────────────── */
 function OverviewPanel({ senior }) {
+  useTicker(15000);
   const meds = senior.medications||[];
   const done = meds.filter(m=>m.status==="done").length;
+  const missed = meds.filter(m=>m.status==="missed").length;
+  const medPct = meds.length ? Math.round((done/meds.length)*100) : 0;
+  const isSOS = senior.status==="sos";
+  const EVENT_COLOR = { checkin:"var(--green)", sos:"var(--red)", fall:"var(--red)", med_taken:"var(--green)", med_missed:"var(--red)", med_snoozed:"var(--gold)", gps:"var(--gold)", notif:"var(--ink2)" };
+  const EVENT_BG = { checkin:"rgba(26,140,74,0.1)", sos:"rgba(196,48,30,0.1)", fall:"rgba(196,48,30,0.1)", med_taken:"rgba(26,140,74,0.1)", med_missed:"rgba(196,48,30,0.1)", med_snoozed:"rgba(192,112,16,0.1)", gps:"rgba(192,112,16,0.1)", notif:"var(--cream2)" };
+
   return (
     <>
+      {/* Hero identity card — mirrors the senior's own phone, so this feels like a real person, not a database row */}
+      <div className="hero-id-card" style={isSOS?{background:"linear-gradient(135deg,var(--red-bright) 0%,var(--red-dark) 100%)"}:{}}>
+        <div className="hero-id-avatar">
+          {(senior.nickname||senior.name||"?")[0]}
+          <span className="hero-id-pulse" style={{background:isSOS?"#fff":"var(--green-bright)"}}></span>
+        </div>
+        <div className="hero-id-body">
+          <div className="hero-id-name">{senior.name}</div>
+          <div className="hero-id-status">{isSOS?"SOS Active — kailangan ng agarang tulong":senior.checkedIn?`Ayos naman · huling check-in ${timeAgo(senior.lastCheckin)}`:"Wala pang check-in ngayong araw"}</div>
+        </div>
+        <div className="hero-id-battery">
+          <Icon name="battery" size={15} color="rgba(255,255,255,0.85)"/>{senior.battery}%
+        </div>
+      </div>
+
       <div className="stat-grid">
         <div className="stat-card">
           <div className="ic" style={{background:"rgba(26,140,74,0.09)",color:"var(--green)"}}><Icon name="checkmark" size={18}/></div>
-          <div className="val">{senior.checkedIn?"Ayos":"—"}</div>
-          <div className="lbl">Huling Check-in</div>
+          <div className="val">{senior.checkedIn?"Ayos":"Wala pa"}</div>
+          <div className="lbl">{senior.checkedIn?timeAgo(senior.lastCheckin):"Huling Check-in"}</div>
         </div>
         <div className="stat-card">
-          <div className="ic" style={{background:"rgba(192,112,16,0.09)",color:"var(--gold)"}}><Icon name="pill" size={18}/></div>
+          <div className="ic" style={{background:missed>0?"rgba(196,48,30,0.09)":"rgba(192,112,16,0.09)",color:missed>0?"var(--red)":"var(--gold)"}}><Icon name="pill" size={18}/></div>
           <div className="val">{done}/{meds.length}</div>
           <div className="lbl">Gamot Ngayon</div>
+          {meds.length>0 && <div className="stat-bar"><div className="stat-bar-fill" style={{width:medPct+"%",background:missed>0?"var(--red)":"var(--green)"}}></div></div>}
         </div>
         <div className="stat-card">
-          <div className="ic" style={{background:"rgba(196,48,30,0.09)",color:"var(--red)"}}><Icon name="battery" size={18}/></div>
+          <div className="ic" style={{background:senior.battery<20?"rgba(196,48,30,0.09)":"rgba(30,10,2,0.06)",color:senior.battery<20?"var(--red)":"var(--ink2)"}}><Icon name="battery" size={18}/></div>
           <div className="val">{senior.battery}%</div>
           <div className="lbl">Baterya ng Telepono</div>
         </div>
         <div className="stat-card">
-          <div className="ic" style={{background:"rgba(30,10,2,0.06)",color:"var(--ink2)"}}><Icon name="phone" size={18}/></div>
+          <div className="ic" style={{background:"rgba(192,112,16,0.09)",color:"var(--gold)"}}><Icon name="phone" size={18}/></div>
           <div className="val">{(senior.contacts||[]).length}</div>
           <div className="lbl">Emergency Contacts</div>
         </div>
@@ -614,8 +712,8 @@ function OverviewPanel({ senior }) {
           <div className="empty-state"><Icon name="activity" size={36}/><p>Wala pang aktibidad.</p></div>
         ) : (senior.eventLog||[]).slice(0,8).map(ev=>(
           <div className="row-item" key={ev.id}>
-            <div className="row-avatar" style={{background:"var(--cream2)",color:"var(--ink2)"}}><Icon name={ev.icon||"activity"} size={16}/></div>
-            <div className="row-body"><div className="t1">{ev.title}</div><div className="t2">{fmtTime(ev.time)}{ev.detail?" · "+ev.detail:""}</div></div>
+            <div className="row-avatar" style={{background:EVENT_BG[ev.type]||"var(--cream2)",color:EVENT_COLOR[ev.type]||"var(--ink2)"}}><Icon name={ev.icon||"activity"} size={16}/></div>
+            <div className="row-body"><div className="t1">{ev.title}</div><div className="t2">{timeAgo(ev.time)}{ev.detail?" · "+ev.detail:""}</div></div>
           </div>
         ))}
       </div>
@@ -868,32 +966,75 @@ function ProfilePanel({ senior, patch }) {
   const [f, setF] = useState(p);
   const [newAllergy, setNewAllergy] = useState("");
   const [newCond, setNewCond] = useState("");
+  const [justSaved, setJustSaved] = useState(false);
   useEffect(()=>setF(senior.medicalProfile||{}), [senior.id]);
-  const save = () => patch(s=>({...s, medicalProfile:f}));
+  const dirty = JSON.stringify(f) !== JSON.stringify(p);
+  const save = () => { patch(s=>({...s, medicalProfile:f})); setJustSaved(true); setTimeout(()=>setJustSaved(false),1800); };
   const addAllergy = () => { if(!newAllergy.trim())return; setF({...f,allergies:[...(f.allergies||[]),newAllergy.trim()]}); setNewAllergy(""); };
   const addCond = () => { if(!newCond.trim())return; setF({...f,conditions:[...(f.conditions||[]),newCond.trim()]}); setNewCond(""); };
+
+  const FIELDS = [f.bloodType, f.philhealth, f.doctorName, f.doctorNum, (f.allergies||[]).length>0, (f.conditions||[]).length>0];
+  const filled = FIELDS.filter(Boolean).length;
+
   return (
-    <div className="panel">
-      <div className="panel-head"><div><h2><Icon name="file_text" size={17}/>Medical Profile</h2><p>Makikita ito sa QR code at Quick ID ng senior</p></div></div>
-      <div className="form-row">
-        <div className="form-field"><label>Blood Type</label><select value={f.bloodType||""} onChange={e=>setF({...f,bloodType:e.target.value})}><option value="">—</option>{["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(b=><option key={b}>{b}</option>)}</select></div>
-        <div className="form-field"><label>PhilHealth No.</label><input value={f.philhealth||""} onChange={e=>setF({...f,philhealth:e.target.value})}/></div>
+    <div className="profile-layout">
+      <div className="panel">
+        <div className="panel-head">
+          <div><h2><Icon name="file_text" size={17}/>Medical Profile</h2><p>Makikita ito sa QR code at Quick ID ng senior</p></div>
+          <div className="profile-progress">
+            <div className="profile-progress-ring" style={{background:`conic-gradient(var(--green) ${filled/6*360}deg, var(--cream2) 0deg)`}}>
+              <span>{filled}/6</span>
+            </div>
+          </div>
+        </div>
+        <div className="form-row">
+          <div className="form-field"><label><Icon name="droplet" size={12}/> Blood Type</label><select value={f.bloodType||""} onChange={e=>setF({...f,bloodType:e.target.value})}><option value="">Wala pang napipili</option>{["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(b=><option key={b}>{b}</option>)}</select></div>
+          <div className="form-field"><label><Icon name="file_text" size={12}/> PhilHealth No.</label><input value={f.philhealth||""} onChange={e=>setF({...f,philhealth:e.target.value})} placeholder="hal. 01-234567890-1"/></div>
+        </div>
+        <div className="form-row">
+          <div className="form-field"><label><Icon name="dashboard" size={12}/> Pangalan ng Doktor</label><input value={f.doctorName||""} onChange={e=>setF({...f,doctorName:e.target.value})} placeholder="hal. Dr. Santos"/></div>
+          <div className="form-field"><label><Icon name="phone" size={12}/> Numero ng Doktor</label><input value={f.doctorNum||""} onChange={e=>setF({...f,doctorNum:e.target.value})} placeholder="hal. 0917-123-4567"/></div>
+        </div>
+        <div className="form-field" style={{marginBottom:14}}>
+          <label><Icon name="alert_tri" size={12}/> Allergies</label>
+          <div style={{display:"flex",gap:8}}><input value={newAllergy} onChange={e=>setNewAllergy(e.target.value)} placeholder="hal. Penicillin — pindutin ang Enter" onKeyDown={e=>e.key==="Enter"&&addAllergy()}/><button className="btn-add" onClick={addAllergy}><Icon name="plus" size={13}/></button></div>
+          <div className="chip-row">
+            {(f.allergies||[]).length===0 && <span className="chip-empty">Wala pang naitala na allergy</span>}
+            {(f.allergies||[]).map((a,i)=><div className="chip chip-warn" key={i}>{a}<button onClick={()=>setF({...f,allergies:f.allergies.filter((_,ix)=>ix!==i)})}><Icon name="x" size={11}/></button></div>)}
+          </div>
+        </div>
+        <div className="form-field" style={{marginBottom:14}}>
+          <label><Icon name="heart_pulse" size={12}/> Mga Kondisyon</label>
+          <div style={{display:"flex",gap:8}}><input value={newCond} onChange={e=>setNewCond(e.target.value)} placeholder="hal. Hypertension — pindutin ang Enter" onKeyDown={e=>e.key==="Enter"&&addCond()}/><button className="btn-add" onClick={addCond}><Icon name="plus" size={13}/></button></div>
+          <div className="chip-row">
+            {(f.conditions||[]).length===0 && <span className="chip-empty">Wala pang naitala na kondisyon</span>}
+            {(f.conditions||[]).map((c,i)=><div className="chip chip-gold" key={i}>{c}<button onClick={()=>setF({...f,conditions:f.conditions.filter((_,ix)=>ix!==i)})}><Icon name="x" size={11}/></button></div>)}
+          </div>
+        </div>
+        <div className="form-actions">
+          <button className="btn-save" onClick={save} disabled={!dirty&&!justSaved} style={!dirty&&!justSaved?{opacity:0.5,cursor:"default"}:{}}>
+            {justSaved ? <span style={{display:"inline-flex",alignItems:"center",gap:6}}><Icon name="checkmark" size={14}/>Na-save!</span> : dirty ? "I-save ang Profile" : "Walang bagong pagbabago"}
+          </button>
+        </div>
       </div>
-      <div className="form-row">
-        <div className="form-field"><label>Pangalan ng Doktor</label><input value={f.doctorName||""} onChange={e=>setF({...f,doctorName:e.target.value})}/></div>
-        <div className="form-field"><label>Numero ng Doktor</label><input value={f.doctorNum||""} onChange={e=>setF({...f,doctorNum:e.target.value})}/></div>
+
+      {/* Live preview — exactly what the senior's Quick ID / QR shows, so this screen connects to something real */}
+      <div className="quickid-preview">
+        <div className="quickid-preview-label"><Icon name="eye" size={12}/> GANITO ITO SA QUICK ID</div>
+        <div className="quickid-card">
+          <div className="quickid-card-head">
+            <div className="quickid-avatar">{(senior.nickname||senior.name||"?")[0]}</div>
+            <div><div className="quickid-name">{senior.name}</div><div className="quickid-sub">NakNak Medical ID</div></div>
+          </div>
+          <div className="quickid-row"><span>Blood Type</span><strong>{f.bloodType||"—"}</strong></div>
+          <div className="quickid-row"><span>PhilHealth</span><strong>{f.philhealth||"—"}</strong></div>
+          <div className="quickid-row"><span>Doktor</span><strong>{f.doctorName||"—"}</strong></div>
+          <div className="quickid-sect">Allergies</div>
+          <div className="quickid-tags">{(f.allergies||[]).length? f.allergies.map((a,i)=><span key={i}>{a}</span>) : <em>wala</em>}</div>
+          <div className="quickid-sect">Kondisyon</div>
+          <div className="quickid-tags">{(f.conditions||[]).length? f.conditions.map((c,i)=><span key={i}>{c}</span>) : <em>wala</em>}</div>
+        </div>
       </div>
-      <div className="form-field" style={{marginBottom:14}}>
-        <label>Allergies</label>
-        <div style={{display:"flex",gap:8}}><input value={newAllergy} onChange={e=>setNewAllergy(e.target.value)} placeholder="Penicillin" onKeyDown={e=>e.key==="Enter"&&addAllergy()}/><button className="btn-add" onClick={addAllergy}><Icon name="plus" size={13}/></button></div>
-        <div className="chip-row">{(f.allergies||[]).map((a,i)=><div className="chip" key={i}>{a}<button onClick={()=>setF({...f,allergies:f.allergies.filter((_,ix)=>ix!==i)})}><Icon name="x" size={11}/></button></div>)}</div>
-      </div>
-      <div className="form-field" style={{marginBottom:14}}>
-        <label>Mga Kondisyon</label>
-        <div style={{display:"flex",gap:8}}><input value={newCond} onChange={e=>setNewCond(e.target.value)} placeholder="Hypertension" onKeyDown={e=>e.key==="Enter"&&addCond()}/><button className="btn-add" onClick={addCond}><Icon name="plus" size={13}/></button></div>
-        <div className="chip-row">{(f.conditions||[]).map((c,i)=><div className="chip" key={i}>{c}<button onClick={()=>setF({...f,conditions:f.conditions.filter((_,ix)=>ix!==i)})}><Icon name="x" size={11}/></button></div>)}</div>
-      </div>
-      <div className="form-actions"><button className="btn-save" onClick={save}>I-save ang Profile</button></div>
     </div>
   );
 }
