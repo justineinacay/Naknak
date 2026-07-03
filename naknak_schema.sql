@@ -136,7 +136,7 @@ begin
 
   return query select v_hh_id, v_code;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 -- ═══════════════════════════════════════════════════════════════════════
 --  RPC: pair_device — phone redeems a pair code, gets a private secret.
@@ -168,7 +168,7 @@ begin
 
   return query select v_hh.id, v_secret;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 -- ═══════════════════════════════════════════════════════════════════════
 --  RPC: device_get_state / device_push_state — the only way a phone
@@ -184,7 +184,7 @@ begin
   update naknak_devices set last_seen_at = now() where device_secret = p_secret;
   return query select s.state, s.rev from naknak_state s where s.household_id = v_hh_id;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 create or replace function device_push_state(p_secret text, p_state jsonb, p_rev bigint)
 returns void as $$
@@ -196,7 +196,7 @@ begin
   update naknak_devices set last_seen_at = now() where device_secret = p_secret;
   update naknak_state set state = p_state, rev = p_rev, updated_at = now() where household_id = v_hh_id;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
 
 -- ═══════════════════════════════════════════════════════════════════════
 --  RPC: regenerate_pair_code — owner invalidates the old code (e.g. it
@@ -223,7 +223,9 @@ begin
     where id = p_household_id;
   return v_code;
 end;
-$$ language plpgsql security definer;
+$$ language plpgsql security definer set search_path = public;
+
+revoke all on function regenerate_pair_code(uuid) from public;
 
 -- Lock down execute grants: anon may only call the pairing + device
 -- functions, never touch tables directly. Authenticated caregivers use

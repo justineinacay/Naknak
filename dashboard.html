@@ -212,7 +212,7 @@ const { useState, useEffect, useRef, useCallback } = React;
 
 /* ═══════════════ SUPABASE CONFIG — paste your project values ═══════════════
    Find these in Supabase → Project Settings → API                          */
-const SUPA = { url: "", anonKey: "" };
+const SUPA = { url: "https://louqshzgqutxydfqgnyz.supabase.co", anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvdXFzaHpncXV0eHlkZnFnbnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMTUsImV4cCI6MjA5ODYwNDMxNX0.tvgCedmaK9OxRqeW1piNNRr4KXT0XFFF5EuJ3692vgU" };
 /* ═══════════════════════════════════════════════════════════════════════ */
 
 const supa = (SUPA.url && SUPA.anonKey) ? supabase.createClient(SUPA.url, SUPA.anonKey) : null;

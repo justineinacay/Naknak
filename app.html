@@ -154,8 +154,8 @@ function Icon({ name, size=20, color="currentColor", strokeWidth=2, style={} }) 
 //  Fully offline-first: everything works with no config / no connection.
 // ═══════════════════════════════════════════════════════════════════════════
 const SYNC_CONFIG = {
-  url:     "",   // ← paste your Supabase Project URL  (Settings → API)
-  anonKey: "",   // ← paste your Supabase anon public key
+  url:     "https://louqshzgqutxydfqgnyz.supabase.co",
+  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvdXFzaHpncXV0eHlkZnFnbnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMTUsImV4cCI6MjA5ODYwNDMxNX0.tvgCedmaK9OxRqeW1piNNRr4KXT0XFFF5EuJ3692vgU",
 };
 const SYNC_KEY = "naknak_sync_v1";
 const SYNC_POLL_MS = 12000; // no realtime here by design — see DEPLOY.md §7
