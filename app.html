@@ -2801,6 +2801,19 @@ function SeniorApp({ onSwitchRole, t, plan, a11y, userName, lang }) {
  // User-adjustable text scale — persisted, vision profile defaults larger
  const [textScale, setTextScale] = useState(() => loadTextScale(a11y.vision));
 
+ // ── BACKGROUND GPS REFRESH (Safe Zone needs this to be genuinely live) ─────
+ // Only runs when Safe Zone is a paid feature the household actually uses,
+ // and only while the app is open — this is not a silent always-on tracker.
+ useEffect(() => {
+  if (!canUse(plan, "safeZone")) return;
+  const senior = store?.seniors?.find(x=>x.id===(store?.activeSeniorId||"s1")) || store?.seniors?.[0];
+  if (!senior) return;
+  const ping = async () => { try{ const g = await getLocation(); STORE.setGPS(senior.id, g); }catch(e){} };
+  ping(); // once on open
+  const id = setInterval(ping, 5 * 60 * 1000); // then every 5 minutes
+  return () => clearInterval(id);
+ }, [plan, store?.activeSeniorId]);
+
  // ── A11y PROFILE BINDING (vision, hearing, mobility, cognitive) ────────────
  // Vision: inject root font-size override
  useEffect(() =>{
@@ -3953,4 +3966,3 @@ root.render(<AppErrorBoundary><NakNak/></AppErrorBoundary>);
 </script>
 </body>
 </html>
-
