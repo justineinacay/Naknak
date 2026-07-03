@@ -136,8 +136,7 @@ button{cursor:pointer;}
 .tb-theme-toggle{width:34px;height:34px;border-radius:10px;background:var(--cream2);border:1.5px solid var(--card-border);display:flex;align-items:center;justify-content:center;color:var(--ink2);transition:all 0.15s;}
 .tb-theme-toggle:hover{border-color:var(--red);color:var(--red);transform:rotate(15deg);}
 
-.content{padding:28px 32px 60px;max-width:1360px;}
-.content.wide{max-width:1360px;}
+.content{padding:28px 36px 60px;width:100%;max-width:1760px;}
 
 /* ── SOS BANNER ──────────────────────────────────────────────────────── */
 .sos-banner{
@@ -154,6 +153,22 @@ button{cursor:pointer;}
 .sos-ack-btn{padding:11px 22px;border-radius:14px;background:#fff;border:none;color:var(--red-dark);font-weight:900;font-size:13.5px;white-space:nowrap;}
 
 /* ── STAT GRID ───────────────────────────────────────────────────────── */
+.overview-shell{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;}
+.overview-main{min-width:0;}
+.overview-side{display:flex;flex-direction:column;gap:20px;min-width:0;}
+.overview-side .panel{margin-bottom:0;}
+.empty-state.small{padding:22px 16px;}
+.empty-state.small svg{margin-bottom:8px;}
+.empty-state.small p{font-size:12px;}
+.vitals-snapshot{display:flex;flex-direction:column;gap:2px;}
+.vs-row{display:flex;justify-content:space-between;align-items:baseline;padding:10px 2px;border-bottom:1px solid var(--cream2);}
+.vs-row:last-child{border-bottom:none;}
+.vs-row span{font-size:12px;font-weight:700;color:var(--ink3);}
+.vs-row strong{font-family:var(--font-mono);font-size:15px;font-weight:700;color:var(--ink);}
+.vs-row strong em{font-style:normal;font-size:10.5px;color:var(--ink3);font-weight:600;margin-left:3px;}
+@media (max-width:1150px){
+  .overview-shell{grid-template-columns:1fr;}
+}
 .hero-id-card{
   display:flex;align-items:center;gap:18px;padding:22px 26px;border-radius:24px;margin-bottom:20px;
   background:linear-gradient(135deg,var(--void) 0%,#2A1408 100%);
@@ -201,6 +216,7 @@ button{cursor:pointer;}
 .empty-state p{font-size:13px;color:var(--ink3);font-weight:700;}
 
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;}
+@media (max-width:480px){ .form-row{grid-template-columns:1fr;} }
 .form-row.single{grid-template-columns:1fr;}
 .form-field label{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;color:var(--ink3);margin-bottom:6px;letter-spacing:0.3px;}
 .form-field input,.form-field select,.form-field textarea{
@@ -381,13 +397,26 @@ button{cursor:pointer;}
 
 @media (max-width:840px){
   .shell{flex-direction:column;}
-  .sidebar{width:100%;height:auto;position:relative;flex-direction:row;align-items:center;padding:14px 18px;overflow-x:auto;}
-  .sb-brand{padding:0;margin-right:16px;}
-  .sb-code{margin:0 12px 0 0;}
+  .sidebar{width:100%;height:auto;position:relative;flex-direction:row;align-items:center;padding:14px 18px;overflow-x:auto;flex-wrap:nowrap;}
+  .sb-brand{padding:0;margin-right:14px;flex-shrink:0;}
+  .sb-code{margin:0 10px 0 0;flex-shrink:0;}
+  .sb-code .lbl{display:none;}
+  .sb-senior{margin:0 10px 0 0;flex-shrink:0;}
+  .sb-senior-txt .st{display:none;}
   .sb-nav{flex-direction:row;flex:none;}
-  .sb-footer{display:none;}
+  .sb-link{white-space:nowrap;}
+  .sb-link span{display:none;}
+  .sb-footer{display:flex;padding-top:0;border-top:none;margin-left:8px;flex-shrink:0;}
+  .sb-disconnect{white-space:nowrap;width:auto;padding:10px 14px;}
   .content{padding:20px 16px 50px;}
   .stat-grid{grid-template-columns:1fr 1fr;}
+  .hero-id-card{flex-wrap:wrap;}
+  .hero-id-battery{order:3;width:100%;justify-content:center;}
+}
+@media (max-width:520px){
+  .cal-title{font-size:13px;}
+  .cal-view-switch button{padding:7px 9px;font-size:11px;}
+  .modal-card{padding:20px 18px;}
 }
 </style>
 </head>
@@ -841,8 +870,8 @@ function Dashboard({ household, onDisconnect, theme, session }) {
         </div>
         <div className="sb-nav">
           {NAV.map(([id,label,icon])=>(
-            <button key={id} className={"sb-link"+(tab===id?" on":"")} onClick={()=>setTab(id)}>
-              <Icon name={icon} size={16}/>{label}
+            <button key={id} className={"sb-link"+(tab===id?" on":"")} onClick={()=>setTab(id)} title={label}>
+              <Icon name={icon} size={16}/><span>{label}</span>
             </button>
           ))}
         </div>
@@ -911,58 +940,93 @@ function OverviewPanel({ senior }) {
   const EVENT_COLOR = { checkin:"var(--green)", sos:"var(--red)", fall:"var(--red)", med_taken:"var(--green)", med_missed:"var(--red)", med_snoozed:"var(--gold)", gps:"var(--gold)", notif:"var(--ink2)" };
   const EVENT_BG = { checkin:"rgba(26,140,74,0.1)", sos:"rgba(196,48,30,0.1)", fall:"rgba(196,48,30,0.1)", med_taken:"rgba(26,140,74,0.1)", med_missed:"rgba(196,48,30,0.1)", med_snoozed:"rgba(192,112,16,0.1)", gps:"rgba(192,112,16,0.1)", notif:"var(--cream2)" };
 
+  // Fills the reclaimed desktop width with real content instead of empty space:
+  // upcoming calendar events + a compact vitals snapshot, both genuinely useful.
+  const now = new Date();
+  const upcoming = occurrencesInRange(senior, now, addDays(now,14)).filter(o=>!o.event.isMed).slice(0,5);
+  const vitals = senior.vitals||[];
+  const lastBP = vitals.find(v=>v.type==="bp"), lastWeight = vitals.find(v=>v.type==="weight"), lastOxygen = vitals.find(v=>v.type==="oxygen");
+
   return (
-    <>
-      {/* Hero identity card — mirrors the senior's own phone, so this feels like a real person, not a database row */}
-      <div className="hero-id-card" style={isSOS?{background:"linear-gradient(135deg,var(--red-bright) 0%,var(--red-dark) 100%)"}:{}}>
-        <div className="hero-id-avatar">
-          {(senior.nickname||senior.name||"?")[0]}
-          <span className="hero-id-pulse" style={{background:isSOS?"#fff":"var(--green-bright)"}}></span>
+    <div className="overview-shell">
+      <div className="overview-main">
+        {/* Hero identity card — mirrors the senior's own phone, so this feels like a real person, not a database row */}
+        <div className="hero-id-card" style={isSOS?{background:"linear-gradient(135deg,var(--red-bright) 0%,var(--red-dark) 100%)"}:{}}>
+          <div className="hero-id-avatar">
+            {(senior.nickname||senior.name||"?")[0]}
+            <span className="hero-id-pulse" style={{background:isSOS?"#fff":"var(--green-bright)"}}></span>
+          </div>
+          <div className="hero-id-body">
+            <div className="hero-id-name">{senior.name}</div>
+            <div className="hero-id-status">{isSOS?"SOS Active — kailangan ng agarang tulong":senior.checkedIn?`Ayos naman · huling check-in ${timeAgo(senior.lastCheckin)}`:"Wala pang check-in ngayong araw"}</div>
+          </div>
+          <div className="hero-id-battery">
+            <Icon name="battery" size={15} color="rgba(255,255,255,0.85)"/>{senior.battery}%
+          </div>
         </div>
-        <div className="hero-id-body">
-          <div className="hero-id-name">{senior.name}</div>
-          <div className="hero-id-status">{isSOS?"SOS Active — kailangan ng agarang tulong":senior.checkedIn?`Ayos naman · huling check-in ${timeAgo(senior.lastCheckin)}`:"Wala pang check-in ngayong araw"}</div>
+
+        <div className="stat-grid">
+          <div className="stat-card">
+            <div className="ic" style={{background:"rgba(26,140,74,0.09)",color:"var(--green)"}}><Icon name="checkmark" size={18}/></div>
+            <div className="val">{senior.checkedIn?"Ayos":"Wala pa"}</div>
+            <div className="lbl">{senior.checkedIn?timeAgo(senior.lastCheckin):"Huling Check-in"}</div>
+          </div>
+          <div className="stat-card">
+            <div className="ic" style={{background:missed>0?"rgba(196,48,30,0.09)":"rgba(192,112,16,0.09)",color:missed>0?"var(--red)":"var(--gold)"}}><Icon name="pill" size={18}/></div>
+            <div className="val">{done}/{meds.length}</div>
+            <div className="lbl">Gamot Ngayon</div>
+            {meds.length>0 && <div className="stat-bar"><div className="stat-bar-fill" style={{width:medPct+"%",background:missed>0?"var(--red)":"var(--green)"}}></div></div>}
+          </div>
+          <div className="stat-card">
+            <div className="ic" style={{background:senior.battery<20?"rgba(196,48,30,0.09)":"rgba(30,10,2,0.06)",color:senior.battery<20?"var(--red)":"var(--ink2)"}}><Icon name="battery" size={18}/></div>
+            <div className="val">{senior.battery}%</div>
+            <div className="lbl">Baterya ng Telepono</div>
+          </div>
+          <div className="stat-card">
+            <div className="ic" style={{background:"rgba(192,112,16,0.09)",color:"var(--gold)"}}><Icon name="phone" size={18}/></div>
+            <div className="val">{(senior.contacts||[]).length}</div>
+            <div className="lbl">Emergency Contacts</div>
+          </div>
         </div>
-        <div className="hero-id-battery">
-          <Icon name="battery" size={15} color="rgba(255,255,255,0.85)"/>{senior.battery}%
+        <div className="panel">
+          <div className="panel-head"><h2><Icon name="activity" size={17}/>Pinakabagong Aktibidad</h2></div>
+          {(senior.eventLog||[]).length===0 ? (
+            <div className="empty-state"><Icon name="activity" size={36}/><p>Wala pang aktibidad.</p></div>
+          ) : (senior.eventLog||[]).slice(0,8).map(ev=>(
+            <div className="row-item" key={ev.id}>
+              <div className="row-avatar" style={{background:EVENT_BG[ev.type]||"var(--cream2)",color:EVENT_COLOR[ev.type]||"var(--ink2)"}}><Icon name={ev.icon||"activity"} size={16}/></div>
+              <div className="row-body"><div className="t1">{ev.title}</div><div className="t2">{timeAgo(ev.time)}{ev.detail?" · "+ev.detail:""}</div></div>
+            </div>
+          ))}
         </div>
       </div>
 
-      <div className="stat-grid">
-        <div className="stat-card">
-          <div className="ic" style={{background:"rgba(26,140,74,0.09)",color:"var(--green)"}}><Icon name="checkmark" size={18}/></div>
-          <div className="val">{senior.checkedIn?"Ayos":"Wala pa"}</div>
-          <div className="lbl">{senior.checkedIn?timeAgo(senior.lastCheckin):"Huling Check-in"}</div>
+      <div className="overview-side">
+        <div className="panel">
+          <div className="panel-head"><h2><Icon name="clock" size={17}/>Paparating</h2></div>
+          {upcoming.length===0 ? (
+            <div className="empty-state small"><Icon name="clock" size={28}/><p>Walang naka-schedule sa susunod na 2 linggo.</p></div>
+          ) : upcoming.map((o,idx)=>(
+            <div className="row-item" key={idx}>
+              <div className="row-avatar" style={{background:EVENT_TYPES[o.event.type]?.bg,color:EVENT_TYPES[o.event.type]?.color}}><Icon name="clock" size={14}/></div>
+              <div className="row-body"><div className="t1">{o.event.title}</div><div className="t2">{o.date.toLocaleDateString('en-PH',{month:'short',day:'numeric'})}{o.event.time?" · "+o.event.time:""}</div></div>
+            </div>
+          ))}
         </div>
-        <div className="stat-card">
-          <div className="ic" style={{background:missed>0?"rgba(196,48,30,0.09)":"rgba(192,112,16,0.09)",color:missed>0?"var(--red)":"var(--gold)"}}><Icon name="pill" size={18}/></div>
-          <div className="val">{done}/{meds.length}</div>
-          <div className="lbl">Gamot Ngayon</div>
-          {meds.length>0 && <div className="stat-bar"><div className="stat-bar-fill" style={{width:medPct+"%",background:missed>0?"var(--red)":"var(--green)"}}></div></div>}
-        </div>
-        <div className="stat-card">
-          <div className="ic" style={{background:senior.battery<20?"rgba(196,48,30,0.09)":"rgba(30,10,2,0.06)",color:senior.battery<20?"var(--red)":"var(--ink2)"}}><Icon name="battery" size={18}/></div>
-          <div className="val">{senior.battery}%</div>
-          <div className="lbl">Baterya ng Telepono</div>
-        </div>
-        <div className="stat-card">
-          <div className="ic" style={{background:"rgba(192,112,16,0.09)",color:"var(--gold)"}}><Icon name="phone" size={18}/></div>
-          <div className="val">{(senior.contacts||[]).length}</div>
-          <div className="lbl">Emergency Contacts</div>
+        <div className="panel">
+          <div className="panel-head"><h2><Icon name="heart_pulse" size={17}/>Huling Vitals</h2></div>
+          {!lastBP && !lastWeight && !lastOxygen ? (
+            <div className="empty-state small"><Icon name="heart_pulse" size={28}/><p>Wala pang naka-log.</p></div>
+          ) : (
+            <div className="vitals-snapshot">
+              {lastBP && <div className="vs-row"><span>BP</span><strong>{lastBP.value} <em>mmHg</em></strong></div>}
+              {lastWeight && <div className="vs-row"><span>Timbang</span><strong>{lastWeight.value} <em>kg</em></strong></div>}
+              {lastOxygen && <div className="vs-row"><span>Oxygen</span><strong>{lastOxygen.value} <em>%</em></strong></div>}
+            </div>
+          )}
         </div>
       </div>
-      <div className="panel">
-        <div className="panel-head"><h2><Icon name="activity" size={17}/>Pinakabagong Aktibidad</h2></div>
-        {(senior.eventLog||[]).length===0 ? (
-          <div className="empty-state"><Icon name="activity" size={36}/><p>Wala pang aktibidad.</p></div>
-        ) : (senior.eventLog||[]).slice(0,8).map(ev=>(
-          <div className="row-item" key={ev.id}>
-            <div className="row-avatar" style={{background:EVENT_BG[ev.type]||"var(--cream2)",color:EVENT_COLOR[ev.type]||"var(--ink2)"}}><Icon name={ev.icon||"activity"} size={16}/></div>
-            <div className="row-body"><div className="t1">{ev.title}</div><div className="t2">{timeAgo(ev.time)}{ev.detail?" · "+ev.detail:""}</div></div>
-          </div>
-        ))}
-      </div>
-    </>
+    </div>
   );
 }
 
