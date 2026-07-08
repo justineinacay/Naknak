@@ -7,7 +7,7 @@
 <meta name="description" content="Ang NakNak caregiver dashboard. I-manage ang gamot, contacts, safe zone, at SOS alerts ng iyong senior — naka-sync sa totoong oras sa app.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -28,7 +28,7 @@
   --shadow:rgba(100,50,10,0.14);
   --sidebar-w:248px;
   --font-display:'Baloo 2',sans-serif;
-  --font-body:'Nunito',sans-serif;
+  --font-body:'Poppins',sans-serif;
   --font-mono:'JetBrains Mono',monospace;
   color-scheme:light;
   transition:background 0.25s ease;
@@ -95,7 +95,7 @@ button{cursor:pointer;}
 }
 .sb-code .dot-live{width:7px;height:7px;border-radius:50%;background:var(--green-bright);box-shadow:0 0 0 3px rgba(46,204,113,0.25);flex-shrink:0;}
 .sb-code .txt{flex:1;}
-.sb-code .lbl{font-size:9.5px;font-weight:800;color:rgba(255,255,255,0.4);letter-spacing:1px;}
+.sb-code .lbl{font-size:10.5px;font-weight:800;color:rgba(255,255,255,0.4);letter-spacing:1px;}
 .sb-code .val{font-family:var(--font-mono);font-size:13px;font-weight:700;color:#fff;letter-spacing:2px;}
 .sb-nav{display:flex;flex-direction:column;gap:2px;flex:1;}
 .sb-link{
@@ -184,7 +184,15 @@ button{cursor:pointer;}
 .stat-bar{height:4px;border-radius:2px;background:var(--cream2);margin-top:10px;overflow:hidden;}
 .stat-bar-fill{height:100%;border-radius:2px;transition:width 0.5s ease;}
 @media (max-width:900px){ .stat-grid{grid-template-columns:1fr 1fr;} }
-.stat-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;padding:18px 20px;transition:background 0.25s;}
+.stat-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:18px;padding:18px 20px;transition:background 0.25s,transform 0.18s,box-shadow 0.18s;animation:statIn 0.4s cubic-bezier(0.16,1,0.3,1) both;}
+.stat-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px var(--shadow);}
+.stat-grid .stat-card:nth-child(1){animation-delay:0.02s;}
+.stat-grid .stat-card:nth-child(2){animation-delay:0.08s;}
+.stat-grid .stat-card:nth-child(3){animation-delay:0.14s;}
+.stat-grid .stat-card:nth-child(4){animation-delay:0.20s;}
+@keyframes statIn{from{opacity:0;transform:translateY(10px) scale(0.97);}to{opacity:1;transform:translateY(0) scale(1);}}
+.btn-save:active,.btn-add:active,.btn-cancel:active,.id-upload-btn:active,.icon-btn:active,.ob-btn:active,.sos-ack-btn:active{transform:scale(0.96);}
+.btn-save,.btn-add,.btn-cancel,.id-upload-btn,.icon-btn,.ob-btn{transition:transform 0.12s,background 0.15s,border-color 0.15s,color 0.15s,box-shadow 0.15s;}
 .stat-card .ic{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;}
 .stat-card .val{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--ink);}
 .stat-card .lbl{font-size:11.5px;font-weight:700;color:var(--ink3);margin-top:2px;}
@@ -253,7 +261,7 @@ button{cursor:pointer;}
 .quickid-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:12.5px;}
 .quickid-row span{color:rgba(255,255,255,0.5);font-weight:700;}
 .quickid-row strong{color:#fff;font-weight:800;}
-.quickid-sect{font-size:10px;font-weight:800;color:rgba(255,255,255,0.4);letter-spacing:1px;margin:14px 0 8px;}
+.quickid-sect{font-size:10.5px;font-weight:800;color:rgba(255,255,255,0.4);letter-spacing:1px;margin:14px 0 8px;}
 .quickid-tags{display:flex;flex-wrap:wrap;gap:6px;}
 .quickid-tags span{background:rgba(255,255,255,0.1);color:#fff;font-size:11px;font-weight:700;padding:5px 10px;border-radius:8px;}
 .quickid-tags em{color:rgba(255,255,255,0.35);font-size:12px;font-style:italic;}
@@ -334,8 +342,8 @@ button{cursor:pointer;}
 .month-cell-num{font-size:11.5px;font-weight:800;color:var(--ink2);}
 .month-cell.today .month-cell-num{color:var(--red);}
 .month-cell-events{display:flex;flex-direction:column;gap:2px;overflow:hidden;}
-.month-event-chip{font-size:9.5px;font-weight:700;padding:2px 5px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.month-more{font-size:9px;font-weight:700;color:var(--ink3);padding:1px 5px;}
+.month-event-chip{font-size:10px;font-weight:700;padding:2px 5px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.month-more{font-size:9.5px;font-weight:700;color:var(--ink3);padding:1px 5px;}
 @media (max-width:760px){ .month-cell{min-height:56px;} .month-cell-events{display:none;} .month-cell.today .month-cell-events{display:flex;} }
 
 .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
@@ -343,13 +351,13 @@ button{cursor:pointer;}
 .week-col{background:var(--cream2);border-radius:14px;padding:10px;min-height:180px;}
 .week-col.today{background:rgba(196,48,30,0.07);border:1px solid var(--red);}
 .week-col-head{text-align:center;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--card-border);cursor:pointer;}
-.week-col-head .dow{font-size:10px;font-weight:800;color:var(--ink3);}
+.week-col-head .dow{font-size:10.5px;font-weight:800;color:var(--ink3);}
 .week-col-head .num{font-size:16px;font-weight:800;color:var(--ink);}
 .week-col.today .week-col-head .num{color:var(--red);}
 .week-col-body{display:flex;flex-direction:column;gap:5px;}
 .week-empty{font-size:10.5px;color:var(--ink3);text-align:center;padding:8px 0;font-style:italic;}
 .week-event{font-size:10.5px;font-weight:700;padding:5px 7px;border-radius:8px;cursor:pointer;display:flex;gap:5px;align-items:baseline;}
-.week-event .tm{font-family:var(--font-mono);font-size:9px;opacity:0.8;}
+.week-event .tm{font-family:var(--font-mono);font-size:9.5px;opacity:0.8;}
 .week-add{margin-top:4px;width:100%;padding:5px;border-radius:8px;background:none;border:1px dashed var(--card-border);color:var(--ink3);display:flex;align-items:center;justify-content:center;}
 .week-add:hover{border-color:var(--red);color:var(--red);}
 
@@ -386,6 +394,10 @@ button{cursor:pointer;}
 .vital-chart-head .nm{font-size:12.5px;font-weight:800;color:var(--ink2);}
 .vital-chart-head .latest{font-family:var(--font-mono);font-size:16px;font-weight:700;color:var(--ink);}
 .vital-chart-svg{width:100%;height:64px;display:block;}
+.vc-line{stroke-dasharray:420;stroke-dashoffset:420;animation:vcDraw 0.9s cubic-bezier(0.16,1,0.3,1) forwards;}
+@keyframes vcDraw{to{stroke-dashoffset:0;}}
+.vital-chart-svg path[opacity]{animation:vcFade 0.7s ease 0.3s both;}
+@keyframes vcFade{from{opacity:0;}to{opacity:0.12;}}
 .vital-chart-empty{font-size:11px;color:var(--ink3);text-align:center;padding:20px 0;font-style:italic;}
 
 /* ── SAFE ZONE MAP ───────────────────────────────────────────────────── */
@@ -519,6 +531,34 @@ function occurrencesInRange(senior, rangeStart, rangeEnd){
 }
 function useTicker(ms){ const [,setT]=useState(0); useEffect(()=>{ const id=setInterval(()=>setT(x=>x+1), ms); return ()=>clearInterval(id); },[ms]); }
 
+/* ── ANIMATED NUMBERS: makes stat cards feel alive rather than static text ── */
+function useCountUp(target, duration=650) {
+  const [val, setVal] = useState(target);
+  const fromRef = useRef(target);
+  const rafRef = useRef(null);
+  useEffect(() => {
+    const from = fromRef.current;
+    if (from === target || typeof target !== "number" || isNaN(target)) { setVal(target); fromRef.current = target; return; }
+    const t0 = performance.now();
+    const tick = (now) => {
+      const p = Math.min(1, (now - t0) / duration);
+      const eased = 1 - Math.pow(1 - p, 3); // ease-out cubic
+      setVal(from + (target - from) * eased);
+      if (p < 1) rafRef.current = requestAnimationFrame(tick);
+      else fromRef.current = target;
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => rafRef.current && cancelAnimationFrame(rafRef.current);
+  }, [target]);
+  return val;
+}
+// Drop-in animated number — pass a plain integer/float target, get a live-counting span.
+function CountUp({ value, decimals=0, suffix="" }) {
+  const animated = useCountUp(typeof value==="number"?value:0);
+  if (typeof value !== "number" || isNaN(value)) return <>{value}{suffix}</>;
+  return <>{animated.toFixed(decimals)}{suffix}</>;
+}
+
 /* ── THEME: light / dark / auto — mirrors the phone app's 6PM-6AM PH logic ── */
 const THEME_KEY = "naknak_dash_theme_v1";
 function computeIsDark(mode){
@@ -599,10 +639,32 @@ function AuthGate({ children }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState("");
 
+  // The clean, canonical URL for this page — no hash, no query string.
+  // Used for the magic-link redirect so a stray #error=... from a previous
+  // failed attempt never gets baked into the next link we ask Supabase to send.
+  const cleanUrl = () => window.location.origin + window.location.pathname;
+
   useEffect(() => {
     if(!supa){ setSession(null); return; }
+
+    // If we just landed back from a magic-link click, Supabase Auth may have
+    // put an error in the URL hash (e.g. an already-used or expired link).
+    // Surface that to the person instead of silently failing.
+    const hash = window.location.hash;
+    if (hash.includes("error=")) {
+      const params = new URLSearchParams(hash.slice(1));
+      const desc = params.get("error_description");
+      setErr(desc ? decodeURIComponent(desc.replace(/\+/g," ")) : "Hindi na-verify ang link. Subukan ulit.");
+    }
+    // Whatever was in the hash (tokens or errors), clear it once read so a
+    // page refresh doesn't try to re-process an already-used token, and so
+    // the address bar looks clean.
+    if (hash) {
+      history.replaceState(null, "", cleanUrl());
+    }
+
     supa.auth.getSession().then(({data})=>setSession(data.session||null));
-    const { data: sub } = supa.auth.onAuthStateChange((_evt, sess)=>setSession(sess));
+    const { data: sub } = supa.auth.onAuthStateChange((_evt, sess)=>{ setSession(sess); if(sess) setErr(""); });
     return () => sub.subscription.unsubscribe();
   }, []);
 
@@ -610,7 +672,7 @@ function AuthGate({ children }) {
     if(!supa){ setErr("Hindi pa naka-configure ang Supabase."); return; }
     if(!email.includes("@")){ setErr("Maglagay ng tamang email address."); return; }
     setBusy(true); setErr("");
-    const { error } = await supa.auth.signInWithOtp({ email, options:{ emailRedirectTo: window.location.href } });
+    const { error } = await supa.auth.signInWithOtp({ email, options:{ emailRedirectTo: cleanUrl() } });
     setBusy(false);
     if(error){ setErr(error.message); return; }
     setSent(true);
@@ -973,18 +1035,18 @@ function OverviewPanel({ senior }) {
           </div>
           <div className="stat-card">
             <div className="ic" style={{background:missed>0?"rgba(196,48,30,0.09)":"rgba(192,112,16,0.09)",color:missed>0?"var(--red)":"var(--gold)"}}><Icon name="pill" size={18}/></div>
-            <div className="val">{done}/{meds.length}</div>
+            <div className="val"><CountUp value={done}/>/{meds.length}</div>
             <div className="lbl">Gamot Ngayon</div>
             {meds.length>0 && <div className="stat-bar"><div className="stat-bar-fill" style={{width:medPct+"%",background:missed>0?"var(--red)":"var(--green)"}}></div></div>}
           </div>
           <div className="stat-card">
             <div className="ic" style={{background:senior.battery<20?"rgba(196,48,30,0.09)":"rgba(30,10,2,0.06)",color:senior.battery<20?"var(--red)":"var(--ink2)"}}><Icon name="battery" size={18}/></div>
-            <div className="val">{senior.battery}%</div>
+            <div className="val"><CountUp value={senior.battery} suffix="%"/></div>
             <div className="lbl">Baterya ng Telepono</div>
           </div>
           <div className="stat-card">
             <div className="ic" style={{background:"rgba(192,112,16,0.09)",color:"var(--gold)"}}><Icon name="phone" size={18}/></div>
-            <div className="val">{(senior.contacts||[]).length}</div>
+            <div className="val"><CountUp value={(senior.contacts||[]).length}/></div>
             <div className="lbl">Emergency Contacts</div>
           </div>
         </div>
@@ -1060,7 +1122,7 @@ function MedsPanel({ senior, patch }) {
         <div className="stat-grid">
           <div className="stat-card">
             <div className="ic" style={{background:missedCount>0?"rgba(196,48,30,0.09)":"rgba(26,140,74,0.09)",color:missedCount>0?"var(--red)":"var(--green)"}}><Icon name="checkmark" size={18}/></div>
-            <div className="val">{adherence}%</div>
+            <div className="val"><CountUp value={adherence} suffix="%"/></div>
             <div className="lbl">Adherence Ngayon</div>
             <div className="stat-bar"><div className="stat-bar-fill" style={{width:adherence+"%",background:missedCount>0?"var(--red)":"var(--green)"}}></div></div>
           </div>
@@ -1071,12 +1133,12 @@ function MedsPanel({ senior, patch }) {
           </div>
           <div className="stat-card">
             <div className="ic" style={{background:"rgba(26,140,74,0.09)",color:"var(--green)"}}><Icon name="pill" size={18}/></div>
-            <div className="val">{doneCount}/{meds.length}</div>
+            <div className="val"><CountUp value={doneCount}/>/{meds.length}</div>
             <div className="lbl">Nainom Ngayong Araw</div>
           </div>
           <div className="stat-card">
             <div className="ic" style={{background:missedCount>0?"rgba(196,48,30,0.09)":"var(--cream2)",color:missedCount>0?"var(--red)":"var(--ink3)"}}><Icon name="alert_tri" size={18}/></div>
-            <div className="val">{missedCount}</div>
+            <div className="val"><CountUp value={missedCount}/></div>
             <div className="lbl">Nalaktawan</div>
           </div>
         </div>
@@ -1241,7 +1303,7 @@ function SafeZonePanel({ senior, patch }) {
             <Icon name="map_pin" size={16} color={gps?"var(--green)":"var(--ink3)"}/>
             <div>
               <div style={{fontSize:11.5,fontWeight:800,color:gps?"var(--green)":"var(--ink3)"}}>{gps?"May GPS signal":"Walang GPS data pa"}</div>
-              <div style={{fontSize:10.5,color:"var(--ink3)",fontWeight:700}}>{gps?`Na-update ${timeAgo(gps.fetchedAt)}`:"Kailangan buksan ang app ng senior"}</div>
+              <div style={{fontSize:11,color:"var(--ink3)",fontWeight:700}}>{gps?`Na-update ${timeAgo(gps.fetchedAt)}`:"Kailangan buksan ang app ng senior"}</div>
             </div>
           </div>
           {z && (
@@ -1249,7 +1311,7 @@ function SafeZonePanel({ senior, patch }) {
               <Icon name={inZone===false?"alert_tri":"checkmark"} size={16} color={inZone===false?"var(--red)":"var(--green)"}/>
               <div>
                 <div style={{fontSize:11.5,fontWeight:800,color:inZone===false?"var(--red)":"var(--green)"}}>{inZone===false?"Labas sa Safe Zone":inZone===true?"Nasa loob ng Safe Zone":"—"}</div>
-                <div style={{fontSize:10.5,color:"var(--ink3)",fontWeight:700}}>{dist!==null?`${dist.toFixed(2)} km mula sa ${z.label}`:"—"}</div>
+                <div style={{fontSize:11,color:"var(--ink3)",fontWeight:700}}>{dist!==null?`${dist.toFixed(2)} km mula sa ${z.label}`:"—"}</div>
               </div>
             </div>
           )}
@@ -1301,7 +1363,7 @@ function VitalChart({ label, points, unit, color, extractValue }) {
       <div className="vital-chart-head"><span className="nm">{label}</span><span className="latest" style={{color}}>{latestRaw} {unit}</span></div>
       <svg className="vital-chart-svg" viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
         <path d={areaD} fill={color} opacity="0.12" stroke="none"/>
-        <path d={pathD} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <path className="vc-line" d={pathD} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         {coords.map(([x,y],i)=><circle key={i} cx={x} cy={y} r={i===coords.length-1?3:1.4} fill={color}/>)}
       </svg>
     </div>
@@ -1440,10 +1502,10 @@ function CalendarPanel({ senior, patch }) {
         ))}
       </div>
 
-      {view==="month" && <CalMonthView senior={senior} cursor={cursor} today={today} onDayClick={(d)=>setModal({date:ymd(d)})} onEventClick={(ev)=>!ev.isMed&&setModal({date:ev.date,event:ev})}/>}
-      {view==="week"  && <CalWeekView  senior={senior} cursor={cursor} today={today} onDayClick={(d)=>setModal({date:ymd(d)})} onEventClick={(ev)=>!ev.isMed&&setModal({date:ev.date,event:ev})}/>}
-      {view==="day"   && <CalDayView   senior={senior} cursor={cursor} today={today} onEventClick={(ev)=>!ev.isMed&&setModal({date:ev.date,event:ev})} onAdd={()=>setModal({date:ymd(cursor)})}/>}
-      {view==="year"  && <CalYearView  senior={senior} cursor={cursor} today={today} onMonthClick={(d)=>{setCursor(d);setView("month");}}/>}
+      {view==="month" && <div key="cal-month" className="panel-enter"><CalMonthView senior={senior} cursor={cursor} today={today} onDayClick={(d)=>setModal({date:ymd(d)})} onEventClick={(ev)=>!ev.isMed&&setModal({date:ev.date,event:ev})}/></div>}
+      {view==="week"  && <div key="cal-week" className="panel-enter"><CalWeekView  senior={senior} cursor={cursor} today={today} onDayClick={(d)=>setModal({date:ymd(d)})} onEventClick={(ev)=>!ev.isMed&&setModal({date:ev.date,event:ev})}/></div>}
+      {view==="day"   && <div key="cal-day" className="panel-enter"><CalDayView   senior={senior} cursor={cursor} today={today} onEventClick={(ev)=>!ev.isMed&&setModal({date:ev.date,event:ev})} onAdd={()=>setModal({date:ymd(cursor)})}/></div>}
+      {view==="year"  && <div key="cal-year" className="panel-enter"><CalYearView  senior={senior} cursor={cursor} today={today} onMonthClick={(d)=>{setCursor(d);setView("month");}}/></div>}
 
       {modal && <CalEventModal initial={modal} onSave={saveEvent} onDelete={deleteEvent} onClose={()=>setModal(null)}/>}
     </div>
