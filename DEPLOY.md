@@ -57,6 +57,8 @@ Supabase Auth has email magic links on by default, but confirm this before going
 2. **Authentication → URL Configuration → Redirect URLs** — add your GitHub Pages URL, e.g. `https://<you>.github.io/naknak/dashboard.html`. Without this, the magic link will redirect to `localhost` and fail.
 3. That's it — no client secret, no OAuth app registration, no consent screen. This is the whole reason magic link was the right call for this product.
 
+**If the sign-in link doesn't work:** check **Authentication → URL Configuration → Site URL**. If it still says `http://localhost:3000` (the Supabase default), every magic link will redirect there after verifying — the login succeeds on Supabase's side, but your browser gets sent to a dead local address instead of your real site. Set it to your GitHub Pages URL, e.g. `https://<you>.github.io/naknak/`. You can confirm this is happening by checking **Logs → Auth** in the Supabase dashboard: a successful login followed by the browser going nowhere useful is the signature of this exact misconfiguration.
+
 ## 5. How the sync actually works — and why it's now two different trust models
 
 This app has two very different users, so it uses two different access patterns rather than forcing one compromise on both:
@@ -93,4 +95,3 @@ Every file is a self-contained static HTML page — no server needed:
 cd site && python3 -m http.server 8000
 ```
 Open `http://localhost:8000`.
-
