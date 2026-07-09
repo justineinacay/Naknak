@@ -149,7 +149,7 @@ declare
   v_count int;
   v_secret text;
 begin
-  select * into v_hh from naknak_households where pair_code = upper(trim(p_code));
+  select * into v_hh from naknak_households h where h.pair_code = upper(trim(p_code));
   if not found then
     raise exception 'Hindi mahanap ang code na iyan.';
   end if;
@@ -157,18 +157,18 @@ begin
     raise exception 'Expired na ang code na ito. Gumawa ng bago sa dashboard.';
   end if;
 
-  select count(*) into v_count from naknak_devices where household_id = v_hh.id;
+  select count(*) into v_count from naknak_devices d where d.household_id = v_hh.id;
   if v_count >= v_hh.max_devices then
     raise exception 'Umabot na sa limitasyon ng mga device para sa household na ito.';
   end if;
 
-  v_secret := encode(gen_random_bytes(24), 'hex');
+  v_secret := encode(extensions.gen_random_bytes(24), 'hex');
   insert into naknak_devices (household_id, device_secret, device_label)
     values (v_hh.id, v_secret, p_label);
 
   return query select v_hh.id, v_secret;
 end;
-$$ language plpgsql security definer set search_path = public;
+$$ language plpgsql security definer set search_path = public, extensions;
 
 -- ═══════════════════════════════════════════════════════════════════════
 --  RPC: device_get_state / device_push_state — the only way a phone
