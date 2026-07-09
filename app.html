@@ -39,9 +39,9 @@ const { useState, useEffect, useRef, useCallback } = React;
 
 // ─── PLANS ───────────────────────────────────────────────────────────────────
 const PLANS = {
- free:   { id:"free",   name:"Libre",    price:"₱0",  tag:"palagi",   medications:false, fall:false, multiMember:false, smartAlerts:false, vitals:false, safeZone:false },
- essential: { id:"essential", name:"Essential",  price:"₱100", tag:"isang bayad", medications:true, fall:false, multiMember:false, smartAlerts:false, vitals:true, safeZone:false },
- family:  { id:"family",  name:"Family Plan", price:"₱199", tag:"/buwan",   medications:true, fall:true, multiMember:true, smartAlerts:true, vitals:true, safeZone:true },
+ free:   { id:"free",   name:"Libre",    price:"₱0",  tag:"palagi",   medications:false, fall:false, multiMember:false, smartAlerts:false, vitals:false, safeZone:false, maxContacts:1 },
+ essential: { id:"essential", name:"Essential",  price:"₱100", tag:"isang bayad", medications:true, fall:false, multiMember:false, smartAlerts:false, vitals:true, safeZone:false, maxContacts:2 },
+ family:  { id:"family",  name:"Family Plan", price:"₱199", tag:"/buwan",   medications:true, fall:true, multiMember:true, smartAlerts:true, vitals:true, safeZone:true, maxContacts:3 },
 };
 const canUse = (plan, feat) =>PLANS[plan]?.[feat] ?? true;
 
@@ -989,6 +989,29 @@ function createStore() {
    const s = st.seniors.find(x=>x.id===sid); if(!s)return;
    s.idImage = val; log(" ID uploaded","ok"); pub();
   },
+  // Real per-document upload — matches the web dashboard's field names exactly
+  // (seniorIdImage / pwdIdImage) so an upload from either side shows on both.
+  uploadIdDoc(sid="s1", docType, dataUrl) {
+   const s = st.seniors.find(x=>x.id===sid); if(!s)return;
+   if (docType==="senior") s.seniorIdImage = dataUrl;
+   else if (docType==="pwd") s.pwdIdImage = dataUrl;
+   log(dataUrl?` ${docType==="senior"?"Senior ID":"PWD ID"} uploaded`:` ${docType==="senior"?"Senior ID":"PWD ID"} removed`,"ok"); pub();
+  },
+  addEvent(sid="s1", ev) {
+   const s = st.seniors.find(x=>x.id===sid); if(!s)return;
+   s.events = [...(s.events||[]), { ...ev, id:`ev${st.nid++}` }];
+   log(` Calendar event added: ${ev.title}`,"ok"); pub();
+  },
+  updateEvent(sid="s1", evId, patch) {
+   const s = st.seniors.find(x=>x.id===sid); if(!s)return;
+   s.events = (s.events||[]).map(e=>e.id===evId?{...e,...patch}:e);
+   log(" Calendar event updated","ok"); pub();
+  },
+  deleteEvent(sid="s1", evId) {
+   const s = st.seniors.find(x=>x.id===sid); if(!s)return;
+   s.events = (s.events||[]).filter(e=>e.id!==evId);
+   log(" Calendar event removed","info"); pub();
+  },
   addContact(sid="s1", c) {
    const s = st.seniors.find(x=>x.id===sid); if(!s)return;
    // Duplicate number check
@@ -1527,10 +1550,10 @@ function VitalsLogCare({ goTo, t, plan }) {
  const store = useStore();
  const s = store?.seniors?.find(x=>x.id===(store.activeSeniorId||"s1")) || store?.seniors?.[0];
  const [tab, setTab] = useState("bp");
- const [form, setForm] = useState({ sys:"", dia:"", sugar:"", pulse:"", note:"" });
+ const [form, setForm] = useState({ sys:"", dia:"", sugar:"", pulse:"", weight:"", oxygen:"", note:"" });
  const [saved, setSaved] = useState(false);
  const vitals = (s?.vitals||[]).filter(v=>v.type===tab);
- const tabs = [{id:"bp",label:"Blood Pressure",icon:"heart_pulse",unit:"mmHg"},{id:"sugar",label:"Blood Sugar",icon:"droplet",unit:"mg/dL"},{id:"pulse",label:"Pulse",icon:"activity",unit:"bpm"}];
+ const tabs = [{id:"bp",label:"Blood Pressure",icon:"heart_pulse",unit:"mmHg"},{id:"sugar",label:"Blood Sugar",icon:"droplet",unit:"mg/dL"},{id:"pulse",label:"Pulse",icon:"activity",unit:"bpm"},{id:"weight",label:"Timbang",icon:"activity",unit:"kg"},{id:"oxygen",label:"Oxygen",icon:"heart_pulse",unit:"%"}];
 
  const bpColor = (val) =>{
   const [sys] = (val||"").split("/").map(Number);
@@ -1553,7 +1576,14 @@ function VitalsLogCare({ goTo, t, plan }) {
   if (n > 90 || n < 60) return t.warn;
   return t.green;
  };
- const getColor = (v) =>v.type==="bp"?bpColor(v.value):v.type==="sugar"?sugarColor(v.value):pulseColor(v.value);
+ const oxygenColor = (val) =>{
+  const n = Number(val);
+  if (!n) return t.text3;
+  if (n < 90) return t.red;
+  if (n < 95) return t.warn;
+  return t.green;
+ };
+ const getColor = (v) =>v.type==="bp"?bpColor(v.value):v.type==="sugar"?sugarColor(v.value):v.type==="oxygen"?oxygenColor(v.value):v.type==="pulse"?pulseColor(v.value):t.text3;
 
  const save = () =>{
   if (!canUse(plan,"vitals")) return;
@@ -1561,10 +1591,12 @@ function VitalsLogCare({ goTo, t, plan }) {
   if (tab==="bp") { value=`${form.sys}/${form.dia}`; valid=form.sys&&form.dia; }
   if (tab==="sugar") { value=form.sugar; valid=!!form.sugar; }
   if (tab==="pulse") { value=form.pulse; valid=!!form.pulse; }
+  if (tab==="weight") { value=form.weight; valid=!!form.weight; }
+  if (tab==="oxygen") { value=form.oxygen; valid=!!form.oxygen; }
   if (!valid) return;
   const unit = tabs.find(x=>x.id===tab)?.unit||"";
   STORE.addVital(s?.id||"s1", { type:tab, value, unit, note:form.note });
-  setForm({sys:"",dia:"",sugar:"",pulse:"",note:""});
+  setForm({sys:"",dia:"",sugar:"",pulse:"",weight:"",oxygen:"",note:""});
   setSaved(true); setTimeout(()=>setSaved(false),1500);
  };
 
@@ -1576,7 +1608,7 @@ function VitalsLogCare({ goTo, t, plan }) {
    <div style={{display:"flex",gap:0,background:t.bg2,borderBottom:`1px solid ${t.cardBorder}`,flexShrink:0}}>
     {tabs.map(tb=>(
      <button key={tb.id} onClick={()=>setTab(tb.id)} style={{flex:1,height:44,background:"none",border:"none",borderBottom:tab===tb.id?`2.5px solid ${t.red}`:"2.5px solid transparent",cursor:"pointer",fontSize:11,fontWeight:900,color:tab===tb.id?t.red:t.text3,transition:"all 0.15s"}}>
-      <span style={{display:"inline-flex",alignItems:"center",gap:5,justifyContent:"center"}}><Icon name={tb.icon} size={13} color={tab===tb.id?t.red:t.text3}/>{tb.label.split("")[0]}</span>
+      <span style={{display:"inline-flex",alignItems:"center",gap:5,justifyContent:"center"}}><Icon name={tb.icon} size={13} color={tab===tb.id?t.red:t.text3}/>{tb.label.split(" ")[0]}</span>
      </button>
     ))}
    </div>
@@ -1600,6 +1632,8 @@ function VitalsLogCare({ goTo, t, plan }) {
       )}
       {tab==="sugar" && <input value={form.sugar} onChange={e=>setForm(x=>({...x,sugar:e.target.value}))} placeholder="Blood sugar (mg/dL)" type="number" style={{...inp,marginBottom:8}}/>}
       {tab==="pulse" && <input value={form.pulse} onChange={e=>setForm(x=>({...x,pulse:e.target.value}))} placeholder="Pulse rate (bpm)" type="number" style={{...inp,marginBottom:8}}/>}
+      {tab==="weight" && <input value={form.weight} onChange={e=>setForm(x=>({...x,weight:e.target.value}))} placeholder="Timbang (kg)" type="number" style={{...inp,marginBottom:8}}/>}
+      {tab==="oxygen" && <input value={form.oxygen} onChange={e=>setForm(x=>({...x,oxygen:e.target.value}))} placeholder="Oxygen SpO2 (%)" type="number" style={{...inp,marginBottom:8}}/>}
       <input value={form.note} onChange={e=>setForm(x=>({...x,note:e.target.value}))} placeholder="Tala (hal. Bago kumain)" style={{...inp,marginBottom:10}}/>
       <button onClick={save} style={{width:"100%",height:48,borderRadius:24,background:saved?t.green:t.redGrad,border:"none",cursor:"pointer",fontSize:15,fontWeight:900,color:"#fff",transition:"all 0.3s"}}>
        {saved?" Na-save!":"+ I-save ang Reading"}
@@ -1611,12 +1645,12 @@ function VitalsLogCare({ goTo, t, plan }) {
     {vitals.length===0 && <div style={{textAlign:"center",padding:"32px 0",color:t.text3,fontSize:13,fontWeight:700}}>Wala pang reading.<br/>Simulan ang pag-track ngayon.</div>}
     {vitals.map(v=>(
      <div key={v.id} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",background:t.card,borderRadius:16,border:`1px solid ${t.cardBorder}`,marginBottom:8}}>
-      <div style={{width:48,height:48,borderRadius:14,background:getColor(v)=== t.red?t.redBg:getColor(v)===t.green?t.greenBg:t.warnBg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+      <div style={{width:48,height:48,borderRadius:14,background:getColor(v)===t.red?t.redBg:getColor(v)===t.green?t.greenBg:getColor(v)===t.text3?t.bg2:t.warnBg,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",flexShrink:0}}>
        <div style={{fontSize:14,fontWeight:900,color:getColor(v),lineHeight:1.1}}>{v.value}</div>
        <div style={{fontSize:8,color:getColor(v),fontWeight:700}}>{v.unit}</div>
       </div>
       <div style={{flex:1}}>
-       <div style={{fontSize:13,fontWeight:800,color:t.text}}>{tab==="bp"?"Blood Pressure":tab==="sugar"?"Blood Sugar":"Pulse"}</div>
+       <div style={{fontSize:13,fontWeight:800,color:t.text}}>{tabs.find(x=>x.id===tab)?.label||tab}</div>
        {v.note&&<div style={{fontSize:11,color:t.text3,fontWeight:600}}>{v.note}</div>}
        <div style={{fontSize:10,color:t.text3,fontWeight:600,marginTop:2}}>{v.time}</div>
       </div>
@@ -2195,6 +2229,30 @@ function CaregiverUpdatesSenior({ senior, goTo, t, plan, a11y, lang }) {
       </div>
      </div>
     )}
+
+    {/* Upcoming calendar events — checkups, dialysis, appointments the caregiver scheduled */}
+    {(() => {
+      const now = new Date(); now.setHours(0,0,0,0); // start of today, so today's own events aren't excluded once the clock moves past midnight
+      const upcoming = senior ? occurrencesInRange(senior, now, calAddDays(now,14)).filter(o=>!o.event.isMed).slice(0,5) : [];
+      if (upcoming.length === 0) return null;
+      return (
+        <div style={{background:t.card,borderRadius:20,padding:"16px",border:`1px solid ${t.cardBorder}`}}>
+          <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:12}}>
+            <Icon name="clock" size={16} color={t.text3}/>
+            <div style={{fontSize:11+fs,fontWeight:800,color:t.text3,letterSpacing:1.2}}>PAPARATING</div>
+          </div>
+          {upcoming.map((o,idx)=>(
+            <div key={idx} style={{display:"flex",alignItems:"center",gap:12,padding:"9px 0",borderBottom:idx<upcoming.length-1?`1px solid ${t.cardBorder}`:"none"}}>
+              <div style={{width:8,height:8,borderRadius:4,background:EVENT_TYPES[o.event.type]?.color||t.warn,flexShrink:0}}></div>
+              <div style={{flex:1}}>
+                <div style={{fontSize:14+fs,fontWeight:800,color:t.text}}>{o.event.title}</div>
+                <div style={{fontSize:11+fs,color:t.text3,fontWeight:600}}>{o.date.toLocaleDateString('en-PH',{month:'short',day:'numeric'})}{o.event.time?" · "+o.event.time:""}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    })()}
 
     {/* Caregiver notes — written for the senior */}
     <div style={{background:t.card,borderRadius:20,padding:"16px",border:`1px solid ${t.cardBorder}`}}>
@@ -2912,11 +2970,196 @@ const CR = {
  ID_UP:"id_up", QR:"qr", CONTACTS:"contacts",
  PRICING:"pricing", SETTINGS:"settings",
  TIMELINE:"timeline", MEDICAL_ID:"medical_id",
- SENIOR_VIEW:"senior_view",
+ SENIOR_VIEW:"senior_view", CALENDAR:"calendar",
  // Phase 3
  VITALS:"vitals", MED_REPORT:"med_report",
  SAFE_ZONE:"safe_zone", NOTES:"notes",
 };
+
+// ─── CALENDAR DATE MATH (mirrors dashboard.html — kept in sync manually) ──────
+const EVENT_TYPES = {
+ checkup:    { label:"Checkup",    color:"#1A8C4A" },
+ dialysis:   { label:"Dialysis",   color:"#C4301E" },
+ therapy:    { label:"Therapy/Rehab", color:"#2196A8" },
+ lab_test:   { label:"Lab Test",   color:"#E91E8C" },
+ vaccination:{ label:"Bakuna",     color:"#1A8C4A" },
+ dental:     { label:"Dental",     color:"#0EA5A5" },
+ medication: { label:"Gamot",      color:"#C07010" },
+ appointment:{ label:"Appointment",color:"#6B35C4" },
+ other:      { label:"Iba pa",     color:"#6B3A1F" },
+};
+const RECURRENCE_OPTS = [
+ ["none","Isang beses lang"], ["daily","Araw-araw"], ["weekdays","Weekdays lang"],
+ ["weekends","Weekends lang"], ["weekly","Piling araw kada linggo"],
+ ["monthly","Buwanan"], ["quarterly","Bawat 3 buwan"], ["yearly","Taun-taon"],
+];
+const DOW_SHORT_TL = ["Lin","Lun","Mar","Miy","Huw","Biy","Sab"];
+function calYmd(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
+function calSameDay(a,b){ return calYmd(a)===calYmd(b); }
+function calAddDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
+function calStartOfWeek(d){ const x=new Date(d); x.setDate(x.getDate()-x.getDay()); x.setHours(0,0,0,0); return x; }
+function calMonthGrid(year,month){ const start=calStartOfWeek(new Date(year,month,1)); return Array.from({length:42},(_,i)=>calAddDays(start,i)); }
+function expandOccurrences(ev, rangeStart, rangeEnd){
+ const out=[]; const base=new Date(ev.date+"T00:00:00");
+ if(base>rangeEnd) return out;
+ if(ev.recurrence==="none"||!ev.recurrence){ if(base>=rangeStart&&base<=rangeEnd) out.push(base); return out; }
+ const weeklyDays=(ev.daysOfWeek&&ev.daysOfWeek.length)?ev.daysOfWeek:[base.getDay()];
+ let cursor=new Date(Math.max(base.getTime(),rangeStart.getTime())); cursor.setHours(0,0,0,0);
+ let n=0;
+ while(cursor<=rangeEnd && n<800){
+  n++;
+  const dow=cursor.getDay(); let matches=false;
+  if(ev.recurrence==="daily") matches=true;
+  else if(ev.recurrence==="weekdays") matches=dow>=1&&dow<=5;
+  else if(ev.recurrence==="weekends") matches=dow===0||dow===6;
+  else if(ev.recurrence==="weekly") matches=weeklyDays.includes(dow);
+  else if(ev.recurrence==="monthly") matches=cursor.getDate()===base.getDate();
+  else if(ev.recurrence==="quarterly") matches=cursor.getDate()===base.getDate() && ((cursor.getFullYear()*12+cursor.getMonth())-(base.getFullYear()*12+base.getMonth()))%3===0;
+  else if(ev.recurrence==="yearly") matches=cursor.getDate()===base.getDate()&&cursor.getMonth()===base.getMonth();
+  if(matches&&cursor>=base) out.push(new Date(cursor));
+  cursor=calAddDays(cursor,1);
+ }
+ return out;
+}
+function occurrencesInRange(senior, rangeStart, rangeEnd){
+ const out=[];
+ (senior.events||[]).forEach(ev=>{ expandOccurrences(ev,rangeStart,rangeEnd).forEach(date=>out.push({date,event:ev})); });
+ (senior.medications||[]).forEach(m=>{
+  let cursor=new Date(rangeStart); cursor.setHours(0,0,0,0);
+  while(cursor<=rangeEnd){
+   const dow=cursor.getDay(); const allowed=(m.daysOfWeek&&m.daysOfWeek.length)?m.daysOfWeek:null;
+   if(!allowed||allowed.includes(dow)) out.push({date:new Date(cursor),event:{id:"med_"+m.id,title:`${m.name} ${m.dose}`,type:"medication",isMed:true}});
+   cursor=calAddDays(cursor,1);
+  }
+ });
+ return out.sort((a,b)=>a.date-b.date);
+}
+
+// ─── CALENDAR (Caregiver, mobile) ──────────────────────────────────────────────
+function CalendarCare({ goTo, t }) {
+ const store = useStore();
+ const s = store?.seniors?.find(x=>x.id===(store?.activeSeniorId||"s1")) || store?.seniors?.[0];
+ const [cursor, setCursor] = useState(new Date());
+ const [modal, setModal] = useState(null);
+ const today = new Date(); today.setHours(0,0,0,0); // start of today, so today's own events aren't excluded once the clock moves past midnight
+ const days = calMonthGrid(cursor.getFullYear(), cursor.getMonth());
+ const rangeStart = days[0], rangeEnd = calAddDays(days[41],1);
+ const occ = s ? occurrencesInRange(s, rangeStart, rangeEnd) : [];
+ const byDay = {};
+ occ.forEach(o=>{ const k=calYmd(o.date); (byDay[k]=byDay[k]||[]).push(o.event); });
+ const upcoming = s ? occurrencesInRange(s, today, calAddDays(today,14)).filter(o=>!o.event.isMed).slice(0,8) : [];
+
+ const nav = (dir) => { const d=new Date(cursor); d.setMonth(d.getMonth()+dir); setCursor(d); };
+ const saveEvent = (data) => {
+  if(!s) return;
+  if(data.id) STORE.updateEvent(s.id, data.id, data);
+  else STORE.addEvent(s.id, data);
+  setModal(null);
+ };
+ const deleteEvent = (id) => { if(s) STORE.deleteEvent(s.id, id); setModal(null); };
+
+ return (
+  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+   <Hdr t={t} title="Calendar" sub={`Para kay ${s?.name||"Senior"}`} back={()=>goTo(CR.DASH)} right={
+    <button onClick={()=>setModal({date:calYmd(today)})} style={{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:14,padding:"6px 12px",cursor:"pointer",color:"#fff",fontSize:12,fontWeight:800}}>+ Event</button>
+   }/>
+   <div style={{flex:1,overflow:"auto",padding:"14px 16px"}}>
+    <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+     <button onClick={()=>nav(-1)} style={{width:32,height:32,borderRadius:9,background:t.bg2,border:`1px solid ${t.cardBorder}`,color:t.text2}}>‹</button>
+     <div style={{fontSize:15,fontWeight:900,color:t.text}}>{cursor.toLocaleDateString('en-PH',{month:'long',year:'numeric'})}</div>
+     <button onClick={()=>nav(1)} style={{width:32,height:32,borderRadius:9,background:t.bg2,border:`1px solid ${t.cardBorder}`,color:t.text2}}>›</button>
+    </div>
+    <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",gap:3,marginBottom:18}}>
+     {DOW_SHORT_TL.map(d=><div key={d} style={{textAlign:"center",fontSize:9.5,fontWeight:800,color:t.text3,padding:"4px 0"}}>{d}</div>)}
+     {days.map((d,i)=>{
+      const inMonth=d.getMonth()===cursor.getMonth(); const isToday=calSameDay(d,today);
+      const evs=byDay[calYmd(d)]||[];
+      return (
+       <div key={i} onClick={()=>setModal({date:calYmd(d)})} style={{aspectRatio:"1",borderRadius:8,background:isToday?t.redBg:t.bg2,border:isToday?`1.5px solid ${t.red}`:"1px solid transparent",opacity:inMonth?1:0.3,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",cursor:"pointer",position:"relative"}}>
+        <span style={{fontSize:11,fontWeight:800,color:isToday?t.red:t.text2}}>{d.getDate()}</span>
+        {evs.length>0 && <span style={{width:4,height:4,borderRadius:2,background:EVENT_TYPES[evs[0].type]?.color||t.gold,marginTop:2}}></span>}
+       </div>
+      );
+     })}
+    </div>
+    <div style={{fontSize:11,fontWeight:800,color:t.text3,letterSpacing:1,marginBottom:10}}>PAPARATING (14 ARAW)</div>
+    {upcoming.length===0 ? (
+     <div style={{textAlign:"center",padding:"24px 0",color:t.text3,fontSize:13,fontWeight:700}}>Walang naka-schedule.</div>
+    ) : upcoming.map((o,idx)=>(
+     <div key={idx} onClick={()=>setModal({date:o.event.date,event:o.event})} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",background:t.card,borderRadius:14,border:`1px solid ${t.cardBorder}`,marginBottom:8,cursor:"pointer"}}>
+      <div style={{width:8,height:8,borderRadius:4,background:EVENT_TYPES[o.event.type]?.color||t.gold,flexShrink:0}}></div>
+      <div style={{flex:1}}>
+       <div style={{fontSize:13,fontWeight:800,color:t.text}}>{o.event.title}</div>
+       <div style={{fontSize:11,color:t.text3,fontWeight:600}}>{o.date.toLocaleDateString('en-PH',{month:'short',day:'numeric'})}{o.event.time?" · "+o.event.time:""}</div>
+      </div>
+     </div>
+    ))}
+   </div>
+   {modal && <CalEventModalCare initial={modal} onSave={saveEvent} onDelete={deleteEvent} onClose={()=>setModal(null)} t={t}/>}
+  </div>
+ );
+}
+
+function CalEventModalCare({ initial, onSave, onDelete, onClose, t }) {
+ const ev = initial.event;
+ const baseDate = ev?.date || initial.date;
+ const [f, setF] = useState({
+  id: ev?.id, title: ev?.title||"", type: ev?.type||"checkup",
+  date: baseDate, time: ev?.time||"", recurrence: ev?.recurrence||"none", notes: ev?.notes||"",
+  daysOfWeek: ev?.daysOfWeek || [new Date(baseDate+"T00:00:00").getDay()],
+ });
+ const toggleDay=(d)=>setF(x=>({...x,daysOfWeek:x.daysOfWeek.includes(d)?x.daysOfWeek.filter(v=>v!==d):[...x.daysOfWeek,d].sort()}));
+ const inputStyle={width:"100%",height:48,borderRadius:14,border:`1.5px solid ${t.cardBorder}`,padding:"0 14px",fontSize:14,fontWeight:700,background:t.bg2,color:t.text,outline:"none",boxSizing:"border-box"};
+ return (
+  <div onClick={onClose} style={{position:"fixed",inset:0,background:"rgba(16,9,6,0.6)",display:"flex",alignItems:"flex-end",zIndex:200}}>
+   <div onClick={e=>e.stopPropagation()} style={{background:t.bg,borderRadius:"24px 24px 0 0",padding:"20px 18px",width:"100%",maxHeight:"85vh",overflow:"auto"}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+     <div style={{fontSize:16,fontWeight:900,color:t.text}}>{ev?"I-edit ang Event":"Bagong Event"}</div>
+     <button onClick={onClose} style={{width:30,height:30,borderRadius:15,background:t.bg2,border:"none",color:t.text3}}>✕</button>
+    </div>
+    <div style={{marginBottom:10}}>
+     <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:5}}>Pangalan</div>
+     <input value={f.title} onChange={e=>setF({...f,title:e.target.value})} placeholder="hal. Dialysis sa St. Luke's" style={inputStyle} autoFocus/>
+    </div>
+    <div style={{display:"flex",gap:8,marginBottom:10}}>
+     <div style={{flex:1}}><div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:5}}>Petsa</div><input type="date" value={f.date} onChange={e=>setF({...f,date:e.target.value})} style={inputStyle}/></div>
+     <div style={{flex:1}}><div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:5}}>Oras</div><input type="time" value={f.time} onChange={e=>setF({...f,time:e.target.value})} style={inputStyle}/></div>
+    </div>
+    <div style={{marginBottom:10}}>
+     <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:5}}>Uri</div>
+     <select value={f.type} onChange={e=>setF({...f,type:e.target.value})} style={inputStyle}>
+      {Object.entries(EVENT_TYPES).filter(([k])=>k!=="medication").map(([k,ty])=><option key={k} value={k}>{ty.label}</option>)}
+     </select>
+    </div>
+    <div style={{marginBottom:10}}>
+     <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:5}}>Uulitin</div>
+     <select value={f.recurrence} onChange={e=>setF({...f,recurrence:e.target.value})} style={inputStyle}>
+      {RECURRENCE_OPTS.map(([k,l])=><option key={k} value={k}>{l}</option>)}
+     </select>
+    </div>
+    {f.recurrence==="weekly" && (
+     <div style={{marginBottom:14}}>
+      <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:6}}>Aling mga araw</div>
+      <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+       {DOW_SHORT_TL.map((d,idx)=>(
+        <button key={idx} onClick={()=>toggleDay(idx)} style={{width:38,height:34,borderRadius:9,border:`1.5px solid ${f.daysOfWeek.includes(idx)?t.red:t.cardBorder}`,background:f.daysOfWeek.includes(idx)?t.red:t.bg2,color:f.daysOfWeek.includes(idx)?"#fff":t.text2,fontSize:11,fontWeight:800}}>{d}</button>
+       ))}
+      </div>
+     </div>
+    )}
+    <div style={{marginBottom:16}}>
+     <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:5}}>Tala (opsyonal)</div>
+     <input value={f.notes} onChange={e=>setF({...f,notes:e.target.value})} placeholder="hal. Dalhin ang lab results" style={inputStyle}/>
+    </div>
+    <div style={{display:"flex",gap:10}}>
+     {ev && <button onClick={()=>onDelete(f.id)} style={{height:50,padding:"0 18px",borderRadius:25,background:t.redBg,border:`1.5px solid ${t.redBorder}`,color:t.red,fontWeight:800,fontSize:13}}>Tanggalin</button>}
+     <button onClick={onClose} style={{flex:1,height:50,borderRadius:25,background:"none",border:`1.5px solid ${t.cardBorder}`,color:t.text2,fontWeight:800,fontSize:14}}>Kanselahin</button>
+     <button onClick={()=>onSave(f)} disabled={!f.title.trim()} style={{flex:1,height:50,borderRadius:25,background:t.redGrad,border:"none",color:"#fff",fontWeight:900,fontSize:14,opacity:f.title.trim()?1:0.5}}>I-save</button>
+    </div>
+   </div>
+  </div>
+ );
+}
 
 // ─── SENIOR VIEW PANEL (Caregiver sees live senior dashboard) ─────────────────
 function SeniorViewPanel({ goTo, t, plan, lang }) {
@@ -3210,6 +3453,7 @@ function CaregiverDash({ goTo, t, plan, caregiverName }) {
       {label:"QR Code",     icon:"qr",     s:CR.QR},
       {label:"Dagdag na Gamot", icon:"pill",    s:CR.ADD_MED,  locked:!canUse(plan,"medications")},
       {label:"Senior View",   icon:"senior_person",s:CR.SENIOR_VIEW},
+      {label:"Calendar",      icon:"clock",         s:CR.CALENDAR},
       {label:"Timeline",    icon:"clock",    s:CR.TIMELINE},
       {label:"Vitals Log",   icon:"heart_pulse", s:CR.VITALS,   locked:!canUse(plan,"vitals")},
       {label:"Med Report",   icon:"chart_bar",  s:CR.MED_REPORT, locked:!canUse(plan,"medications")},
@@ -3460,7 +3704,9 @@ function AddMedCare({ goTo, t, plan }) {
  const activeSid = store?.activeSeniorId ||"s1";
  const activeSenior = store?.seniors?.find(x=>x.id===activeSid);
  const FREQ_OPTS = ["1x","2x","3x","4x","custom"];
- const [med, setMed] = useState({ name:"", dose:"", freq:"1x", schedule:["08:00"] });
+ const MED_ROUTES = { oral:"Oral", topical:"Topical", injection:"Injection", inhaler:"Inhaler", drops:"Drops", patch:"Patch", other:"Iba pa" };
+ const DOW_TL_SHORT = ["Lin","Lun","Mar","Miy","Huw","Biy","Sab"];
+ const [med, setMed] = useState({ name:"", dose:"", freq:"1x", schedule:["08:00"], route:"oral", prn:false, daysOfWeek:[], startDate:"", endDate:"", instructions:"", prescribedBy:"", refillCount:"", refillThreshold:"" });
  const [customTime, setCustomTime] = useState("");
  const inp=(k,v)=>setMed(m=>({...m,[k]:v}));
  const setFreq=(f)=>{
@@ -3469,6 +3715,7 @@ function AddMedCare({ goTo, t, plan }) {
  };
  const addSlot=()=>{ if(customTime&&!med.schedule.includes(customTime)) { setMed(m=>({...m,schedule:[...m.schedule,customTime].sort()})); setCustomTime(""); } };
  const removeSlot=(tm)=>setMed(m=>({...m,schedule:m.schedule.filter(s=>s!==tm)}));
+ const toggleDay=(d)=>setMed(m=>({...m,daysOfWeek:m.daysOfWeek.includes(d)?m.daysOfWeek.filter(v=>v!==d):[...m.daysOfWeek,d].sort()}));
  const inputStyle={width:"100%",height:52,borderRadius:16,border:`1.5px solid ${t.cardBorder}`,padding:"0 16px",fontSize:15,fontWeight:700,background:t.bg2,color:t.text,outline:"none",fontFamily:"'Nunito',sans-serif",boxSizing:"border-box"};
  if (!canUse(plan,"medications")) return (
   <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
@@ -3492,6 +3739,29 @@ function AddMedCare({ goTo, t, plan }) {
         <input value={med[k]} onChange={e=>inp(k,e.target.value)} placeholder={ph} style={inputStyle}/>
        </div>
       ))}
+
+      {/* Route */}
+      <div>
+       <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:8,textTransform:"uppercase",letterSpacing:0.8}}>Route</div>
+       <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+        {Object.entries(MED_ROUTES).map(([k,l])=>(
+         <button key={k} onClick={()=>inp("route",k)} style={{padding:"9px 13px",borderRadius:12,border:`1.5px solid ${med.route===k?t.red:t.cardBorder}`,background:med.route===k?t.redBg:t.bg2,cursor:"pointer",fontSize:12,fontWeight:800,color:med.route===k?t.red:t.text2}}>{l}</button>
+        ))}
+       </div>
+      </div>
+
+      {/* PRN toggle */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:t.bg2,borderRadius:16,padding:"12px 16px"}}>
+       <div>
+        <div style={{fontSize:13,fontWeight:800,color:t.text}}>Kapag kinakailangan lang (PRN)</div>
+        <div style={{fontSize:11,color:t.text3,fontWeight:600,marginTop:2}}>Walang fixed na oras</div>
+       </div>
+       <button onClick={()=>inp("prn",!med.prn)} style={{width:44,height:25,borderRadius:13,border:"none",position:"relative",background:med.prn?t.red:t.cardBorder,flexShrink:0,cursor:"pointer"}}>
+        <span style={{position:"absolute",top:2.5,left:med.prn?21:2.5,width:20,height:20,borderRadius:10,background:"#fff",transition:"left 0.2s",boxShadow:"0 1px 3px rgba(0,0,0,0.25)"}}></span>
+       </button>
+      </div>
+
+      {!med.prn && <>
       {/* Frequency */}
       <div>
        <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:8,textTransform:"uppercase",letterSpacing:0.8}}>Dalas (Frequency)</div>
@@ -3521,10 +3791,66 @@ function AddMedCare({ goTo, t, plan }) {
         </div>
        )}
       </div>
+      {/* Days of week */}
+      <div>
+       <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:8,textTransform:"uppercase",letterSpacing:0.8}}>Mga araw (blangko = araw-araw)</div>
+       <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+        {DOW_TL_SHORT.map((d,idx)=>(
+         <button key={idx} onClick={()=>toggleDay(idx)} style={{width:40,height:36,borderRadius:10,border:`1.5px solid ${med.daysOfWeek.includes(idx)?t.red:t.cardBorder}`,background:med.daysOfWeek.includes(idx)?t.red:t.bg2,color:med.daysOfWeek.includes(idx)?"#fff":t.text2,fontSize:11,fontWeight:800,cursor:"pointer"}}>{d}</button>
+        ))}
+       </div>
+      </div>
+      </>}
+
+      {/* Date range */}
+      <div style={{display:"flex",gap:10}}>
+       <div style={{flex:1}}>
+        <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:6,textTransform:"uppercase",letterSpacing:0.8}}>Simula</div>
+        <input type="date" value={med.startDate} onChange={e=>inp("startDate",e.target.value)} style={{...inputStyle,height:46,fontSize:13}}/>
+       </div>
+       <div style={{flex:1}}>
+        <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:6,textTransform:"uppercase",letterSpacing:0.8}}>Hanggang</div>
+        <input type="date" value={med.endDate} onChange={e=>inp("endDate",e.target.value)} style={{...inputStyle,height:46,fontSize:13}}/>
+       </div>
+      </div>
+
+      {/* Refill tracking */}
+      <div style={{display:"flex",gap:10}}>
+       <div style={{flex:1}}>
+        <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:6,textTransform:"uppercase",letterSpacing:0.8}}>Natitirang bilang</div>
+        <input type="number" value={med.refillCount} onChange={e=>inp("refillCount",e.target.value)} placeholder="30" style={{...inputStyle,height:46,fontSize:13}}/>
+       </div>
+       <div style={{flex:1}}>
+        <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:6,textTransform:"uppercase",letterSpacing:0.8}}>Alertuhan kapag</div>
+        <input type="number" value={med.refillThreshold} onChange={e=>inp("refillThreshold",e.target.value)} placeholder="5" style={{...inputStyle,height:46,fontSize:13}}/>
+       </div>
+      </div>
+
+      {/* Instructions + prescriber */}
+      <div>
+       <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:6,textTransform:"uppercase",letterSpacing:0.8}}>Mga tagubilin</div>
+       <input value={med.instructions} onChange={e=>inp("instructions",e.target.value)} placeholder="hal. Inumin kasabay ng pagkain" style={inputStyle}/>
+      </div>
+      <div>
+       <div style={{fontSize:11,fontWeight:800,color:t.text3,marginBottom:6,textTransform:"uppercase",letterSpacing:0.8}}>Inireseta ni</div>
+       <input value={med.prescribedBy} onChange={e=>inp("prescribedBy",e.target.value)} placeholder={activeSenior?.medicalProfile?.doctorName||"Dr. Santos"} style={inputStyle}/>
+      </div>
      </div>
     </Card>
-    <button onClick={()=>{ if(med.name&&med.dose&&med.schedule.length){STORE.addMed(activeSid,{name:med.name,dose:med.dose,freq:med.freq,schedule:med.schedule});goTo(CR.MED_MON);}}}
-     disabled={!med.name||!med.dose||!med.schedule.length}
+    <button onClick={()=>{
+      if(!med.name||!med.dose) return;
+      if(!med.prn && !med.schedule.length) return;
+      STORE.addMed(activeSid,{
+        name:med.name, dose:med.dose, freq:med.freq, schedule:med.prn?[]:med.schedule,
+        route:med.route, prn:med.prn, daysOfWeek:med.daysOfWeek,
+        startDate:med.startDate||undefined, endDate:med.endDate||undefined,
+        instructions:med.instructions||undefined, prescribedBy:med.prescribedBy||undefined,
+        refillCount:med.refillCount===""?undefined:Number(med.refillCount),
+        refillThreshold:med.refillThreshold===""?undefined:Number(med.refillThreshold),
+      });
+      goTo(CR.MED_MON);
+     }}
+     disabled={!med.name||!med.dose||(!med.prn&&!med.schedule.length)}
      style={{height:64,borderRadius:32,background:t.redGrad,border:"none",cursor:med.name&&med.dose?"pointer":"default",fontSize:20,fontWeight:900,color:"#fff",opacity:med.name&&med.dose?1:0.45}}>
      I-save ang Gamot
     </button>
@@ -3533,7 +3859,7 @@ function AddMedCare({ goTo, t, plan }) {
  );
 }
 
-function ContactsCare({ goTo, t }) {
+function ContactsCare({ goTo, t, plan }) {
  const store = useStore();
  const [adding, setAdding] = useState(false);
  const [callTarget, setCallTarget] = useState(null);
@@ -3541,7 +3867,10 @@ function ContactsCare({ goTo, t }) {
  const [errors, setErrors] = useState({});
  const activeSid = store?.activeSeniorId ||"s1";
  const contacts = (store?.seniors?.find(x=>x.id===activeSid) || store?.seniors?.[0])?.contacts || [];
+ const maxContacts = PLANS[plan]?.maxContacts ?? 1;
+ const atLimit = contacts.length >= maxContacts;
  const validateAndSave = () =>{
+  if (atLimit) return;
   const errs = {};
   if (!newC.name.trim()) errs.name ="Kailangan ang pangalan.";
   else if (!isFullName(newC.name)) errs.name ="Ilagay ang buong pangalan (una at apelyido).";
@@ -3558,12 +3887,21 @@ function ContactsCare({ goTo, t }) {
  const inputStyle = { width:"100%", height:48, borderRadius:14, border:`1.5px solid ${t.cardBorder}`, padding:"0 14px", fontSize:14, fontWeight:700, background:t.bg2, color:t.text, outline:"none", fontFamily:"'Nunito',sans-serif", boxSizing:"border-box" };
  return (
   <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden",position:"relative"}}>
-   <Hdr t={t} title="Emergency Contacts" sub="I-manage ang mga tatawagan." right={
-    <button onClick={()=>setAdding(a=>!a)} style={{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:14,padding:"6px 12px",cursor:"pointer",color:"#fff",fontSize:12,fontWeight:700}}>
-     {adding?"✕ Isara":"+ Dagdag"}
+   <Hdr t={t} title="Emergency Contacts" sub={`${contacts.length}/${maxContacts} na-gamit sa ${PLANS[plan]?.name||plan} plan`} right={
+    <button onClick={()=>atLimit?goTo(CR.PRICING):setAdding(a=>!a)} style={{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:14,padding:"6px 12px",cursor:"pointer",color:"#fff",fontSize:12,fontWeight:700}}>
+     {adding?"✕ Isara":atLimit?"🔒 Dagdag":"+ Dagdag"}
     </button>
    }/>
    <div style={{flex:1,overflow:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:12}}>
+    {atLimit && !adding && (
+     <div onClick={()=>goTo(CR.PRICING)} style={{background:t.isDark?"rgba(240,160,48,0.1)":"#FFFBF0",border:`1.5px solid ${t.warnBorder}`,borderRadius:16,padding:"14px 16px",cursor:"pointer",display:"flex",alignItems:"center",gap:12}}>
+      <span style={{fontSize:22}}>🔒</span>
+      <div style={{flex:1}}>
+       <div style={{fontSize:13,fontWeight:800,color:t.text}}>Umabot na sa limitasyon ng {PLANS[plan]?.name}</div>
+       <div style={{fontSize:11.5,color:t.text3,fontWeight:600,marginTop:2}}>I-upgrade para magdagdag pa ng emergency contact →</div>
+      </div>
+     </div>
+    )}
     {adding&&(
      <Card t={t}>
       <div style={{fontSize:13,fontWeight:800,color:t.text2,marginBottom:12}}>BAGONG CONTACT</div>
@@ -3622,34 +3960,44 @@ function ContactsCare({ goTo, t }) {
 }
 
 function IDUploadCare({ goTo, t }) {
- const store=useStore(); const [uploaded,setUploaded]=useState(false);
+ const store=useStore();
  const s = store?.seniors?.find(x=>x.id===(store?.activeSeniorId||"s1")) || store?.seniors?.[0];
+ const seniorInputRef = useRef(null), pwdInputRef = useRef(null);
+ const readFile = (file, cb) => {
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => cb(reader.result);
+  reader.readAsDataURL(file);
+ };
+ const IdCard = ({ label, sub, image, docType, inputRef }) => (
+  <div style={{marginBottom:16}}>
+   {image ? (
+    <div style={{width:"100%",aspectRatio:"1.58",borderRadius:22,overflow:"hidden",boxShadow:`0 16px 48px ${t.redGlow}`,position:"relative"}}>
+     <img src={image} alt={label} style={{width:"100%",height:"100%",objectFit:"cover"}}/>
+    </div>
+   ) : (
+    <div style={{width:"100%",aspectRatio:"1.58",borderRadius:22,background:t.bg2,border:`2px dashed ${t.cardBorder}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:10}}>
+     <Icon name="id_card" size={38} color={t.text3} strokeWidth={1.5}/>
+     <div style={{fontSize:13,fontWeight:800,color:t.text2}}>{label}</div>
+     <div style={{fontSize:11,color:t.text3,fontWeight:600}}>{sub}</div>
+    </div>
+   )}
+   <input ref={inputRef} type="file" accept="image/*" style={{display:"none"}} onChange={e=>readFile(e.target.files[0], (dataUrl)=>STORE.uploadIdDoc(s?.id||"s1", docType, dataUrl))}/>
+   <div style={{display:"flex",gap:8,marginTop:10}}>
+    <button onClick={()=>inputRef.current.click()} style={{flex:1,height:44,borderRadius:22,background:image?"none":t.redGrad,border:image?`2px solid ${t.cardBorder}`:"none",cursor:"pointer",fontSize:13,fontWeight:800,color:image?t.text2:"#fff"}}>{image?"Palitan":`Mag-upload ng ${label}`}</button>
+    {image && <button onClick={()=>STORE.uploadIdDoc(s?.id||"s1", docType, null)} style={{width:44,height:44,borderRadius:22,background:t.redBg,border:`1.5px solid ${t.redBorder}`,cursor:"pointer",color:t.red}}>✕</button>}
+   </div>
+  </div>
+ );
  return (
   <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
-   <Hdr t={t} title="I-upload ang ID" sub="Senior Citizen ID o PWD ID" back={()=>goTo(CR.DASH)}/>
-   <div style={{flex:1,overflow:"auto",padding:"16px 16px",display:"flex",flexDirection:"column",gap:14}}>
-    {(s?.idImage||uploaded)?(<>
-     <div style={{width:"100%",aspectRatio:"1.58",borderRadius:22,background:`linear-gradient(135deg,${t.header},#7A0E08)`,display:"flex",flexDirection:"column",padding:22,boxShadow:`0 16px 48px ${t.redGlow}`}}>
-      <div style={{color:"rgba(255,255,255,0.6)",fontSize:10,fontWeight:800,letterSpacing:1.5,marginBottom:8}}>SENIOR CITIZEN IDENTIFICATION CARD</div>
-      <div style={{color:"#fff",fontSize:26,fontWeight:900}}>{s?.name}</div>
-      <div style={{color:"rgba(255,255,255,0.75)",fontSize:13,marginTop:6,fontWeight:600}}>Dialysis Patient · Blood Type: A+</div>
-      <div style={{marginTop:"auto",color:"rgba(255,255,255,0.65)",fontSize:11,fontWeight:600}}>Emergency Contact: {s?.contacts?.[0]?.name} {s?.contacts?.[0]?.num}</div>
-     </div>
-     <div style={{background:t.greenBg,border:`1px solid ${t.greenBorder}`,borderRadius:16,padding:"12px 16px",display:"flex",alignItems:"center",gap:10}}>
-      <Icon name="checkmark" size={20} color={t.green}/><div style={{fontSize:14,fontWeight:800,color:t.green}}>ID nai-upload na at aktibo</div>
-     </div>
-     <button onClick={()=>{setUploaded(false);STORE.uploadID(s?.id||"s1",null);}} style={{height:52,borderRadius:26,background:"none",border:`2px solid ${t.cardBorder}`,cursor:"pointer",fontSize:15,fontWeight:800,color:t.text2}}>Palitan ang ID</button>
-    </>):(<>
-     <div style={{width:"100%",aspectRatio:"1.58",borderRadius:22,background:t.bg2,border:`2px dashed ${t.cardBorder}`,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:12}}>
-      <Icon name="id_card" size={44} color={t.text3} strokeWidth={1.5}/>
-      <div style={{fontSize:15,fontWeight:800,color:t.text2}}>Wala pang ID na naka-upload</div>
-      <div style={{fontSize:12,color:t.text3,fontWeight:600}}>PNG, JPG, PDF – max 10MB</div>
-     </div>
-     <div style={{display:"flex",flexDirection:"column",gap:10}}>
-      <button onClick={()=>{STORE.uploadID(s?.id||"s1","uploaded");setUploaded(true);}} style={{height:52,borderRadius:26,background:t.redGrad,border:"none",cursor:"pointer",fontSize:16,fontWeight:800,color:"#fff"}}>Mag-upload ng Senior Citizen ID</button>
-      <button onClick={()=>{STORE.uploadID(s?.id||"s1","uploaded");setUploaded(true);}} style={{height:52,borderRadius:26,background:"none",border:`2px solid ${t.cardBorder}`,cursor:"pointer",fontSize:15,fontWeight:800,color:t.text2}}>Mag-upload ng PWD ID</button>
-     </div>
-    </>)}
+   <Hdr t={t} title="I-upload ang ID" sub="Senior Citizen ID at PWD ID" back={()=>goTo(CR.DASH)}/>
+   <div style={{flex:1,overflow:"auto",padding:"16px 16px",display:"flex",flexDirection:"column"}}>
+    <IdCard label="Senior Citizen ID" sub="JPG, PNG – malinaw na larawan" image={s?.seniorIdImage} docType="senior" inputRef={seniorInputRef}/>
+    <IdCard label="PWD ID" sub="JPG, PNG – malinaw na larawan" image={s?.pwdIdImage} docType="pwd" inputRef={pwdInputRef}/>
+    <div style={{background:t.greenBg,border:`1px solid ${t.greenBorder}`,borderRadius:16,padding:"12px 16px",display:"flex",alignItems:"center",gap:10}}>
+     <Icon name="checkmark" size={18} color={t.green}/><div style={{fontSize:12,fontWeight:700,color:t.green}}>Naka-imbak nang ligtas, makikita rin sa web dashboard ng caregiver.</div>
+    </div>
    </div>
   </div>
  );
@@ -3869,7 +4217,8 @@ function CaregiverApp({ onSwitchRole, t, plan, onUpgradePlan, displayMode, setDi
   [CR.SAFE_ZONE]: <SafeZoneCare goTo={s=>setScreen(s)} t={t} plan={plan}/>,
   [CR.NOTES]:   <NotesCare goTo={s=>setScreen(s)} t={t}/>,
   [CR.SENIOR_VIEW]: <SeniorViewPanel goTo={goTo} t={t} plan={plan} lang={lang}/>,
-  [CR.CONTACTS]: <ContactsCare goTo={goTo} t={t}/>,
+  [CR.CALENDAR]: <CalendarCare goTo={goTo} t={t}/>,
+  [CR.CONTACTS]: <ContactsCare goTo={goTo} t={t} plan={plan}/>,
   [CR.PRICING]: <PricingCare goTo={goTo} t={t} plan={plan} onUpgrade={id=>{onUpgradePlan(id);goTo(CR.SETTINGS);}}/>,
   [CR.SETTINGS]: <CareSettings goTo={goTo} t={t} displayMode={displayMode} setDisplayMode={setDisplayMode} onSwitchRole={onSwitchRole} plan={plan} lang={lang} setLang={setLang}/>,
  };
