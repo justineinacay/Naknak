@@ -105,6 +105,7 @@ button{cursor:pointer;}
 .sb-link:hover{background:rgba(255,255,255,0.05);color:#fff;}
 .sb-link.on{background:linear-gradient(135deg,var(--red-bright),var(--red-dark));color:#fff;box-shadow:0 6px 16px rgba(196,48,30,0.3);}
 .sb-link svg{flex-shrink:0;}
+.sb-link.locked{color:rgba(255,255,255,0.32);}
 .sb-footer{padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);}
 .sb-senior{display:flex;align-items:center;gap:11px;padding:11px 10px;margin-bottom:18px;background:var(--void2);border:1px solid rgba(255,255,255,0.08);border-radius:14px;}
 .sb-senior-avatar{position:relative;width:38px;height:38px;border-radius:19px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:16px;color:#fff;flex-shrink:0;}
@@ -207,8 +208,11 @@ button{cursor:pointer;}
 
 .row-item{
   display:flex;align-items:center;gap:14px;padding:13px 4px;border-bottom:1px solid var(--cream2);
+  transition:background 0.3s;
 }
 .row-item:last-child{border-bottom:none;}
+.row-item.flash-ok{animation:flashOk 0.9s ease;}
+@keyframes flashOk{0%{background:rgba(26,140,74,0.18);}100%{background:transparent;}}
 .row-avatar{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .row-body{flex:1;min-width:0;}
 .row-body .t1{font-size:14px;font-weight:800;color:var(--ink);}
@@ -336,6 +340,8 @@ button{cursor:pointer;}
 .month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;}
 .month-dow{text-align:center;font-size:10.5px;font-weight:800;color:var(--ink3);padding:6px 0;letter-spacing:0.5px;}
 .month-cell{min-height:88px;border-radius:10px;padding:6px;background:var(--cream2);border:1px solid transparent;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;gap:3px;}
+.month-cell:hover{transform:scale(1.03);box-shadow:0 4px 14px var(--shadow);z-index:1;}
+.month-cell:active{transform:scale(0.98);}
 .month-cell:hover{border-color:var(--red);}
 .month-cell.other-month{opacity:0.35;}
 .month-cell.today{background:rgba(196,48,30,0.08);border-color:var(--red);}
@@ -461,6 +467,16 @@ function timeAgo(iso){
   }catch(e){ return "—"; }
 }
 function nid(){ return Math.random().toString(36).slice(2,10); }
+// Mirrors app.html's PLANS exactly — kept in sync manually since these are
+// separate static files with no shared module. If you change tier gating,
+// change it in both places.
+const PLANS = {
+  free:      { id:"free",      name:"Libre",       maxContacts:1, vitals:false, safeZone:false, medications:false, fall:false, multiMember:false },
+  essential: { id:"essential", name:"Essential",    maxContacts:2, vitals:true,  safeZone:false, medications:true,  fall:false, multiMember:false },
+  family:    { id:"family",    name:"Family Plan",  maxContacts:3, vitals:true,  safeZone:true,  medications:true,  fall:true,  multiMember:true  },
+};
+const canUse = (plan, feat) => PLANS[plan]?.[feat] ?? true;
+
 function haversineKm(lat1,lon1,lat2,lon2){
   const R=6371, dLat=(lat2-lat1)*Math.PI/180, dLon=(lon2-lon1)*Math.PI/180;
   const a=Math.sin(dLat/2)**2+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
@@ -473,10 +489,25 @@ const MON_TL = ["Enero","Pebrero","Marso","Abril","Mayo","Hunyo","Hulyo","Agosto
 const EVENT_TYPES = {
   checkup:    { label:"Checkup",    color:"var(--green)",     bg:"rgba(26,140,74,0.12)" },
   dialysis:   { label:"Dialysis",   color:"var(--red)",       bg:"rgba(196,48,30,0.12)" },
+  therapy:    { label:"Therapy/Rehab", color:"#2196A8",       bg:"rgba(33,150,168,0.12)" },
+  lab_test:   { label:"Lab Test",   color:"#E91E8C",          bg:"rgba(233,30,140,0.12)" },
+  vaccination:{ label:"Bakuna",     color:"#1A8C4A",          bg:"rgba(26,140,74,0.10)" },
+  dental:     { label:"Dental",     color:"#0EA5A5",          bg:"rgba(14,165,165,0.12)" },
   medication: { label:"Gamot",      color:"var(--gold)",      bg:"rgba(192,112,16,0.12)" },
   appointment:{ label:"Appointment",color:"#6B35C4",          bg:"rgba(107,53,196,0.12)" },
   other:      { label:"Iba pa",     color:"var(--ink2)",      bg:"var(--cream2)" },
 };
+const RECURRENCE_OPTS = [
+  ["none","Isang beses lang"],
+  ["daily","Araw-araw"],
+  ["weekdays","Weekdays lang (Lun–Biy)"],
+  ["weekends","Weekends lang (Sab–Lin)"],
+  ["weekly","Piling araw kada linggo"],
+  ["monthly","Buwanan"],
+  ["quarterly","Bawat 3 buwan"],
+  ["yearly","Taun-taon"],
+];
+const DOW_SHORT_TL = ["Lin","Lun","Mar","Miy","Huw","Biy","Sab"];
 function ymd(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; }
 function sameDay(a,b){ return ymd(a)===ymd(b); }
 function addDays(d,n){ const x=new Date(d); x.setDate(x.getDate()+n); return x; }
@@ -489,25 +520,32 @@ function monthGrid(year, month){
   for(let i=0;i<42;i++) days.push(addDays(start,i));
   return days;
 }
-// Expands one event definition into concrete occurrence dates within [rangeStart, rangeEnd]
+// Expands one event definition into concrete occurrence dates within [rangeStart, rangeEnd].
+// recurrence: none | daily | weekdays | weekends | weekly (+ daysOfWeek[]) | monthly | quarterly | yearly
 function expandOccurrences(ev, rangeStart, rangeEnd){
   const out = [];
   const base = new Date(ev.date+"T00:00:00");
   if(base > rangeEnd) return out;
-  if(ev.recurrence==="none"){
+  if(ev.recurrence==="none" || !ev.recurrence){
     if(base>=rangeStart && base<=rangeEnd) out.push(base);
     return out;
   }
+  const weeklyDays = (ev.daysOfWeek && ev.daysOfWeek.length) ? ev.daysOfWeek : [base.getDay()];
   let cursor = new Date(Math.max(base.getTime(), rangeStart.getTime()));
   cursor.setHours(0,0,0,0);
-  const untilCount = 400; // hard safety cap on iterations
+  const untilCount = 800; // hard safety cap on iterations
   let n=0;
   while(cursor<=rangeEnd && n<untilCount){
     n++;
     let matches = false;
+    const dow = cursor.getDay();
     if(ev.recurrence==="daily") matches = true;
-    else if(ev.recurrence==="weekly") matches = cursor.getDay()===base.getDay();
+    else if(ev.recurrence==="weekdays") matches = dow>=1 && dow<=5;
+    else if(ev.recurrence==="weekends") matches = dow===0 || dow===6;
+    else if(ev.recurrence==="weekly") matches = weeklyDays.includes(dow);
     else if(ev.recurrence==="monthly") matches = cursor.getDate()===base.getDate();
+    else if(ev.recurrence==="quarterly") matches = cursor.getDate()===base.getDate() && ((cursor.getFullYear()*12+cursor.getMonth()) - (base.getFullYear()*12+base.getMonth())) % 3 === 0;
+    else if(ev.recurrence==="yearly") matches = cursor.getDate()===base.getDate() && cursor.getMonth()===base.getMonth();
     if(matches && cursor>=base) out.push(new Date(cursor));
     cursor = addDays(cursor,1);
   }
@@ -519,17 +557,105 @@ function occurrencesInRange(senior, rangeStart, rangeEnd){
   (senior.events||[]).forEach(ev=>{
     expandOccurrences(ev, rangeStart, rangeEnd).forEach(date=>out.push({date, event:ev}));
   });
-  // Medications surface on the calendar too (read-only here — edit via Gamot panel)
+  // Medications surface on the calendar too (read-only here — edit via Gamot panel).
+  // Respects each medication's own daysOfWeek if it's not an every-day med.
   (senior.medications||[]).forEach(m=>{
     let cursor = new Date(rangeStart); cursor.setHours(0,0,0,0);
     while(cursor<=rangeEnd){
-      out.push({date:new Date(cursor), event:{id:"med_"+m.id, title:`${m.name} ${m.dose}`, type:"medication", isMed:true, schedule:m.schedule}});
+      const dow = cursor.getDay();
+      const allowedDays = (m.daysOfWeek && m.daysOfWeek.length) ? m.daysOfWeek : null;
+      if(!allowedDays || allowedDays.includes(dow)){
+        out.push({date:new Date(cursor), event:{id:"med_"+m.id, title:`${m.name} ${m.dose}`, type:"medication", isMed:true, schedule:m.schedule}});
+      }
       cursor = addDays(cursor,1);
     }
   });
   return out.sort((a,b)=>a.date-b.date);
 }
 function useTicker(ms){ const [,setT]=useState(0); useEffect(()=>{ const id=setInterval(()=>setT(x=>x+1), ms); return ()=>clearInterval(id); },[ms]); }
+
+/* ── INSIGHTS: derived from real eventLog/vitals data, never fabricated ──── */
+function deriveAdherenceHistory(senior, days=7){
+  const log = senior.eventLog||[];
+  const out = [];
+  for(let i=days-1;i>=0;i--){
+    const d = addDays(new Date(), -i); d.setHours(0,0,0,0);
+    const dayKey = ymd(d);
+    const dayEvents = log.filter(ev => ev.time && ymd(new Date(ev.time))===dayKey && (ev.type==="med_taken"||ev.type==="med_missed"));
+    const taken = dayEvents.filter(ev=>ev.type==="med_taken").length;
+    const missed = dayEvents.filter(ev=>ev.type==="med_missed").length;
+    const total = taken+missed;
+    out.push({ date:d, dayLabel:DOW_TL[d.getDay()], taken, missed, pct: total>0 ? Math.round((taken/total)*100) : null });
+  }
+  return out;
+}
+function deriveInsights(senior){
+  const insights = [];
+  const history = deriveAdherenceHistory(senior, 7);
+  const withData = history.filter(h=>h.pct!==null);
+  if(withData.length>=2){
+    const recent = withData.slice(-3), earlier = withData.slice(0,-3);
+    if(earlier.length){
+      const recentAvg = recent.reduce((a,h)=>a+h.pct,0)/recent.length;
+      const earlierAvg = earlier.reduce((a,h)=>a+h.pct,0)/earlier.length;
+      if(recentAvg - earlierAvg >= 15) insights.push({icon:"checkmark",color:"var(--green)",text:"Gumaganda ang pag-inom ng gamot sa mga huling araw."});
+      else if(earlierAvg - recentAvg >= 15) insights.push({icon:"alert_tri",color:"var(--red)",text:"Bumababa ang adherence sa gamot — baka kailangan ng paalala."});
+    }
+    const allPerfect = withData.every(h=>h.pct===100);
+    if(allPerfect && withData.length>=5) insights.push({icon:"checkmark",color:"var(--green)",text:`${withData.length} sunod-sunod na araw na perpekto ang pag-inom ng gamot!`});
+  }
+  const vitals = senior.vitals||[];
+  const bpHistory = vitals.filter(v=>v.type==="bp").slice(0,5).reverse();
+  if(bpHistory.length>=3){
+    const vals = bpHistory.map(v=>parseFloat(String(v.value).split("/")[0])).filter(v=>!isNaN(v));
+    if(vals.length>=3){
+      const trend = vals[vals.length-1] - vals[0];
+      if(trend >= 10) insights.push({icon:"heart_pulse",color:"var(--red)",text:"Tumataas ang blood pressure sa mga huling reading — subaybayan."});
+      else if(trend <= -10) insights.push({icon:"heart_pulse",color:"var(--green)",text:"Bumababa ang blood pressure sa mga huling reading."});
+    }
+  }
+  const missedRecent = (senior.medications||[]).filter(m=>m.status==="missed");
+  if(missedRecent.length>0) insights.push({icon:"alert_tri",color:"var(--red)",text:`${missedRecent.length} gamot ang nalaktawan ngayong araw.`});
+  const lowRefills = (senior.medications||[]).filter(m=>typeof m.refillCount==="number" && typeof m.refillThreshold==="number" && m.refillCount<=m.refillThreshold);
+  if(lowRefills.length>0) insights.push({icon:"pill",color:"var(--gold)",text:`Paubos na ang ${lowRefills.map(m=>m.name).join(", ")}.`});
+  return insights;
+}
+function AdherenceBarChart({ senior }) {
+  const history = deriveAdherenceHistory(senior, 7);
+  const hasAnyData = history.some(h=>h.pct!==null);
+  if(!hasAnyData) return <div className="empty-state small"><Icon name="pill" size={28}/><p>Wala pang sapat na data sa 7 araw.</p></div>;
+  return (
+    <div style={{display:"flex",alignItems:"flex-end",gap:8,height:110,padding:"6px 4px"}}>
+      {history.map((h,i)=>(
+        <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
+          <div style={{width:"100%",height:70,display:"flex",alignItems:"flex-end",background:"var(--cream2)",borderRadius:6,overflow:"hidden"}}>
+            {h.pct!==null && <div style={{width:"100%",height:`${h.pct}%`,background:h.pct>=80?"var(--green)":h.pct>=50?"var(--gold)":"var(--red)",borderRadius:"6px 6px 0 0",transition:"height 0.5s ease",animationDelay:`${i*0.05}s`}} className="panel-enter"></div>}
+          </div>
+          <span style={{fontSize:9.5,fontWeight:700,color:"var(--ink3)"}}>{h.dayLabel}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+function InsightsPanel({ senior }) {
+  const insights = deriveInsights(senior);
+  return (
+    <div className="panel">
+      <div className="panel-head"><h2><Icon name="activity" size={17}/>7-Araw na Adherence</h2></div>
+      <AdherenceBarChart senior={senior}/>
+      {insights.length>0 && (
+        <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid var(--card-border)",display:"flex",flexDirection:"column",gap:10}}>
+          {insights.map((ins,idx)=>(
+            <div key={idx} style={{display:"flex",alignItems:"center",gap:10}}>
+              <Icon name={ins.icon} size={15} color={ins.color}/>
+              <span style={{fontSize:12.5,fontWeight:700,color:"var(--ink2)"}}>{ins.text}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 /* ── ANIMATED NUMBERS: makes stat cards feel alive rather than static text ── */
 function useCountUp(target, duration=650) {
@@ -896,19 +1022,19 @@ function Dashboard({ household, onDisconnect, theme, session }) {
   const ackSOS = () => patch(s => { s.status="ok"; s.eventLog=[{id:nid(),type:"checkin",icon:"checkmark",title:"SOS na-acknowledge ng caregiver",time:tNow(),detail:""},...(s.eventLog||[])]; return s; });
 
   const NAV = [
-    ["overview","Overview","dashboard"],
-    ["calendar","Calendar","clock"],
-    ["timeline","Timeline","activity"],
-    ["meds","Gamot","pill"],
-    ["contacts","Contacts","phone"],
-    ["safezone","Safe Zone","map_pin"],
-    ["vitals","Vitals","heart_pulse"],
-    ["notes","Mga Tala","notes"],
-    ["profile","Medical Profile","file_text"],
-    ["idupload","ID Upload","id_card"],
-    ["qr","QR Code","qr"],
-    ["devices","Mga Device","phone"],
-    ["settings","Settings","settings"],
+    ["overview","Overview","dashboard",null],
+    ["calendar","Calendar","clock",null],
+    ["timeline","Timeline","activity",null],
+    ["meds","Gamot","pill",null],
+    ["contacts","Contacts","phone",null],
+    ["safezone","Safe Zone","map_pin","safeZone"],
+    ["vitals","Vitals","heart_pulse","vitals"],
+    ["notes","Mga Tala","notes",null],
+    ["profile","Medical Profile","file_text",null],
+    ["idupload","ID Upload","id_card",null],
+    ["qr","QR Code","qr",null],
+    ["devices","Mga Device","phone",null],
+    ["settings","Settings","settings",null],
   ];
 
   return (
@@ -931,11 +1057,14 @@ function Dashboard({ household, onDisconnect, theme, session }) {
           </div>
         </div>
         <div className="sb-nav">
-          {NAV.map(([id,label,icon])=>(
-            <button key={id} className={"sb-link"+(tab===id?" on":"")} onClick={()=>setTab(id)} title={label}>
-              <Icon name={icon} size={16}/><span>{label}</span>
-            </button>
-          ))}
+          {NAV.map(([id,label,icon,gate])=>{
+            const locked = gate && !canUse(state.plan, gate);
+            return (
+              <button key={id} className={"sb-link"+(tab===id?" on":"")+(locked?" locked":"")} onClick={()=>setTab(id)} title={locked?label+" — "+PLANS[state.plan]?.name+" lang":label}>
+                <Icon name={locked?"lock":icon} size={16}/><span>{label}</span>
+              </button>
+            );
+          })}
         </div>
         <div className="sb-footer">
           <button className="sb-disconnect" onClick={onDisconnect}>Mag-sign out</button>
@@ -974,9 +1103,9 @@ function Dashboard({ household, onDisconnect, theme, session }) {
           )}
           {tab==="overview" && <div key="overview" className="panel-enter"><OverviewPanel senior={senior}/></div>}
           {tab==="meds" && <div key="meds" className="panel-enter"><MedsPanel senior={senior} patch={patch}/></div>}
-          {tab==="contacts" && <div key="contacts" className="panel-enter"><ContactsPanel senior={senior} patch={patch}/></div>}
-          {tab==="safezone" && <div key="safezone" className="panel-enter"><SafeZonePanel senior={senior} patch={patch}/></div>}
-          {tab==="vitals" && <div key="vitals" className="panel-enter"><VitalsPanel senior={senior} patch={patch}/></div>}
+          {tab==="contacts" && <div key="contacts" className="panel-enter"><ContactsPanel senior={senior} patch={patch} plan={state.plan}/></div>}
+          {tab==="safezone" && <div key="safezone" className="panel-enter">{canUse(state.plan,"safeZone") ? <SafeZonePanel senior={senior} patch={patch}/> : <UpsellPanel feature="Safe Zone GPS" needPlan="Family Plan" icon="map_pin"/>}</div>}
+          {tab==="vitals" && <div key="vitals" className="panel-enter">{canUse(state.plan,"vitals") ? <VitalsPanel senior={senior} patch={patch}/> : <UpsellPanel feature="Vitals Tracking" needPlan="Essential o Family Plan" icon="heart_pulse"/>}</div>}
           {tab==="notes" && <div key="notes" className="panel-enter"><NotesPanel senior={senior} patch={patch}/></div>}
           {tab==="profile" && <div key="profile" className="panel-enter"><ProfilePanel senior={senior} patch={patch}/></div>}
           {tab==="devices" && <div key="devices" className="panel-enter"><DevicesPanel household={household}/></div>}
@@ -1004,7 +1133,7 @@ function OverviewPanel({ senior }) {
 
   // Fills the reclaimed desktop width with real content instead of empty space:
   // upcoming calendar events + a compact vitals snapshot, both genuinely useful.
-  const now = new Date();
+  const now = new Date(); now.setHours(0,0,0,0); // start of today, so today's own events aren't excluded once the clock moves past midnight
   const upcoming = occurrencesInRange(senior, now, addDays(now,14)).filter(o=>!o.event.isMed).slice(0,5);
   const vitals = senior.vitals||[];
   const lastBP = vitals.find(v=>v.type==="bp"), lastWeight = vitals.find(v=>v.type==="weight"), lastOxygen = vitals.find(v=>v.type==="oxygen");
@@ -1050,6 +1179,7 @@ function OverviewPanel({ senior }) {
             <div className="lbl">Emergency Contacts</div>
           </div>
         </div>
+        <InsightsPanel senior={senior}/>
         <div className="panel">
           <div className="panel-head"><h2><Icon name="activity" size={17}/>Pinakabagong Aktibidad</h2></div>
           {(senior.eventLog||[]).length===0 ? (
@@ -1093,28 +1223,50 @@ function OverviewPanel({ senior }) {
 }
 
 /* ── MEDICATIONS ─────────────────────────────────────────────────────── */
+const MED_ROUTES = { oral:"Oral", topical:"Topical", injection:"Injection", inhaler:"Inhaler", drops:"Drops", patch:"Patch", other:"Iba pa" };
+
 function MedsPanel({ senior, patch }) {
   const [form, setForm] = useState(null);
+  const [justDone, setJustDone] = useState(null);
   const meds = senior.medications||[];
-  const save = () => {
-    if(!form.name) return;
-    patch(s=>{
-      const list = s.medications||[];
-      if(form.id) s.medications = list.map(m=>m.id===form.id?{...m,...form}:m);
-      else s.medications = [...list, {...form, id:nid(), status:"pending"}];
-      return s;
-    });
-    setForm(null);
-  };
   const del = (id) => patch(s=>({...s, medications:(s.medications||[]).filter(m=>m.id!==id)}));
-  const markDone = (id) => patch(s=>({...s, medications:(s.medications||[]).map(m=>m.id===id?{...m,status:"done",taken:true}:m)}));
+  const markDone = (id) => {
+    setJustDone(id); setTimeout(()=>setJustDone(null), 900);
+    patch(s=>({...s, medications:(s.medications||[]).map(m=>{
+      if(m.id!==id) return m;
+      const next = {...m, status:"done", taken:true};
+      if(typeof m.refillCount==="number") next.refillCount = Math.max(0, m.refillCount-1);
+      return next;
+    })}));
+  };
   const statusColor = { done:"var(--green)", pending:"var(--gold)", upcoming:"var(--ink3)", missed:"var(--red)" };
   const statusBg = { done:"rgba(26,140,74,0.1)", pending:"rgba(192,112,16,0.1)", upcoming:"rgba(30,10,2,0.05)", missed:"rgba(196,48,30,0.1)" };
   const statusLabel = { done:"Nainom", pending:"Naghihintay", upcoming:"Mamaya", missed:"Nalaktawan" };
   const doneCount = meds.filter(m=>m.status==="done").length;
   const missedCount = meds.filter(m=>m.status==="missed").length;
   const adherence = meds.length ? Math.round((doneCount/meds.length)*100) : null;
-  const nextDose = meds.filter(m=>m.status==="pending").sort((a,b)=>(a.schedule?.[0]||"").localeCompare(b.schedule?.[0]||""))[0];
+  const nextDose = meds.filter(m=>m.status==="pending"&&!m.prn).sort((a,b)=>(a.schedule?.[0]||"").localeCompare(b.schedule?.[0]||""))[0];
+  const lowRefills = meds.filter(m=>typeof m.refillCount==="number" && typeof m.refillThreshold==="number" && m.refillCount<=m.refillThreshold);
+
+  const openNew = () => setForm({ name:"",dose:"",route:"oral",schedule:"08:00",freq:"1x",prn:false,daysOfWeek:[],startDate:"",endDate:"",instructions:"",prescribedBy:"",refillCount:"",refillThreshold:"" });
+  const openEdit = (m) => setForm({...m, schedule:(m.schedule||[]).join(", "), daysOfWeek:m.daysOfWeek||[]});
+  const toggleDay = (d) => setForm(x => ({...x, daysOfWeek: x.daysOfWeek.includes(d) ? x.daysOfWeek.filter(v=>v!==d) : [...x.daysOfWeek,d].sort()}));
+  const saveForm = () => {
+    if(!form.name) return;
+    const rec = {
+      ...form,
+      schedule: form.prn ? [] : form.schedule.split(",").map(s=>s.trim()).filter(Boolean),
+      refillCount: form.refillCount===""?undefined:Number(form.refillCount),
+      refillThreshold: form.refillThreshold===""?undefined:Number(form.refillThreshold),
+    };
+    patch(s=>{
+      const list = s.medications||[];
+      if(form.id) s.medications = list.map(m=>m.id===form.id?{...m,...rec}:m);
+      else s.medications = [...list, {...rec, id:nid(), status:"pending"}];
+      return s;
+    });
+    setForm(null);
+  };
 
   return (
     <>
@@ -1143,10 +1295,16 @@ function MedsPanel({ senior, patch }) {
           </div>
         </div>
       )}
+      {lowRefills.length>0 && (
+        <div style={{background:"rgba(196,48,30,0.08)",border:"1.5px solid rgba(196,48,30,0.25)",borderRadius:16,padding:"12px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:12}}>
+          <Icon name="alert_tri" size={18} color="var(--red)"/>
+          <div style={{fontSize:12.5,fontWeight:700,color:"var(--red-dark)"}}>Paubos na: {lowRefills.map(m=>`${m.name} (${m.refillCount} na lang)`).join(", ")}</div>
+        </div>
+      )}
       <div className="panel">
       <div className="panel-head">
         <div><h2><Icon name="pill" size={17}/>Gamot ni {senior.nickname||senior.name}</h2><p>{meds.length} na gamot naka-schedule</p></div>
-        <button className="btn-add" onClick={()=>setForm({name:"",dose:"",schedule:"08:00",freq:"1x"})}><Icon name="plus" size={14}/>Magdagdag</button>
+        <button className="btn-add" onClick={openNew}><Icon name="plus" size={14}/>Magdagdag</button>
       </div>
       {form && (
         <div style={{background:"var(--cream2)",borderRadius:16,padding:18,marginBottom:18}}>
@@ -1155,11 +1313,54 @@ function MedsPanel({ senior, patch }) {
             <div className="form-field"><label>Dosage</label><input value={form.dose} onChange={e=>setForm({...form,dose:e.target.value})} placeholder="5mg"/></div>
           </div>
           <div className="form-row">
-            <div className="form-field"><label>Oras (24h)</label><input value={form.schedule} onChange={e=>setForm({...form,schedule:e.target.value})} placeholder="08:00, 20:00"/></div>
-            <div className="form-field"><label>Dalas</label><select value={form.freq} onChange={e=>setForm({...form,freq:e.target.value})}><option value="1x">1x isang araw</option><option value="2x">2x isang araw</option><option value="3x">3x isang araw</option></select></div>
+            <div className="form-field"><label>Route</label><select value={form.route||"oral"} onChange={e=>setForm({...form,route:e.target.value})}>{Object.entries(MED_ROUTES).map(([k,l])=><option key={k} value={k}>{l}</option>)}</select></div>
+            <div className="form-field"><label>Inireseta ni (opsyonal)</label><input value={form.prescribedBy||""} onChange={e=>setForm({...form,prescribedBy:e.target.value})} placeholder={senior.medicalProfile?.doctorName||"Dr. Santos"}/></div>
           </div>
+
+          <div className="toggle-row" style={{padding:"6px 0 14px",border:"none"}}>
+            <div>
+              <div style={{fontSize:13,fontWeight:800,color:"var(--ink)"}}>Kapag kinakailangan lang (PRN)</div>
+              <div style={{fontSize:11,color:"var(--ink3)",fontWeight:600,marginTop:2}}>Walang fixed na oras — hal. pampakalma ng sakit</div>
+            </div>
+            <button type="button" className={"toggle"+(form.prn?" on":"")} onClick={()=>setForm({...form,prn:!form.prn})} style={{background:form.prn?"var(--red)":"var(--card-border)"}}><span className="knob"></span></button>
+          </div>
+
+          {!form.prn && (
+            <div className="form-row">
+              <div className="form-field"><label>Oras (24h, comma-separated)</label><input value={form.schedule} onChange={e=>setForm({...form,schedule:e.target.value})} placeholder="08:00, 20:00"/></div>
+              <div className="form-field"><label>Dalas</label><select value={form.freq} onChange={e=>setForm({...form,freq:e.target.value})}><option value="1x">1x isang araw</option><option value="2x">2x isang araw</option><option value="3x">3x isang araw</option></select></div>
+            </div>
+          )}
+
+          {!form.prn && (
+            <div className="form-field" style={{marginBottom:12}}>
+              <label>Mga araw (blangko = araw-araw)</label>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                {DOW_SHORT_TL.map((d,idx)=>(
+                  <button key={idx} type="button" onClick={()=>toggleDay(idx)}
+                    style={{width:40,height:34,borderRadius:9,border:`1.5px solid ${form.daysOfWeek.includes(idx)?"var(--red)":"var(--card-border)"}`,background:form.daysOfWeek.includes(idx)?"var(--red)":"var(--card-bg)",color:form.daysOfWeek.includes(idx)?"#fff":"var(--ink2)",fontSize:11,fontWeight:800,cursor:"pointer"}}>{d}</button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="form-row">
+            <div className="form-field"><label>Simula (opsyonal)</label><input type="date" value={form.startDate||""} onChange={e=>setForm({...form,startDate:e.target.value})}/></div>
+            <div className="form-field"><label>Hanggang (opsyonal — para sa antibiotics atbp.)</label><input type="date" value={form.endDate||""} onChange={e=>setForm({...form,endDate:e.target.value})}/></div>
+          </div>
+
+          <div className="form-row">
+            <div className="form-field"><label>Bilang na natitira (opsyonal)</label><input type="number" value={form.refillCount} onChange={e=>setForm({...form,refillCount:e.target.value})} placeholder="30"/></div>
+            <div className="form-field"><label>Alertuhan kapag umabot sa (opsyonal)</label><input type="number" value={form.refillThreshold} onChange={e=>setForm({...form,refillThreshold:e.target.value})} placeholder="5"/></div>
+          </div>
+
+          <div className="form-field" style={{marginBottom:14}}>
+            <label>Mga tagubilin (opsyonal)</label>
+            <input value={form.instructions||""} onChange={e=>setForm({...form,instructions:e.target.value})} placeholder="hal. Inumin kasabay ng pagkain"/>
+          </div>
+
           <div className="form-actions">
-            <button className="btn-save" onClick={()=>{ const sched=form.schedule.split(",").map(s=>s.trim()).filter(Boolean); save.call(null); patch(s=>{const list=s.medications||[]; const rec={...form,schedule:sched}; if(form.id) s.medications=list.map(m=>m.id===form.id?{...m,...rec}:m); else s.medications=[...list,{...rec,id:nid(),status:"pending"}]; return s;}); setForm(null); }}>I-save</button>
+            <button className="btn-save" onClick={saveForm}>I-save</button>
             <button className="btn-cancel" onClick={()=>setForm(null)}>Kanselahin</button>
           </div>
         </div>
@@ -1167,13 +1368,21 @@ function MedsPanel({ senior, patch }) {
       {meds.length===0 ? (
         <div className="empty-state"><Icon name="pill" size={36}/><p>Wala pang gamot na naka-schedule.</p></div>
       ) : meds.map(m=>(
-        <div className="row-item" key={m.id}>
+        <div className={"row-item"+(justDone===m.id?" flash-ok":"")} key={m.id}>
           <div className="row-avatar" style={{background:statusBg[m.status]||"var(--cream2)",color:statusColor[m.status]||"var(--ink3)"}}><Icon name="pill" size={16}/></div>
-          <div className="row-body"><div className="t1">{m.name} <span style={{color:"var(--ink3)",fontWeight:600}}>{m.dose}</span></div><div className="t2">{(m.schedule||[]).join(" · ")}</div></div>
+          <div className="row-body">
+            <div className="t1">{m.name} <span style={{color:"var(--ink3)",fontWeight:600}}>{m.dose}</span>{m.prn && <span style={{marginLeft:6,fontSize:10,fontWeight:800,color:"var(--gold)",background:"rgba(192,112,16,0.12)",padding:"2px 7px",borderRadius:7}}>PRN</span>}</div>
+            <div className="t2">
+              {m.prn ? "Kapag kinakailangan" : (m.schedule||[]).join(" · ")}
+              {m.route && m.route!=="oral" && ` · ${MED_ROUTES[m.route]||m.route}`}
+              {m.daysOfWeek?.length>0 && ` · ${m.daysOfWeek.map(d=>DOW_SHORT_TL[d]).join("/")}`}
+              {typeof m.refillCount==="number" && ` · ${m.refillCount} na lang`}
+            </div>
+          </div>
           <span className="pill-status" style={{background:statusBg[m.status],color:statusColor[m.status]}}>{statusLabel[m.status]||m.status}</span>
           <div className="row-actions">
             {m.status!=="done" && <button className="icon-btn ok" onClick={()=>markDone(m.id)} title="Markahan nainom"><Icon name="checkmark" size={14}/></button>}
-            <button className="icon-btn" onClick={()=>setForm({...m,schedule:(m.schedule||[]).join(", ")})} title="I-edit"><Icon name="settings" size={14}/></button>
+            <button className="icon-btn" onClick={()=>openEdit(m)} title="I-edit"><Icon name="settings" size={14}/></button>
             <button className="icon-btn" onClick={()=>del(m.id)} title="Tanggalin"><Icon name="trash" size={14}/></button>
           </div>
         </div>
@@ -1184,9 +1393,11 @@ function MedsPanel({ senior, patch }) {
 }
 
 /* ── CONTACTS ────────────────────────────────────────────────────────── */
-function ContactsPanel({ senior, patch }) {
+function ContactsPanel({ senior, patch, plan }) {
   const [form, setForm] = useState(null);
   const contacts = senior.contacts||[];
+  const maxContacts = PLANS[plan]?.maxContacts ?? 1;
+  const atLimit = contacts.length >= maxContacts;
   const save = () => {
     if(!form.name||!form.num) return;
     patch(s=>{
@@ -1201,9 +1412,15 @@ function ContactsPanel({ senior, patch }) {
   return (
     <div className="panel">
       <div className="panel-head">
-        <div><h2><Icon name="phone" size={17}/>Emergency Contacts</h2><p>Tatawagan ayon sa priority kapag SOS</p></div>
-        <button className="btn-add" onClick={()=>setForm({name:"",rel:"Anak",num:""})}><Icon name="plus" size={14}/>Magdagdag</button>
+        <div><h2><Icon name="phone" size={17}/>Emergency Contacts</h2><p>{contacts.length}/{maxContacts} na-gamit sa {PLANS[plan]?.name||plan} plan</p></div>
+        <button className="btn-add" onClick={()=>atLimit?null:setForm({name:"",rel:"Anak",num:""})} disabled={atLimit} style={atLimit?{opacity:0.5,cursor:"default"}:{}}><Icon name={atLimit?"lock":"plus"} size={14}/>Magdagdag</button>
       </div>
+      {atLimit && !form && (
+        <div style={{background:"var(--cream2)",border:"1.5px solid var(--card-border)",borderRadius:16,padding:"14px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:12}}>
+          <Icon name="lock" size={20} color="var(--ink3)"/>
+          <div style={{fontSize:12.5,color:"var(--ink2)",fontWeight:700}}>Umabot na sa limitasyon ng {PLANS[plan]?.name}. I-upgrade sa app para magdagdag pa.</div>
+        </div>
+      )}
       {form && (
         <div style={{background:"var(--cream2)",borderRadius:16,padding:18,marginBottom:18}}>
           <div className="form-row">
@@ -1444,6 +1661,18 @@ function NotesPanel({ senior, patch }) {
 /* ── MEDICAL PROFILE ─────────────────────────────────────────────────── */
 /* ── DEVICES: view paired phones, copy/regenerate the pair code ────────── */
 /* ── CALENDAR ────────────────────────────────────────────────────────── */
+function UpsellPanel({ feature, needPlan, icon }) {
+  return (
+    <div className="panel" style={{textAlign:"center",padding:"48px 24px"}}>
+      <Icon name="lock" size={44} color="var(--ink3)"/>
+      <div style={{fontFamily:"var(--font-display)",fontSize:19,fontWeight:600,color:"var(--ink)",marginTop:16}}>{feature} ay naka-lock</div>
+      <p style={{fontSize:13.5,color:"var(--ink3)",fontWeight:600,marginTop:8,maxWidth:340,marginLeft:"auto",marginRight:"auto"}}>
+        Available ito sa {needPlan}. I-upgrade sa NakNak app (Settings → Plans) para ma-access ito sa parehong dashboard at telepono.
+      </p>
+    </div>
+  );
+}
+
 function CalendarPanel({ senior, patch }) {
   const [view, setView] = useState("month");
   const [cursor, setCursor] = useState(new Date());
@@ -1625,10 +1854,13 @@ function CalYearView({ senior, cursor, today, onMonthClick }) {
 
 function CalEventModal({ initial, onSave, onDelete, onClose }) {
   const ev = initial.event;
+  const baseDate = ev?.date || initial.date;
   const [f, setF] = useState({
     id: ev?.id, title: ev?.title||"", type: ev?.type||"checkup",
-    date: ev?.date||initial.date, time: ev?.time||"", recurrence: ev?.recurrence||"none", notes: ev?.notes||"",
+    date: baseDate, time: ev?.time||"", recurrence: ev?.recurrence||"none", notes: ev?.notes||"",
+    daysOfWeek: ev?.daysOfWeek || [new Date(baseDate+"T00:00:00").getDay()],
   });
+  const toggleDay = (d) => setF(x => ({...x, daysOfWeek: x.daysOfWeek.includes(d) ? x.daysOfWeek.filter(v=>v!==d) : [...x.daysOfWeek,d].sort()}));
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-card" onClick={e=>e.stopPropagation()}>
@@ -1644,23 +1876,30 @@ function CalEventModal({ initial, onSave, onDelete, onClose }) {
           <div className="form-field"><label>Petsa</label><input type="date" value={f.date} onChange={e=>setF({...f,date:e.target.value})}/></div>
           <div className="form-field"><label>Oras (opsyonal)</label><input type="time" value={f.time} onChange={e=>setF({...f,time:e.target.value})}/></div>
         </div>
-        <div className="form-row">
-          <div className="form-field">
-            <label>Uri</label>
-            <select value={f.type} onChange={e=>setF({...f,type:e.target.value})}>
-              {Object.entries(EVENT_TYPES).filter(([k])=>k!=="medication").map(([k,t])=><option key={k} value={k}>{t.label}</option>)}
-            </select>
-          </div>
-          <div className="form-field">
-            <label>Uulitin</label>
-            <select value={f.recurrence} onChange={e=>setF({...f,recurrence:e.target.value})}>
-              <option value="none">Isang beses lang</option>
-              <option value="daily">Araw-araw</option>
-              <option value="weekly">Lingguhan</option>
-              <option value="monthly">Buwanan</option>
-            </select>
-          </div>
+        <div className="form-field" style={{marginBottom:12}}>
+          <label>Uri</label>
+          <select value={f.type} onChange={e=>setF({...f,type:e.target.value})}>
+            {Object.entries(EVENT_TYPES).filter(([k])=>k!=="medication").map(([k,t])=><option key={k} value={k}>{t.label}</option>)}
+          </select>
         </div>
+        <div className="form-field" style={{marginBottom:f.recurrence==="weekly"?10:12}}>
+          <label>Uulitin</label>
+          <select value={f.recurrence} onChange={e=>setF({...f,recurrence:e.target.value})}>
+            {RECURRENCE_OPTS.map(([k,l])=><option key={k} value={k}>{l}</option>)}
+          </select>
+        </div>
+        {f.recurrence==="weekly" && (
+          <div className="form-field" style={{marginBottom:16}}>
+            <label>Aling mga araw</label>
+            <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+              {DOW_SHORT_TL.map((d,idx)=>(
+                <button key={idx} type="button" onClick={()=>toggleDay(idx)}
+                  style={{width:42,height:36,borderRadius:10,border:`1.5px solid ${f.daysOfWeek.includes(idx)?"var(--red)":"var(--card-border)"}`,background:f.daysOfWeek.includes(idx)?"var(--red)":"var(--cream2)",color:f.daysOfWeek.includes(idx)?"#fff":"var(--ink2)",fontSize:11.5,fontWeight:800,cursor:"pointer"}}>{d}</button>
+              ))}
+            </div>
+            <p style={{fontSize:11,color:"var(--ink3)",fontWeight:600,marginTop:6}}>Halimbawa: piliin ang Lunes, Miyerkules, Biyernes para sa 3x isang linggo.</p>
+          </div>
+        )}
         <div className="form-field" style={{marginBottom:16}}>
           <label>Tala (opsyonal)</label>
           <input value={f.notes} onChange={e=>setF({...f,notes:e.target.value})} placeholder="hal. Dalhin ang lab results"/>
@@ -1669,7 +1908,7 @@ function CalEventModal({ initial, onSave, onDelete, onClose }) {
           <div>{ev && <button className="id-upload-btn danger" onClick={()=>onDelete(f.id)}><Icon name="trash" size={13}/>Tanggalin</button>}</div>
           <div style={{display:"flex",gap:10}}>
             <button className="btn-cancel" onClick={onClose}>Kanselahin</button>
-            <button className="btn-save" disabled={!f.title.trim()} onClick={()=>onSave(f)}>I-save</button>
+            <button className="btn-save" disabled={!f.title.trim()||(f.recurrence==="weekly"&&f.daysOfWeek.length===0)} onClick={()=>onSave(f)}>I-save</button>
           </div>
         </div>
       </div>
