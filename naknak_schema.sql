@@ -242,3 +242,32 @@ grant execute on function regenerate_pair_code(uuid) to authenticated;
 
 -- Realtime broadcast on state changes (caregiver dashboard listens here)
 alter publication supabase_realtime add table naknak_state;
+
+-- ═══════════════════════════════════════════════════════════════════════
+--  NAKS, MY LETTER — a private journal for the caregiver. Same RLS pattern
+--  as everything else: authenticated household members only, no anon access.
+-- ═══════════════════════════════════════════════════════════════════════
+create table if not exists naknak_letters (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid not null references naknak_households(id) on delete cascade,
+  author_email text,
+  content text not null,
+  created_at timestamptz default now()
+);
+
+alter table naknak_letters enable row level security;
+
+create policy "member can read own letters" on naknak_letters
+  for select to authenticated using (
+    household_id in (select household_id from naknak_household_members where auth_uid = auth.uid())
+  );
+
+create policy "member can write own letters" on naknak_letters
+  for insert to authenticated with check (
+    household_id in (select household_id from naknak_household_members where auth_uid = auth.uid())
+  );
+
+create policy "member can delete own letters" on naknak_letters
+  for delete to authenticated using (
+    household_id in (select household_id from naknak_household_members where auth_uid = auth.uid())
+  );
