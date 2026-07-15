@@ -7,7 +7,7 @@
 <meta name="description" content="Ang NakNak caregiver dashboard. I-manage ang gamot, contacts, safe zone, at SOS alerts ng iyong senior — naka-sync sa totoong oras sa app.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Poppins:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -27,9 +27,9 @@
   --card-bg:#FFFFFF;
   --shadow:rgba(100,50,10,0.14);
   --sidebar-w:248px;
-  --font-display:'Baloo 2',sans-serif;
-  --font-body:'Poppins',sans-serif;
-  --font-mono:'JetBrains Mono',monospace;
+  --font-display:'IBM Plex Mono',monospace;
+  --font-body:'IBM Plex Mono',monospace;
+  --font-mono:'IBM Plex Mono',monospace;
   color-scheme:light;
   transition:background 0.25s ease;
 }
@@ -84,6 +84,7 @@ button{cursor:pointer;}
 .sidebar{
   width:var(--sidebar-w);flex-shrink:0;background:var(--void);color:#fff;
   display:flex;flex-direction:column;padding:22px 16px;position:sticky;top:0;height:100vh;
+  overflow:hidden;
 }
 .sb-brand{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:18px;padding:0 8px 22px;}
 .sb-mark{width:22px;height:22px;position:relative;flex-shrink:0;}
@@ -97,7 +98,9 @@ button{cursor:pointer;}
 .sb-code .txt{flex:1;}
 .sb-code .lbl{font-size:10.5px;font-weight:800;color:rgba(255,255,255,0.4);letter-spacing:1px;}
 .sb-code .val{font-family:var(--font-mono);font-size:13px;font-weight:700;color:#fff;letter-spacing:2px;}
-.sb-nav{display:flex;flex-direction:column;gap:2px;flex:1;}
+.sb-nav{display:flex;flex-direction:column;gap:2px;flex:1;min-height:0;overflow-y:auto;scrollbar-width:thin;}
+.sb-nav::-webkit-scrollbar{width:5px;}
+.sb-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.12);border-radius:3px;}
 .sb-link{
   display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;border:none;background:none;
   color:rgba(255,255,255,0.55);font-weight:700;font-size:13.5px;text-align:left;transition:all 0.15s;
@@ -106,7 +109,7 @@ button{cursor:pointer;}
 .sb-link.on{background:linear-gradient(135deg,var(--red-bright),var(--red-dark));color:#fff;box-shadow:0 6px 16px rgba(196,48,30,0.3);}
 .sb-link svg{flex-shrink:0;}
 .sb-link.locked{color:rgba(255,255,255,0.32);}
-.sb-footer{padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:10px;}
+.sb-footer{padding-top:14px;padding-bottom:4px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
 .sb-help{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;color:rgba(255,255,255,0.4);text-decoration:none;line-height:1.4;transition:color 0.15s;}
 .sb-help:hover{color:rgba(255,255,255,0.75);}
 .sb-senior{display:flex;align-items:center;gap:11px;padding:11px 10px;margin-bottom:18px;background:var(--void2);border:1px solid rgba(255,255,255,0.08);border-radius:14px;}
@@ -172,6 +175,14 @@ button{cursor:pointer;}
 @media (max-width:1150px){
   .overview-shell{grid-template-columns:1fr;}
 }
+.greeting-bar{
+  display:flex;align-items:center;gap:14px;margin-bottom:20px;padding:4px 2px;
+  animation:panelIn 0.4s cubic-bezier(0.16,1,0.3,1);
+}
+.greeting-wave{font-size:28px;display:inline-block;animation:wave 2.2s ease-in-out infinite;transform-origin:70% 70%;}
+@keyframes wave{0%,100%{transform:rotate(0deg);}15%{transform:rotate(16deg);}30%{transform:rotate(-8deg);}45%{transform:rotate(14deg);}60%{transform:rotate(0deg);}}
+.greeting-text{font-family:var(--font-display);font-size:19px;font-weight:600;color:var(--ink);}
+.greeting-sub{font-size:12.5px;color:var(--ink3);font-weight:600;margin-top:2px;}
 .hero-id-card{
   display:flex;align-items:center;gap:18px;padding:22px 26px;border-radius:24px;margin-bottom:20px;
   background:linear-gradient(135deg,var(--void) 0%,#2A1408 100%);
@@ -1130,7 +1141,7 @@ function Dashboard({ household, onDisconnect, theme, session }) {
               <button className="sos-ack-btn" onClick={ackSOS}>Acknowledge</button>
             </div>
           )}
-          {tab==="overview" && <div key="overview" className="panel-enter"><OverviewPanel senior={senior}/></div>}
+          {tab==="overview" && <div key="overview" className="panel-enter"><OverviewPanel senior={senior} session={session}/></div>}
           {tab==="meds" && <div key="meds" className="panel-enter"><MedsPanel senior={senior} patch={patch}/></div>}
           {tab==="contacts" && <div key="contacts" className="panel-enter"><ContactsPanel senior={senior} patch={patch} plan={state.plan}/></div>}
           {tab==="safezone" && <div key="safezone" className="panel-enter">{canUse(state.plan,"safeZone") ? <SafeZonePanel senior={senior} patch={patch}/> : <UpsellPanel feature="Safe Zone GPS" needPlan="Family Plan" icon="map_pin"/>}</div>}
@@ -1151,7 +1162,7 @@ function Dashboard({ household, onDisconnect, theme, session }) {
 }
 
 /* ── OVERVIEW ────────────────────────────────────────────────────────── */
-function OverviewPanel({ senior }) {
+function OverviewPanel({ senior, session }) {
   useTicker(15000);
   const meds = senior.medications||[];
   const done = meds.filter(m=>m.status==="done").length;
@@ -1161,6 +1172,11 @@ function OverviewPanel({ senior }) {
   const EVENT_COLOR = { checkin:"var(--green)", sos:"var(--red)", fall:"var(--red)", med_taken:"var(--green)", med_missed:"var(--red)", med_snoozed:"var(--gold)", gps:"var(--gold)", notif:"var(--ink2)" };
   const EVENT_BG = { checkin:"rgba(26,140,74,0.1)", sos:"rgba(196,48,30,0.1)", fall:"rgba(196,48,30,0.1)", med_taken:"rgba(26,140,74,0.1)", med_missed:"rgba(196,48,30,0.1)", med_snoozed:"rgba(192,112,16,0.1)", gps:"rgba(192,112,16,0.1)", notif:"var(--cream2)" };
 
+  // Personalized, time-of-day-aware greeting — Philippine local time regardless of viewer's own timezone.
+  const phHour = new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Manila"})).getHours();
+  const greetWord = phHour<12 ? "Magandang umaga" : phHour<18 ? "Magandang hapon" : "Magandang gabi";
+  const emailName = session?.user?.email ? session.user.email.split("@")[0].replace(/[._-]+/g," ").replace(/\b\w/g,c=>c.toUpperCase()) : null;
+
   // Fills the reclaimed desktop width with real content instead of empty space:
   // upcoming calendar events + a compact vitals snapshot, both genuinely useful.
   const now = new Date(); now.setHours(0,0,0,0); // start of today, so today's own events aren't excluded once the clock moves past midnight
@@ -1169,7 +1185,17 @@ function OverviewPanel({ senior }) {
   const lastBP = vitals.find(v=>v.type==="bp"), lastWeight = vitals.find(v=>v.type==="weight"), lastOxygen = vitals.find(v=>v.type==="oxygen");
 
   return (
-    <div className="overview-shell">
+    <>
+      {emailName && (
+        <div className="greeting-bar">
+          <span className="greeting-wave">👋</span>
+          <div>
+            <div className="greeting-text">{greetWord}, {emailName}!</div>
+            <div className="greeting-sub">Narito ang buod ng pag-aalaga kay {senior.nickname||senior.name} ngayong araw.</div>
+          </div>
+        </div>
+      )}
+      <div className="overview-shell">
       <div className="overview-main">
         {/* Hero identity card — mirrors the senior's own phone, so this feels like a real person, not a database row */}
         <div className="hero-id-card" style={isSOS?{background:"linear-gradient(135deg,var(--red-bright) 0%,var(--red-dark) 100%)"}:{}}>
@@ -1249,6 +1275,7 @@ function OverviewPanel({ senior }) {
         </div>
       </div>
     </div>
+    </>
   );
 }
 
