@@ -106,7 +106,9 @@ button{cursor:pointer;}
 .sb-link.on{background:linear-gradient(135deg,var(--red-bright),var(--red-dark));color:#fff;box-shadow:0 6px 16px rgba(196,48,30,0.3);}
 .sb-link svg{flex-shrink:0;}
 .sb-link.locked{color:rgba(255,255,255,0.32);}
-.sb-footer{padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);}
+.sb-footer{padding-top:14px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:10px;}
+.sb-help{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;color:rgba(255,255,255,0.4);text-decoration:none;line-height:1.4;transition:color 0.15s;}
+.sb-help:hover{color:rgba(255,255,255,0.75);}
 .sb-senior{display:flex;align-items:center;gap:11px;padding:11px 10px;margin-bottom:18px;background:var(--void2);border:1px solid rgba(255,255,255,0.08);border-radius:14px;}
 .sb-senior-avatar{position:relative;width:38px;height:38px;border-radius:19px;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:16px;color:#fff;flex-shrink:0;}
 .sb-senior-pulse{position:absolute;bottom:-1px;right:-1px;width:11px;height:11px;border-radius:50%;border:2px solid var(--void2);animation:pulseDot 2s infinite;}
@@ -137,7 +139,7 @@ button{cursor:pointer;}
 .tb-theme-toggle{width:34px;height:34px;border-radius:10px;background:var(--cream2);border:1.5px solid var(--card-border);display:flex;align-items:center;justify-content:center;color:var(--ink2);transition:all 0.15s;}
 .tb-theme-toggle:hover{border-color:var(--red);color:var(--red);transform:rotate(15deg);}
 
-.content{padding:28px 36px 60px;width:100%;max-width:1760px;}
+.content{padding:28px 40px 60px;width:100%;}
 
 /* ── SOS BANNER ──────────────────────────────────────────────────────── */
 .sos-banner{
@@ -1092,6 +1094,9 @@ function Dashboard({ household, onDisconnect, theme, session }) {
         </div>
         <div className="sb-footer">
           <button className="sb-disconnect" onClick={onDisconnect}>Mag-sign out</button>
+          <a href="mailto:naknak@gmail.com" className="sb-help">
+            <Icon name="mail" size={12} color="rgba(255,255,255,0.4)"/>Need help? Contact us at naknak@gmail.com
+          </a>
         </div>
       </div>
 
