@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard — NakNak</title>
 <meta name="description" content="Ang NakNak caregiver dashboard. I-manage ang gamot, contacts, safe zone, at SOS alerts ng iyong senior — naka-sync sa totoong oras sa app.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -14,13 +17,16 @@
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
 :root{
-  /* Apple system neutrals — replaces the warm cream/brown token set */
+  /* Brand red — matches app.html exactly (accent-dark/accent/accent-bright/
+     accent-hot = app's light-mode red gradient stops), so the dashboard,
+     phone app, and website now share one consistent identity. */
   --cream:#FFFFFF; --cream2:#F5F5F7; --cream3:#E8E8ED;
   --ink:#1D1D1F; --ink2:#48484A; --ink3:#86868B;
-  --red-dark:#D70015; --red:#FF3B30; --red-bright:#FF453A; --red-hot:#FF3B30;
+  --accent-dark:#9C2010; --accent:#C4301E; --accent-bright:#E04535; --accent-hot:#FF5040;
+  --red-dark:#9C2010; --red:#C4301E; --red-bright:#E04535; --red-hot:#FF5040;
   --green:#248A3D; --green-bright:#34C759;
   --gold:#C93400; --gold-bright:#FF9500;
-  --void:#000000; --void2:#1C1C1E; --void3:#2C2C2E;
+  --void:#100906; --void2:#1C1C1E; --void3:#2C2C2E;
   --card-border:#D2D2D7;
   --card-bg:#FFFFFF;
   --shadow:rgba(0,0,0,0.08);
@@ -28,22 +34,28 @@
   /* System typeface stack — one family for display and text; the optical
      sizing contract below (tracking + line-height) provides the actual
      Display/Text differentiation, matching how SF Pro itself works. */
-  --font-display:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro","SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
-  --font-body:system-ui,-apple-system,BlinkMacSystemFont,"SF Pro","SF Pro Text","SF Pro Display","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --font-display:'Inter',-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro",sans-serif;
+  --font-body:'Inter',-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro",sans-serif;
   --font-mono:"SF Mono",SFMono-Regular,Consolas,"Liberation Mono",Menlo,monospace;
   --font-serif:"New York",Georgia,serif;
   color-scheme:light;
   transition:background 0.25s ease;
 }
 [data-theme="dark"]{
-  --cream:#000000; --cream2:#1C1C1E; --cream3:#2C2C2E;
+  --cream:#0D0705; --cream2:#1A1210; --cream3:#241A16;
   --ink:#F5F5F7; --ink2:#AEAEB2; --ink3:#8E8E93;
-  --card-border:#38383A;
-  --card-bg:#1C1C1E;
-  --shadow:rgba(0,0,0,0.3);
+  --card-border:#2E211C;
+  --card-bg:#170F0C;
+  --shadow:rgba(0,0,0,0.4);
   color-scheme:dark;
 }
-[data-theme="dark"] body{background:var(--cream);}
+[data-theme="dark"] body{
+  background:
+    radial-gradient(ellipse 900px 500px at 15% -10%, rgba(196,48,30,0.16), transparent 60%),
+    radial-gradient(ellipse 700px 400px at 100% 0%, rgba(196,48,30,0.1), transparent 55%),
+    var(--cream);
+  background-attachment:fixed;
+}
 [data-theme="dark"] .quickid-preview-label,
 [data-theme="dark"] .sb-code .lbl{color:var(--ink3);}
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -53,17 +65,18 @@
    roomy line-height. Applied at the base + heading level so it cascades. */
 body{
   font-family:var(--font-body);background:var(--cream2);color:var(--ink);-webkit-font-smoothing:antialiased;
-  font-size:15px;line-height:1.47;letter-spacing:-0.01em;font-weight:400;
+  font-size:14px;line-height:1.5;letter-spacing:-0.01em;font-weight:400;
 }
-h1,h2,h3,.panel-head h2,.hero-id-name,.greeting-text,.tb-title h1{
-  font-family:var(--font-display);letter-spacing:-0.025em;line-height:1.15;font-weight:700;
-}
+/* ── TYPE SCALE (6 steps only — Hero/Section/Card Title/Body/Caption/Micro) ── */
+.tb-title h1{ font-family:var(--font-display);font-size:20px;letter-spacing:-0.02em;line-height:1.2;font-weight:700;color:var(--ink); }
+h1,h2,.panel-head h2{ font-family:var(--font-display);font-size:20px;letter-spacing:-0.02em;line-height:1.2;font-weight:700;color:var(--ink); }
+h3,.hero-id-name,.greeting-text{ font-family:var(--font-display);font-size:16px;letter-spacing:-0.01em;line-height:1.25;font-weight:600;color:var(--ink); }
 .lbl,.t2,.sb-code .lbl,.quickid-preview-label,.cal-legend-item,.year-mini-cell{
-  letter-spacing:0.01em;font-weight:500;color:var(--ink3);
+  font-size:11px;letter-spacing:0.01em;font-weight:500;color:var(--ink3);
 }
 button,input,select,textarea{font-family:inherit;}
 button{cursor:pointer;}
-:focus-visible{outline:3px solid var(--red);outline-offset:2px;}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;}
 ::-webkit-scrollbar{width:9px;height:9px;}
 ::-webkit-scrollbar-thumb{background:var(--card-border);border-radius:5px;}
 
@@ -72,25 +85,25 @@ button{cursor:pointer;}
 /* ── ONBOARD (no household yet) ─────────────────────────────────────── */
 .onboard-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--cream2);padding:24px;}
 .onboard-card{background:var(--cream);border-radius:18px;max-width:460px;width:100%;padding:40px 36px;box-shadow:0 20px 50px var(--shadow);border:1px solid var(--card-border);}
-.ob-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--red-dark);margin-bottom:28px;}
+.ob-brand{display:flex;align-items:center;gap:10px;font-family:var(--font-display);font-weight:700;font-size:20px;color:var(--accent-dark);margin-bottom:28px;}
 .ob-mark{width:24px;height:24px;position:relative;}
-.ob-mark .ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--red-hot);animation:obPulse 2.4s ease-out infinite;}
-.ob-mark .dot{position:absolute;inset:6px;border-radius:50%;background:var(--red);}
+.ob-mark .ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent-hot);animation:obPulse 2.4s ease-out infinite;}
+.ob-mark .dot{position:absolute;inset:6px;border-radius:50%;background:var(--accent);}
 @keyframes obPulse{0%{transform:scale(0.55);opacity:1;}100%{transform:scale(1.5);opacity:0;}}
 .ob-tabs{display:flex;gap:6px;background:var(--cream2);border-radius:16px;padding:5px;margin-bottom:26px;}
 .ob-tab{flex:1;padding:11px;border:none;background:none;border-radius:12px;font-weight:800;font-size:13.5px;color:var(--ink3);transition:all 0.15s;}
-.ob-tab.on{background:var(--card-bg);color:var(--red);box-shadow:0 3px 10px rgba(0,0,0,0.08);}
+.ob-tab.on{background:var(--card-bg);color:var(--accent);box-shadow:0 3px 10px rgba(0,0,0,0.08);}
 .ob-card h2{font-family:var(--font-display);font-size:24px;font-weight:600;margin-bottom:8px;}
 .ob-card p.desc{font-size:14px;color:var(--ink2);font-weight:600;line-height:1.6;margin-bottom:24px;}
 .ob-input{width:100%;height:52px;border-radius:14px;border:1.5px solid var(--card-border);background:var(--card-bg);padding:0 16px;font-size:15px;font-weight:700;color:var(--ink);outline:none;margin-bottom:14px;transition:border-color 0.15s;}
-.ob-input:focus{border-color:var(--red);}
+.ob-input:focus{border-color:var(--accent);}
 .ob-input.code{text-align:center;letter-spacing:6px;font-family:var(--font-mono);font-size:20px;text-transform:uppercase;}
-.ob-btn{width:100%;height:52px;border-radius:12px;border:none;background:var(--red);color:#fff;font-weight:700;font-size:15px;box-shadow:0 1px 3px var(--shadow);transition:transform 0.15s;}
+.ob-btn{width:100%;height:52px;border-radius:999px;border:none;background:var(--accent);color:#fff;font-weight:700;font-size:15px;box-shadow:0 1px 3px var(--shadow);transition:transform 0.15s;}
 .ob-btn:hover:not(:disabled){transform:translateY(-1px);}
 .ob-btn:disabled{opacity:0.5;cursor:default;}
-.ob-err{background:rgba(196,48,30,0.08);border:1px solid rgba(196,48,30,0.25);border-radius:10px;padding:10px 12px;font-size:12.5px;font-weight:700;color:var(--red);margin-bottom:14px;}
+.ob-err{background:rgba(192,112,16,0.08);border:1px solid rgba(192,112,16,0.25);border-radius:10px;padding:10px 12px;font-size:12.5px;font-weight:700;color:var(--gold);margin-bottom:14px;}
 .ob-success{text-align:center;padding:8px 0;}
-.ob-code-display{font-family:var(--font-mono);font-size:36px;font-weight:700;letter-spacing:8px;color:var(--red);background:var(--cream2);border-radius:16px;padding:20px;margin:18px 0;}
+.ob-code-display{font-family:var(--font-mono);font-size:36px;font-weight:700;letter-spacing:8px;color:var(--accent);background:var(--cream2);border-radius:16px;padding:20px;margin:18px 0;}
 .ob-note{font-size:12px;color:var(--ink3);font-weight:600;text-align:center;line-height:1.6;}
 .ob-config-warn{background:rgba(192,112,16,0.1);border:1px solid rgba(192,112,16,0.3);border-radius:12px;padding:14px 16px;font-size:12.5px;font-weight:700;color:var(--gold);line-height:1.6;margin-bottom:20px;}
 
@@ -98,13 +111,13 @@ button{cursor:pointer;}
 .shell{display:flex;min-height:100vh;}
 .sidebar{
   width:var(--sidebar-w);flex-shrink:0;background:var(--void);color:#fff;
-  display:flex;flex-direction:column;padding:22px 16px;position:sticky;top:0;height:100vh;
+  display:flex;flex-direction:column;padding:24px 16px;position:sticky;top:0;height:100vh;
   overflow:hidden;
 }
 .sb-brand{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:700;font-size:18px;padding:0 8px 22px;}
 .sb-mark{width:22px;height:22px;position:relative;flex-shrink:0;}
-.sb-mark .ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--red-hot);animation:obPulse 2.4s ease-out infinite;}
-.sb-mark .dot{position:absolute;inset:6px;border-radius:50%;background:var(--red-hot);}
+.sb-mark .ring{position:absolute;inset:0;border-radius:50%;border:2px solid var(--accent-hot);animation:obPulse 2.4s ease-out infinite;}
+.sb-mark .dot{position:absolute;inset:6px;border-radius:50%;background:var(--accent-hot);}
 .sb-code{
   display:flex;align-items:center;gap:8px;background:var(--void2);border:1px solid rgba(255,255,255,0.08);
   border-radius:12px;padding:9px 12px;margin-bottom:18px;
@@ -121,7 +134,7 @@ button{cursor:pointer;}
   color:rgba(255,255,255,0.55);font-weight:700;font-size:13.5px;text-align:left;transition:all 0.15s;
 }
 .sb-link:hover{background:rgba(255,255,255,0.05);color:#fff;}
-.sb-link.on{background:var(--red);color:#fff;box-shadow:none;}
+.sb-link.on{background:var(--accent);color:#fff;box-shadow:none;}
 .sb-link svg{flex-shrink:0;}
 .sb-link.locked{color:rgba(255,255,255,0.32);}
 .sb-footer{padding-top:14px;padding-bottom:4px;border-top:1px solid rgba(255,255,255,0.08);display:flex;flex-direction:column;gap:10px;flex-shrink:0;}
@@ -138,30 +151,58 @@ button{cursor:pointer;}
 .panel-enter{animation:panelIn 0.32s cubic-bezier(0.16,1,0.3,1) both;}
 @keyframes panelIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
 .sb-disconnect{width:100%;padding:10px;border-radius:10px;background:none;border:1px solid rgba(255,255,255,0.12);color:rgba(255,255,255,0.5);font-size:12px;font-weight:700;transition:all 0.15s;}
-.sb-disconnect:hover{border-color:var(--red-hot);color:var(--red-hot);}
+.sb-disconnect:hover{border-color:var(--accent-hot);color:var(--accent-hot);}
 
 .main{flex:1;min-width:0;background:var(--cream2);}
+.status-bar{
+  background:var(--void);color:#fff;padding:9px 32px;display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:20;
+}
+.status-bar-left{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.sb-clock{display:flex;align-items:center;gap:6px;font-family:var(--font-mono);font-weight:600;color:rgba(255,255,255,0.9);font-variant-numeric:tabular-nums;}
+.sb-date{font-weight:500;color:rgba(255,255,255,0.55);}
+.sb-weather{display:flex;align-items:center;gap:6px;font-weight:600;color:rgba(255,255,255,0.85);}
+.sb-weather-place{color:rgba(255,255,255,0.45);font-weight:500;}
+@media (max-width:760px){ .sb-date,.sb-weather-place{display:none;} }
+
+.notif-wrap{position:relative;}
+.notif-bell{position:relative;width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.08);border:none;display:flex;align-items:center;justify-content:center;transition:background 0.15s;}
+.notif-bell:hover{background:rgba(255,255,255,0.15);}
+.notif-bell svg{stroke:rgba(255,255,255,0.85);}
+.notif-badge{position:absolute;top:-2px;right:-2px;min-width:16px;height:16px;padding:0 4px;border-radius:8px;color:#fff;font-size:9.5px;font-weight:700;display:flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums;}
+.notif-dropdown{
+  position:absolute;top:calc(100% + 10px);right:0;width:300px;max-height:360px;overflow-y:auto;
+  background:var(--card-bg);border:1px solid var(--card-border);border-radius:28px;box-shadow:0 12px 32px rgba(0,0,0,0.16);
+  z-index:50;animation:panelIn 0.18s cubic-bezier(0.16,1,0.3,1);
+}
+.notif-dropdown::before{content:"";position:absolute;top:-6px;right:12px;width:12px;height:12px;background:var(--card-bg);border-left:1px solid var(--card-border);border-top:1px solid var(--card-border);transform:rotate(45deg);}
+.notif-dropdown-head{padding:12px 16px;font-size:11px;font-weight:600;color:var(--ink3);letter-spacing:0.01em;border-bottom:1px solid var(--card-border);}
+.notif-empty{padding:24px 16px;text-align:center;font-size:12.5px;color:var(--ink3);font-weight:500;}
+.notif-item{display:flex;align-items:flex-start;gap:10px;padding:11px 16px;border-bottom:1px solid var(--card-border);}
+.notif-item:last-child{border-bottom:none;}
+.notif-item-title{font-size:12.5px;font-weight:600;color:var(--ink);}
+.notif-item-sub{font-size:11px;color:var(--ink3);font-weight:500;margin-top:1px;}
+
 .topbar{
   background:var(--cream);border-bottom:1px solid var(--card-border);
-  padding:18px 32px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
-  position:sticky;top:0;z-index:10;
+  padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+  position:sticky;top:42px;z-index:10;
 }
-.tb-title h1{font-family:var(--font-display);font-size:22px;font-weight:600;color:var(--ink);}
-.tb-title p{font-size:12.5px;color:var(--ink3);font-weight:700;margin-top:2px;}
+.tb-title p{font-size:12px;color:var(--ink3);font-weight:500;margin-top:2px;}
 .senior-tabs{display:flex;gap:6px;background:var(--cream2);border-radius:14px;padding:4px;}
 .senior-tab{padding:8px 16px;border:none;background:none;border-radius:10px;font-weight:800;font-size:12.5px;color:var(--ink3);white-space:nowrap;transition:all 0.15s;display:flex;align-items:center;gap:6px;}
-.senior-tab.on{background:var(--card-bg);color:var(--red);box-shadow:0 3px 8px rgba(0,0,0,0.08);}
+.senior-tab.on{background:var(--card-bg);color:var(--accent);box-shadow:0 3px 8px rgba(0,0,0,0.08);}
 .senior-tab .st-dot{width:6px;height:6px;border-radius:50%;}
 .tb-add-senior{width:34px;height:34px;border-radius:10px;background:var(--cream2);border:1.5px dashed var(--card-border);display:flex;align-items:center;justify-content:center;color:var(--ink3);transition:all 0.15s;}
-.tb-add-senior:hover{border-color:var(--red);color:var(--red);}
+.tb-add-senior:hover{border-color:var(--accent);color:var(--accent);}
 .tb-theme-toggle{width:34px;height:34px;border-radius:10px;background:var(--cream2);border:1.5px solid var(--card-border);display:flex;align-items:center;justify-content:center;color:var(--ink2);transition:all 0.15s;}
-.tb-theme-toggle:hover{border-color:var(--red);color:var(--red);transform:rotate(15deg);}
+.tb-theme-toggle:hover{border-color:var(--accent);color:var(--accent);transform:rotate(15deg);}
 
-.content{padding:28px 40px 60px;width:100%;}
+.content{padding:32px 40px 64px;width:100%;}
 
 /* ── SOS BANNER ──────────────────────────────────────────────────────── */
 .sos-banner{
-  background:var(--red);color:#fff;border-radius:20px;
+  background:var(--accent);color:#fff;border-radius:20px;
   padding:18px 22px;display:flex;align-items:center;gap:16px;margin-bottom:24px;
   box-shadow:0 4px 14px var(--shadow);
 }
@@ -171,10 +212,10 @@ button{cursor:pointer;}
 .sos-banner .txt{flex:1;}
 .sos-banner .txt strong{display:block;font-size:16px;font-weight:700;}
 .sos-banner .txt span{font-size:12.5px;font-weight:700;opacity:0.85;}
-.sos-ack-btn{padding:11px 22px;border-radius:12px;background:#fff;border:none;color:var(--red-dark);font-weight:700;font-size:13.5px;white-space:nowrap;}
+.sos-ack-btn{padding:11px 22px;border-radius:999px;background:#fff;border:none;color:var(--red-dark);font-weight:700;font-size:13.5px;white-space:nowrap;}
 
 /* ── STAT GRID ───────────────────────────────────────────────────────── */
-.overview-shell{display:grid;grid-template-columns:1fr 340px;gap:20px;align-items:start;}
+.overview-shell{display:grid;grid-template-columns:1fr minmax(300px,26%);gap:20px;align-items:start;}
 .overview-main{min-width:0;}
 .overview-side{display:flex;flex-direction:column;gap:20px;min-width:0;}
 .overview-side .panel{margin-bottom:0;}
@@ -227,15 +268,15 @@ button{cursor:pointer;}
 .stat-card .lbl{font-size:11.5px;font-weight:700;color:var(--ink3);margin-top:2px;}
 
 /* ── PANELS ──────────────────────────────────────────────────────────── */
-.panel{background:var(--card-bg);border:1px solid var(--card-border);border-radius:22px;padding:26px 26px;margin-bottom:20px;transition:background 0.25s;}
+.panel{background:var(--card-bg);border:1px solid var(--card-border);border-radius:26px;padding:32px;margin-bottom:24px;transition:background 0.25s;}
 .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;}
 .panel-head h2{font-family:var(--font-display);font-size:18px;font-weight:600;display:flex;align-items:center;gap:9px;}
 .panel-head p{font-size:12.5px;color:var(--ink3);font-weight:600;margin-top:2px;}
-.btn-add{display:flex;align-items:center;gap:7px;padding:9px 16px;border-radius:12px;background:var(--cream2);border:1.5px solid var(--card-border);font-weight:800;font-size:12.5px;color:var(--ink2);transition:all 0.15s;}
-.btn-add:hover{border-color:var(--red);color:var(--red);}
+.btn-add{display:flex;align-items:center;gap:7px;padding:10px 18px;border-radius:999px;background:var(--cream2);border:1.5px solid var(--card-border);font-weight:800;font-size:12.5px;color:var(--ink2);transition:all 0.15s;}
+.btn-add:hover{border-color:var(--accent);color:var(--accent);}
 
 .row-item{
-  display:flex;align-items:center;gap:14px;padding:15px 4px;border-bottom:1px solid #E5E5EA;
+  display:flex;align-items:center;gap:16px;padding:16px 8px;border-bottom:1px solid #E5E5EA;
   transition:background 0.3s;
 }
 [data-theme="dark"] .row-item{border-bottom-color:#38383A;}
@@ -247,8 +288,8 @@ button{cursor:pointer;}
 .row-body .t1{font-size:14px;font-weight:800;color:var(--ink);}
 .row-body .t2{font-size:12px;color:var(--ink3);font-weight:600;margin-top:1px;}
 .row-actions{display:flex;gap:6px;flex-shrink:0;}
-.icon-btn{width:32px;height:32px;border-radius:9px;background:var(--cream2);border:none;display:flex;align-items:center;justify-content:center;color:var(--ink3);transition:all 0.15s;}
-.icon-btn:hover{background:var(--red);color:#fff;}
+.icon-btn{width:32px;height:32px;border-radius:999px;background:var(--cream2);border:none;display:flex;align-items:center;justify-content:center;color:var(--ink3);transition:all 0.15s;}
+.icon-btn:hover{background:var(--accent);color:#fff;}
 .icon-btn.ok:hover{background:var(--green);}
 .pill-status{padding:4px 10px;border-radius:9px;font-size:10.5px;font-weight:800;white-space:nowrap;}
 
@@ -261,17 +302,17 @@ button{cursor:pointer;}
 .form-row.single{grid-template-columns:1fr;}
 .form-field label{display:flex;align-items:center;gap:5px;font-size:11.5px;font-weight:800;color:var(--ink3);margin-bottom:6px;letter-spacing:0.3px;}
 .form-field input,.form-field select,.form-field textarea{
-  width:100%;padding:11px 13px;border-radius:11px;border:1.5px solid var(--card-border);
-  font-size:13.5px;font-weight:700;color:var(--ink);outline:none;background:var(--cream);transition:border-color 0.15s;
+  width:100%;padding:12px 16px;border-radius:18px;border:1.5px solid var(--card-border);
+  font-size:14px;font-weight:600;color:var(--ink);outline:none;background:var(--cream);transition:border-color 0.15s;
 }
-.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--red);}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{border-color:var(--accent);}
 .form-actions{display:flex;gap:10px;margin-top:16px;}
-.btn-save{padding:11px 22px;border-radius:12px;background:var(--red);border:none;color:#fff;font-weight:800;font-size:13px;}
-.btn-cancel{padding:11px 18px;border-radius:12px;background:none;border:1.5px solid var(--card-border);color:var(--ink3);font-weight:800;font-size:13px;}
+.btn-save{padding:12px 24px;border-radius:999px;background:var(--accent);border:none;color:#fff;font-weight:800;font-size:13px;}
+.btn-cancel{padding:12px 20px;border-radius:999px;background:none;border:1.5px solid var(--card-border);color:var(--ink3);font-weight:800;font-size:13px;}
 
 .chip-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
 .chip{display:flex;align-items:center;gap:6px;background:var(--cream2);border-radius:10px;padding:6px 10px;font-size:12px;font-weight:700;color:var(--ink2);}
-.chip-warn{background:rgba(196,48,30,0.09);color:var(--red-dark);}
+.chip-warn{background:rgba(192,112,16,0.09);color:var(--gold);}
 .chip-gold{background:rgba(192,112,16,0.09);color:var(--gold);}
 .chip-empty{font-size:12px;color:var(--ink3);font-weight:600;font-style:italic;padding:4px 0;}
 
@@ -280,7 +321,7 @@ button{cursor:pointer;}
 .profile-progress-ring span{position:relative;z-index:1;font-family:var(--font-mono);font-size:10.5px;font-weight:700;color:var(--ink2);}
 
 .quickid-preview{position:sticky;top:88px;}
-.profile-layout{display:grid;grid-template-columns:1fr 300px;gap:20px;align-items:start;}
+.profile-layout{display:grid;grid-template-columns:1fr minmax(280px,24%);gap:20px;align-items:start;}
 @media (max-width:960px){
   .profile-layout{grid-template-columns:1fr;}
   .quickid-preview{position:static;}
@@ -288,7 +329,7 @@ button{cursor:pointer;}
 .quickid-preview-label{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:var(--ink3);letter-spacing:1px;margin-bottom:10px;}
 .quickid-card{background:var(--void2);border-radius:18px;padding:22px;box-shadow:0 1px 3px var(--shadow);}
 .quickid-card-head{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.12);}
-.quickid-avatar{width:42px;height:42px;border-radius:21px;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:17px;color:#fff;flex-shrink:0;}
+.quickid-avatar{width:42px;height:42px;border-radius:21px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:700;font-size:17px;color:#fff;flex-shrink:0;}
 .quickid-name{font-family:var(--font-display);font-size:15px;font-weight:600;color:#fff;}
 .quickid-sub{font-size:10.5px;color:rgba(255,255,255,0.45);font-weight:700;margin-top:1px;}
 .quickid-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;font-size:12.5px;}
@@ -307,7 +348,7 @@ button{cursor:pointer;}
 .vital-tile .v{font-family:var(--font-mono);font-size:24px;font-weight:700;color:var(--ink);font-variant-numeric:tabular-nums;letter-spacing:-0.02em;}
 .vital-tile .u{font-size:11px;color:var(--ink3);font-weight:700;margin-top:2px;}
 
-.note-item{background:var(--cream2);border-radius:14px;padding:13px 15px;margin-bottom:10px;border-left:4px solid var(--red);}
+.note-item{background:var(--cream2);border-radius:14px;padding:13px 15px;margin-bottom:10px;border-left:4px solid var(--accent);}
 .note-item p{font-size:13.5px;font-weight:700;color:var(--ink);line-height:1.5;}
 .note-item .meta{font-size:11px;color:var(--ink3);font-weight:700;margin-top:6px;}
 
@@ -316,7 +357,7 @@ button{cursor:pointer;}
 .toggle .knob{position:absolute;top:2.5px;left:2.5px;width:20px;height:20px;border-radius:10px;background:#fff;transition:transform 0.2s;box-shadow:0 1px 3px rgba(0,0,0,0.25);}
 .toggle.on .knob{transform:translateX(19px);}
 
-.loading-spin{width:32px;height:32px;border:3px solid var(--card-border);border-top-color:var(--red);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;}
+.loading-spin{width:32px;height:32px;border:3px solid var(--card-border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto;}
 
 /* ── ID UPLOAD ───────────────────────────────────────────────────────── */
 .id-upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
@@ -326,10 +367,10 @@ button{cursor:pointer;}
 .id-upload-card h4{font-size:13.5px;font-weight:800;color:var(--ink);margin:12px 0 4px;}
 .id-upload-card p{font-size:11.5px;color:var(--ink3);font-weight:600;margin-bottom:14px;}
 .id-upload-preview{width:100%;max-height:160px;object-fit:contain;border-radius:12px;margin-bottom:14px;background:var(--cream2);}
-.id-upload-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:12px;background:var(--cream2);border:1.5px solid var(--card-border);font-weight:800;font-size:12.5px;color:var(--ink2);cursor:pointer;transition:all 0.15s;}
-.id-upload-btn:hover{border-color:var(--red);color:var(--red);}
-.id-upload-btn.danger{color:var(--red);}
-.id-upload-btn.danger:hover{background:rgba(196,48,30,0.08);}
+.id-upload-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:999px;background:var(--cream2);border:1.5px solid var(--card-border);font-weight:800;font-size:12.5px;color:var(--ink2);cursor:pointer;transition:all 0.15s;}
+.id-upload-btn:hover{border-color:var(--accent);color:var(--accent);}
+.id-upload-btn.danger{color:var(--accent);}
+.id-upload-btn.danger:hover{background:rgba(15,155,142,0.08);}
 
 /* ── QR PANEL ────────────────────────────────────────────────────────── */
 .qr-wrap{display:flex;flex-direction:column;align-items:center;gap:18px;padding:20px 0;}
@@ -343,12 +384,12 @@ button{cursor:pointer;}
 /* ── SETTINGS ────────────────────────────────────────────────────────── */
 .theme-picker{display:flex;gap:8px;}
 .theme-opt{flex:1;padding:16px 10px;border-radius:16px;background:var(--cream2);border:2px solid var(--card-border);cursor:pointer;text-align:center;transition:all 0.15s;}
-.theme-opt.on{border-color:var(--red);background:var(--card-bg);}
+.theme-opt.on{border-color:var(--accent);background:var(--card-bg);}
 .theme-opt svg{margin:0 auto 8px;display:block;}
 .theme-opt span{font-size:12px;font-weight:800;color:var(--ink2);}
-.theme-opt.on span{color:var(--red);}
+.theme-opt.on span{color:var(--accent);}
 .account-row{display:flex;align-items:center;gap:14px;padding:8px 0;}
-.account-avatar{width:44px;height:44px;border-radius:22px;background:var(--red);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
+.account-avatar{width:44px;height:44px;border-radius:22px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;flex-shrink:0;}
 .plan-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:10px;font-size:11.5px;font-weight:800;}
 .settings-price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
 @media (max-width:820px){ .settings-price-grid{grid-template-columns:1fr;} }
@@ -361,12 +402,12 @@ button{cursor:pointer;}
 .cal-toolbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
 .cal-nav{display:flex;align-items:center;gap:8px;}
 .cal-nav button{width:32px;height:32px;border-radius:9px;background:var(--cream2);border:1px solid var(--card-border);color:var(--ink2);display:flex;align-items:center;justify-content:center;transition:all 0.15s;}
-.cal-nav button:hover{border-color:var(--red);color:var(--red);}
+.cal-nav button:hover{border-color:var(--accent);color:var(--accent);}
 .cal-today-btn{width:auto !important;padding:0 12px;font-size:12px;font-weight:800;}
 .cal-title{font-family:var(--font-display);font-size:16px;font-weight:600;color:var(--ink);margin-left:6px;white-space:nowrap;}
 .cal-view-switch{display:flex;gap:4px;background:var(--cream2);border-radius:12px;padding:4px;}
 .cal-view-switch button{padding:7px 14px;border-radius:9px;background:none;border:none;font-size:12px;font-weight:800;color:var(--ink3);transition:all 0.15s;}
-.cal-view-switch button.on{background:var(--card-bg);color:var(--red);box-shadow:0 2px 6px rgba(0,0,0,0.08);}
+.cal-view-switch button.on{background:var(--card-bg);color:var(--accent);box-shadow:0 2px 6px rgba(0,0,0,0.08);}
 .cal-legend{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--card-border);}
 .cal-legend-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--ink3);}
 .cal-legend-item span{width:8px;height:8px;border-radius:4px;flex-shrink:0;}
@@ -376,11 +417,11 @@ button{cursor:pointer;}
 .month-cell{min-height:88px;border-radius:10px;padding:6px;background:var(--cream2);border:1px solid transparent;cursor:pointer;transition:all 0.15s;display:flex;flex-direction:column;gap:3px;}
 .month-cell:hover{transform:scale(1.03);box-shadow:0 4px 14px var(--shadow);z-index:1;}
 .month-cell:active{transform:scale(0.98);}
-.month-cell:hover{border-color:var(--red);}
+.month-cell:hover{border-color:var(--accent);}
 .month-cell.other-month{opacity:0.35;}
-.month-cell.today{background:rgba(196,48,30,0.08);border-color:var(--red);}
+.month-cell.today{background:rgba(15,155,142,0.08);border-color:var(--accent);}
 .month-cell-num{font-size:11.5px;font-weight:800;color:var(--ink2);}
-.month-cell.today .month-cell-num{color:var(--red);}
+.month-cell.today .month-cell-num{color:var(--accent);}
 .month-cell-events{display:flex;flex-direction:column;gap:2px;overflow:hidden;}
 .month-event-chip{font-size:10px;font-weight:700;padding:2px 5px;border-radius:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .month-more{font-size:9.5px;font-weight:700;color:var(--ink3);padding:1px 5px;}
@@ -389,17 +430,17 @@ button{cursor:pointer;}
 .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;}
 @media (max-width:900px){ .week-grid{grid-template-columns:1fr;} }
 .week-col{background:var(--cream2);border-radius:14px;padding:10px;min-height:180px;}
-.week-col.today{background:rgba(196,48,30,0.07);border:1px solid var(--red);}
+.week-col.today{background:rgba(15,155,142,0.07);border:1px solid var(--accent);}
 .week-col-head{text-align:center;padding-bottom:8px;margin-bottom:8px;border-bottom:1px solid var(--card-border);cursor:pointer;}
 .week-col-head .dow{font-size:10.5px;font-weight:800;color:var(--ink3);}
 .week-col-head .num{font-size:16px;font-weight:800;color:var(--ink);}
-.week-col.today .week-col-head .num{color:var(--red);}
+.week-col.today .week-col-head .num{color:var(--accent);}
 .week-col-body{display:flex;flex-direction:column;gap:5px;}
 .week-empty{font-size:10.5px;color:var(--ink3);text-align:center;padding:8px 0;font-style:italic;}
 .week-event{font-size:10.5px;font-weight:700;padding:5px 7px;border-radius:8px;cursor:pointer;display:flex;gap:5px;align-items:baseline;}
 .week-event .tm{font-family:var(--font-mono);font-size:9.5px;opacity:0.8;}
 .week-add{margin-top:4px;width:100%;padding:5px;border-radius:8px;background:none;border:1px dashed var(--card-border);color:var(--ink3);display:flex;align-items:center;justify-content:center;}
-.week-add:hover{border-color:var(--red);color:var(--red);}
+.week-add:hover{border-color:var(--accent);color:var(--accent);}
 
 .day-view{display:flex;flex-direction:column;gap:10px;}
 .day-event-card{display:flex;gap:16px;padding:14px 16px;background:var(--cream2);border-radius:14px;border-left:4px solid var(--ink3);cursor:pointer;transition:transform 0.15s;}
@@ -412,18 +453,18 @@ button{cursor:pointer;}
 @media (max-width:900px){ .year-grid{grid-template-columns:repeat(2,1fr);} }
 @media (max-width:560px){ .year-grid{grid-template-columns:1fr;} }
 .year-month-head{text-align:center;font-size:12px;font-weight:800;color:var(--ink2);padding:6px 0;cursor:pointer;border-radius:8px;transition:background 0.15s;}
-.year-month-head:hover{background:var(--cream2);color:var(--red);}
+.year-month-head:hover{background:var(--cream2);color:var(--accent);}
 .year-mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;}
 .year-mini-cell{position:relative;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:700;color:var(--ink3);}
 .year-mini-cell.dim{opacity:0;}
-.year-mini-cell.today{background:var(--red);color:#fff;border-radius:3px;}
+.year-mini-cell.today{background:var(--accent);color:#fff;border-radius:3px;}
 .year-mini-cell .dot{position:absolute;bottom:1px;width:3px;height:3px;border-radius:2px;background:var(--gold);}
 .year-mini-cell.today .dot{background:#fff;}
 
 /* ── MODAL (shared: calendar events, etc.) ──────────────────────────────── */
-.modal-overlay{position:fixed;inset:0;background:rgba(16,9,6,0.55);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;animation:modalFade 0.18s ease;}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:200;padding:20px;animation:modalFade 0.18s ease;}
 @keyframes modalFade{from{opacity:0;}to{opacity:1;}}
-.modal-card{background:var(--card-bg);border-radius:22px;padding:24px 26px;max-width:440px;width:100%;box-shadow:0 30px 70px rgba(0,0,0,0.35);animation:panelIn 0.22s cubic-bezier(0.16,1,0.3,1);max-height:90vh;overflow:auto;}
+.modal-card{background:var(--card-bg);border-radius:30px;padding:32px;max-width:440px;width:100%;box-shadow:0 30px 70px rgba(0,0,0,0.35);animation:panelIn 0.22s cubic-bezier(0.16,1,0.3,1);max-height:90vh;overflow:auto;}
 .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
 .modal-head h3{font-family:var(--font-display);font-size:17px;font-weight:600;color:var(--ink);}
 .modal-head button{width:30px;height:30px;border-radius:15px;background:var(--cream2);border:none;color:var(--ink3);display:flex;align-items:center;justify-content:center;}
@@ -536,7 +577,7 @@ const DOW_TL = ["Lin","Lun","Mar","Miy","Huw","Biy","Sab"];
 const MON_TL = ["Enero","Pebrero","Marso","Abril","Mayo","Hunyo","Hulyo","Agosto","Setyembre","Oktubre","Nobyembre","Disyembre"];
 const EVENT_TYPES = {
   checkup:    { label:"Checkup",    color:"var(--green)",     bg:"rgba(26,140,74,0.12)" },
-  dialysis:   { label:"Dialysis",   color:"var(--red)",       bg:"rgba(196,48,30,0.12)" },
+  dialysis:   { label:"Dialysis",   color:"var(--accent)",       bg:"rgba(15,155,142,0.12)" },
   therapy:    { label:"Therapy/Rehab", color:"#2196A8",       bg:"rgba(33,150,168,0.12)" },
   lab_test:   { label:"Lab Test",   color:"#E91E8C",          bg:"rgba(233,30,140,0.12)" },
   vaccination:{ label:"Bakuna",     color:"#1A8C4A",          bg:"rgba(26,140,74,0.10)" },
@@ -622,6 +663,113 @@ function occurrencesInRange(senior, rangeStart, rangeEnd){
 }
 function useTicker(ms){ const [,setT]=useState(0); useEffect(()=>{ const id=setInterval(()=>setT(x=>x+1), ms); return ()=>clearInterval(id); },[ms]); }
 
+/* ── LIVE CLOCK ──────────────────────────────────────────────────────── */
+function useClock(){
+  const [now, setNow] = useState(new Date());
+  useEffect(() => { const id = setInterval(() => setNow(new Date()), 1000); return () => clearInterval(id); }, []);
+  return now;
+}
+
+/* ── LIVE WEATHER (Open-Meteo — free, no API key, CORS-enabled) ────────── */
+const WMO_WEATHER = {
+  0:["Maaraw","sun"], 1:["Medyo maaraw","sun"], 2:["Maulap-ulap","sun"], 3:["Maulap","clock"],
+  45:["Maulap na hamog","clock"], 48:["Maulap na hamog","clock"],
+  51:["Ambon","droplet"], 53:["Ambon","droplet"], 55:["Malakas na ambon","droplet"],
+  61:["Ulan","droplet"], 63:["Ulan","droplet"], 65:["Malakas na ulan","droplet"],
+  71:["Snow","droplet"], 73:["Snow","droplet"], 75:["Malakas na snow","droplet"],
+  80:["Sama-samang ulan","droplet"], 81:["Sama-samang ulan","droplet"], 82:["Malakas na ulan","droplet"],
+  95:["Bagyo","alert_tri"], 96:["Bagyo na may yelo","alert_tri"], 99:["Malakas na bagyo","alert_tri"],
+};
+function useWeather(){
+  const [weather, setWeather] = useState(null); // {temp, label, icon, place} | null | "error"
+  useEffect(() => {
+    let cancelled = false;
+    const fetchFor = async (lat, lng, place) => {
+      try{
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,weather_code`);
+        const data = await res.json();
+        if(cancelled) return;
+        const code = data?.current?.weather_code;
+        const [label, icon] = WMO_WEATHER[code] || ["Panahon", "sun"];
+        setWeather({ temp: Math.round(data?.current?.temperature_2m), label, icon, place });
+      }catch(e){ if(!cancelled) setWeather("error"); }
+    };
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        (pos) => fetchFor(pos.coords.latitude, pos.coords.longitude, "Kasalukuyang lokasyon"),
+        () => fetchFor(14.5995, 120.9842, "Maynila"), // Manila fallback if permission denied
+        { timeout: 6000, maximumAge: 1800000 }
+      );
+    } else {
+      fetchFor(14.5995, 120.9842, "Maynila");
+    }
+    return () => { cancelled = true; };
+  }, []);
+  return weather;
+}
+
+/* ── STATUS BAR: live time, date, weather, notifications — top of dashboard ── */
+function StatusBar({ senior, seniors, session }) {
+  const now = useClock();
+  const weather = useWeather();
+  const dateStr = now.toLocaleDateString('en-PH',{weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  const timeStr = now.toLocaleTimeString('en-PH',{hour:'numeric', minute:'2-digit', second:'2-digit', hour12:true});
+  return (
+    <div className="status-bar">
+      <div className="status-bar-left">
+        <div className="sb-clock">
+          <Icon name="clock" size={14} color="var(--ink3)"/>
+          <span className="sb-clock-time">{timeStr}</span>
+        </div>
+        <div className="sb-date">{dateStr}</div>
+        {weather && weather!=="error" && (
+          <div className="sb-weather">
+            <Icon name={weather.icon} size={14} color="var(--accent)"/>
+            <span>{weather.temp}°C</span>
+            <span className="sb-weather-place">{weather.label} · {weather.place}</span>
+          </div>
+        )}
+      </div>
+      <NotificationBell senior={senior} seniors={seniors}/>
+    </div>
+  );
+}
+
+/* ── NOTIFICATION BELL: aggregates real state, hover-triggered dropdown ── */
+function NotificationBell({ senior, seniors }) {
+  const notifs = [];
+  (seniors||[senior]).forEach(s=>{
+    if(!s) return;
+    if(s.status==="sos") notifs.push({ icon:"sos", color:"var(--red)", title:`SOS Active — ${s.name}`, sub:"Kailangan ng agarang tulong" });
+    (s.medications||[]).filter(m=>m.status==="missed").forEach(m=>notifs.push({ icon:"pill", color:"var(--gold)", title:`Nalaktawan: ${m.name}`, sub:s.name }));
+    (s.medications||[]).filter(m=>typeof m.refillCount==="number" && typeof m.refillThreshold==="number" && m.refillCount<=m.refillThreshold)
+      .forEach(m=>notifs.push({ icon:"pill", color:"var(--gold)", title:`Paubos na: ${m.name}`, sub:`${m.refillCount} na lang` }));
+    if(s.status!=="sos" && !s.checkedIn) notifs.push({ icon:"clock", color:"var(--ink3)", title:`Wala pang check-in`, sub:s.name });
+  });
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="notif-wrap" onMouseEnter={()=>setOpen(true)} onMouseLeave={()=>setOpen(false)}>
+      <button className="notif-bell" aria-label="Notifications">
+        <Icon name="bell" size={18} color="var(--ink2)"/>
+        {notifs.length>0 && <span className="notif-badge" style={{background:notifs.some(n=>n.icon==="sos")?"var(--red)":"var(--accent)"}}>{notifs.length}</span>}
+      </button>
+      {open && (
+        <div className="notif-dropdown">
+          <div className="notif-dropdown-head">Mga Abiso</div>
+          {notifs.length===0 ? (
+            <div className="notif-empty">Walang bagong abiso. Ayos ang lahat.</div>
+          ) : notifs.map((n,i)=>(
+            <div key={i} className="notif-item">
+              <Icon name={n.icon} size={15} color={n.color}/>
+              <div><div className="notif-item-title">{n.title}</div><div className="notif-item-sub">{n.sub}</div></div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── INSIGHTS: derived from real eventLog/vitals data, never fabricated ──── */
 function deriveAdherenceHistory(senior, days=7){
   const log = senior.eventLog||[];
@@ -647,7 +795,7 @@ function deriveInsights(senior){
       const recentAvg = recent.reduce((a,h)=>a+h.pct,0)/recent.length;
       const earlierAvg = earlier.reduce((a,h)=>a+h.pct,0)/earlier.length;
       if(recentAvg - earlierAvg >= 15) insights.push({icon:"checkmark",color:"var(--green)",text:"Gumaganda ang pag-inom ng gamot sa mga huling araw."});
-      else if(earlierAvg - recentAvg >= 15) insights.push({icon:"alert_tri",color:"var(--red)",text:"Bumababa ang adherence sa gamot — baka kailangan ng paalala."});
+      else if(earlierAvg - recentAvg >= 15) insights.push({icon:"alert_tri",color:"var(--accent)",text:"Bumababa ang adherence sa gamot — baka kailangan ng paalala."});
     }
     const allPerfect = withData.every(h=>h.pct===100);
     if(allPerfect && withData.length>=5) insights.push({icon:"checkmark",color:"var(--green)",text:`${withData.length} sunod-sunod na araw na perpekto ang pag-inom ng gamot!`});
@@ -658,12 +806,12 @@ function deriveInsights(senior){
     const vals = bpHistory.map(v=>parseFloat(String(v.value).split("/")[0])).filter(v=>!isNaN(v));
     if(vals.length>=3){
       const trend = vals[vals.length-1] - vals[0];
-      if(trend >= 10) insights.push({icon:"heart_pulse",color:"var(--red)",text:"Tumataas ang blood pressure sa mga huling reading — subaybayan."});
+      if(trend >= 10) insights.push({icon:"heart_pulse",color:"var(--accent)",text:"Tumataas ang blood pressure sa mga huling reading — subaybayan."});
       else if(trend <= -10) insights.push({icon:"heart_pulse",color:"var(--green)",text:"Bumababa ang blood pressure sa mga huling reading."});
     }
   }
   const missedRecent = (senior.medications||[]).filter(m=>m.status==="missed");
-  if(missedRecent.length>0) insights.push({icon:"alert_tri",color:"var(--red)",text:`${missedRecent.length} gamot ang nalaktawan ngayong araw.`});
+  if(missedRecent.length>0) insights.push({icon:"alert_tri",color:"var(--accent)",text:`${missedRecent.length} gamot ang nalaktawan ngayong araw.`});
   const lowRefills = (senior.medications||[]).filter(m=>typeof m.refillCount==="number" && typeof m.refillThreshold==="number" && m.refillCount<=m.refillThreshold);
   if(lowRefills.length>0) insights.push({icon:"pill",color:"var(--gold)",text:`Paubos na ang ${lowRefills.map(m=>m.name).join(", ")}.`});
   return insights;
@@ -677,7 +825,7 @@ function AdherenceBarChart({ senior }) {
       {history.map((h,i)=>(
         <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:6}}>
           <div style={{width:"100%",height:70,display:"flex",alignItems:"flex-end",background:"var(--cream2)",borderRadius:6,overflow:"hidden"}}>
-            {h.pct!==null && <div style={{width:"100%",height:`${h.pct}%`,background:h.pct>=80?"var(--green)":h.pct>=50?"var(--gold)":"var(--red)",borderRadius:"6px 6px 0 0",transition:"height 0.5s ease",animationDelay:`${i*0.05}s`}} className="panel-enter"></div>}
+            {h.pct!==null && <div style={{width:"100%",height:`${h.pct}%`,background:h.pct>=80?"var(--green)":h.pct>=50?"var(--gold)":"var(--accent)",borderRadius:"6px 6px 0 0",transition:"height 0.5s ease",animationDelay:`${i*0.05}s`}} className="panel-enter"></div>}
           </div>
           <span style={{fontSize:9.5,fontWeight:700,color:"var(--ink3)"}}>{h.dayLabel}</span>
         </div>
@@ -685,6 +833,68 @@ function AdherenceBarChart({ senior }) {
     </div>
   );
 }
+/* ── DONUT CHART: real care-status breakdown, hand-rolled SVG ──────────── */
+function DonutChart({ segments, size=140, thickness=18 }) {
+  const total = segments.reduce((a,s)=>a+s.value,0);
+  const r = (size-thickness)/2;
+  const circumference = 2*Math.PI*r;
+  let offset = 0;
+  const arcs = total>0 ? segments.filter(s=>s.value>0).map((s,i)=>{
+    const frac = s.value/total;
+    const dash = frac*circumference;
+    const arc = { ...s, dasharray:`${dash} ${circumference-dash}`, dashoffset:-offset };
+    offset += dash;
+    return arc;
+  }) : [];
+  return (
+    <div style={{display:"flex",alignItems:"center",gap:20}}>
+      <div style={{position:"relative",width:size,height:size,flexShrink:0}}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{transform:"rotate(-90deg)"}}>
+          <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="var(--cream2)" strokeWidth={thickness}/>
+          {arcs.map((a,i)=>(
+            <circle key={i} cx={size/2} cy={size/2} r={r} fill="none" stroke={a.color} strokeWidth={thickness}
+              strokeDasharray={a.dasharray} strokeDashoffset={a.dashoffset} strokeLinecap="butt"
+              style={{transition:"stroke-dasharray 0.6s ease"}}/>
+          ))}
+        </svg>
+        <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+          <div style={{fontFamily:"var(--font-mono)",fontSize:22,fontWeight:700,color:"var(--ink)",fontVariantNumeric:"tabular-nums"}}>{total}</div>
+          <div style={{fontSize:10,fontWeight:500,color:"var(--ink3)"}}>ngayon</div>
+        </div>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:9,flex:1}}>
+        {segments.map((s,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{width:9,height:9,borderRadius:3,background:s.color,flexShrink:0}}></span>
+            <span style={{fontSize:12.5,fontWeight:600,color:"var(--ink2)",flex:1}}>{s.label}</span>
+            <span style={{fontFamily:"var(--font-mono)",fontSize:12.5,fontWeight:700,color:"var(--ink)",fontVariantNumeric:"tabular-nums"}}>{s.value}</span>
+            <span style={{fontSize:11,fontWeight:500,color:"var(--ink3)",minWidth:32,textAlign:"right"}}>{total>0?Math.round(s.value/total*100):0}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+function CareStatusDonut({ senior }) {
+  const meds = senior.medications||[];
+  const done = meds.filter(m=>m.status==="done").length;
+  const pending = meds.filter(m=>m.status==="pending"||m.status==="upcoming").length;
+  const missed = meds.filter(m=>m.status==="missed").length;
+  const segments = [
+    { label:"Nainom", value:done, color:"var(--green-bright)" },
+    { label:"Naghihintay", value:pending, color:"var(--gold-bright)" },
+    { label:"Nalaktawan", value:missed, color:"var(--red)" },
+  ];
+  return (
+    <div className="panel">
+      <div className="panel-head"><h2><Icon name="activity" size={17}/>Kalagayan ng Pag-aalaga</h2></div>
+      {meds.length===0 ? (
+        <div className="empty-state small"><Icon name="pill" size={28}/><p>Wala pang gamot na naka-schedule ngayong araw.</p></div>
+      ) : <DonutChart segments={segments}/>}
+    </div>
+  );
+}
+
 function InsightsPanel({ senior }) {
   const insights = deriveInsights(senior);
   return (
@@ -742,7 +952,7 @@ function computeIsDark(mode){
   return phHour >= 18 || phHour < 6;
 }
 function useTheme(){
-  const [mode, setModeState] = useState(()=>{ try{return localStorage.getItem(THEME_KEY)||"auto";}catch(e){return "auto";} });
+  const [mode, setModeState] = useState(()=>{ try{return localStorage.getItem(THEME_KEY)||"light";}catch(e){return "light";} });
   const isDark = computeIsDark(mode);
   useEffect(()=>{ document.documentElement.setAttribute("data-theme", isDark?"dark":"light"); }, [isDark]);
   useTicker(60000); // re-evaluate "auto" every minute as the clock crosses 6/18
@@ -799,6 +1009,7 @@ function Icon({ name, size=18, color="currentColor", strokeWidth=2 }) {
     mail:<><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6l9-6"/></>,
     credit_card:<><rect x="3" y="5" width="18" height="14" rx="3"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="7" y1="15" x2="7.01" y2="15"/><line x1="11" y1="15" x2="13" y2="15"/></>,
     info:<><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12.01" y2="8"/><polyline points="11 12 12 12 12 16 13 16"/></>,
+    bell:<><path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2-3v-3a7 7 0 0 1 4-6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></>,
     arrow_left:<><line x1="5" y1="12" x2="19" y2="12"/><line x1="5" y1="12" x2="11" y2="18"/><line x1="5" y1="12" x2="11" y2="6"/></>,
     arrow_right:<><line x1="5" y1="12" x2="19" y2="12"/><line x1="13" y1="18" x2="19" y2="12"/><line x1="13" y1="6" x2="19" y2="12"/></>,
   };
@@ -936,7 +1147,7 @@ function HouseholdResolver({ session, children }) {
             <input className="ob-input" style={{marginBottom:0}} value={seniorName} onChange={e=>setSeniorName(e.target.value)} placeholder="Nanay, Tatay, Lola…"/>
           </div>
           <button className="ob-btn" disabled={busy} onClick={doCreate}>{busy?"Ginagawa…":"Gumawa ng Family Space"}</button>
-          <p className="ob-note" style={{marginTop:18}}>Naka-sign in bilang {session.user.email}. <button onClick={()=>supa.auth.signOut()} style={{background:"none",border:"none",color:"var(--red)",fontWeight:800,cursor:"pointer",padding:0}}>Mag-sign out</button></p>
+          <p className="ob-note" style={{marginTop:18}}>Naka-sign in bilang {session.user.email}. <button onClick={()=>supa.auth.signOut()} style={{background:"none",border:"none",color:"var(--accent)",fontWeight:800,cursor:"pointer",padding:0}}>Mag-sign out</button></p>
         </div>
       </div>
     );
@@ -1101,7 +1312,7 @@ function Dashboard({ household, onDisconnect, theme, session }) {
           <button className="icon-btn" style={{width:26,height:26,background:"rgba(255,255,255,0.08)",color:"rgba(255,255,255,0.6)"}} onClick={()=>navigator.clipboard&&navigator.clipboard.writeText(household.pairCode)}><Icon name="copy" size={13}/></button>
         </div>
         <div className="sb-senior">
-          <div className="sb-senior-avatar" style={{background:senior.status==="sos"?"var(--red-hot)":"var(--red-bright)"}}>
+          <div className="sb-senior-avatar" style={{background:senior.status==="sos"?"var(--red-hot)":"var(--accent-bright)"}}>
             {(senior.nickname||senior.name||"?")[0]}
             <span className="sb-senior-pulse" style={{background:senior.status==="sos"?"var(--red-hot)":"var(--green-bright)"}}></span>
           </div>
@@ -1129,6 +1340,7 @@ function Dashboard({ household, onDisconnect, theme, session }) {
       </div>
 
       <div className="main">
+        <StatusBar senior={senior} seniors={seniors} session={session}/>
         <div className="topbar">
           <div className="tb-title">
             <h1>{NAV.find(n=>n[0]===tab)?.[1]}</h1>
@@ -1186,8 +1398,8 @@ function OverviewPanel({ senior, session }) {
   const missed = meds.filter(m=>m.status==="missed").length;
   const medPct = meds.length ? Math.round((done/meds.length)*100) : 0;
   const isSOS = senior.status==="sos";
-  const EVENT_COLOR = { checkin:"var(--green)", sos:"var(--red)", fall:"var(--red)", med_taken:"var(--green)", med_missed:"var(--red)", med_snoozed:"var(--gold)", gps:"var(--gold)", notif:"var(--ink2)" };
-  const EVENT_BG = { checkin:"rgba(26,140,74,0.1)", sos:"rgba(196,48,30,0.1)", fall:"rgba(196,48,30,0.1)", med_taken:"rgba(26,140,74,0.1)", med_missed:"rgba(196,48,30,0.1)", med_snoozed:"rgba(192,112,16,0.1)", gps:"rgba(192,112,16,0.1)", notif:"var(--cream2)" };
+  const EVENT_COLOR = { checkin:"var(--green)", sos:"var(--red)", fall:"var(--red)", med_taken:"var(--green)", med_missed:"var(--gold)", med_snoozed:"var(--gold)", gps:"var(--gold)", notif:"var(--ink2)" };
+  const EVENT_BG = { checkin:"rgba(26,140,74,0.1)", sos:"rgba(196,48,30,0.1)", fall:"rgba(196,48,30,0.1)", med_taken:"rgba(26,140,74,0.1)", med_missed:"rgba(192,112,16,0.1)", med_snoozed:"rgba(192,112,16,0.1)", gps:"rgba(192,112,16,0.1)", notif:"var(--cream2)" };
 
   // Personalized, time-of-day-aware greeting — Philippine local time regardless of viewer's own timezone.
   const phHour = new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Manila"})).getHours();
@@ -1236,13 +1448,13 @@ function OverviewPanel({ senior, session }) {
             <div className="lbl">{senior.checkedIn?timeAgo(senior.lastCheckin):"Huling Check-in"}</div>
           </div>
           <div className="stat-card">
-            <div className="ic" style={{background:missed>0?"rgba(196,48,30,0.09)":"rgba(192,112,16,0.09)",color:missed>0?"var(--red)":"var(--gold)"}}><Icon name="pill" size={18}/></div>
+            <div className="ic" style={{background:missed>0?"rgba(192,112,16,0.09)":"rgba(192,112,16,0.09)",color:missed>0?"var(--gold)":"var(--gold)"}}><Icon name="pill" size={18}/></div>
             <div className="val"><CountUp value={done}/>/{meds.length}</div>
             <div className="lbl">Gamot Ngayon</div>
-            {meds.length>0 && <div className="stat-bar"><div className="stat-bar-fill" style={{width:medPct+"%",background:missed>0?"var(--red)":"var(--green)"}}></div></div>}
+            {meds.length>0 && <div className="stat-bar"><div className="stat-bar-fill" style={{width:medPct+"%",background:missed>0?"var(--accent)":"var(--green)"}}></div></div>}
           </div>
           <div className="stat-card">
-            <div className="ic" style={{background:senior.battery<20?"rgba(196,48,30,0.09)":"rgba(30,10,2,0.06)",color:senior.battery<20?"var(--red)":"var(--ink2)"}}><Icon name="battery" size={18}/></div>
+            <div className="ic" style={{background:senior.battery<20?"rgba(192,112,16,0.09)":"var(--cream2)",color:senior.battery<20?"var(--gold)":"var(--ink2)"}}><Icon name="battery" size={18}/></div>
             <div className="val"><CountUp value={senior.battery} suffix="%"/></div>
             <div className="lbl">Baterya ng Telepono</div>
           </div>
@@ -1267,6 +1479,7 @@ function OverviewPanel({ senior, session }) {
       </div>
 
       <div className="overview-side">
+        <CareStatusDonut senior={senior}/>
         <div className="panel">
           <div className="panel-head"><h2><Icon name="clock" size={17}/>Paparating</h2></div>
           {upcoming.length===0 ? (
@@ -1313,8 +1526,8 @@ function MedsPanel({ senior, patch }) {
       return next;
     })}));
   };
-  const statusColor = { done:"var(--green)", pending:"var(--gold)", upcoming:"var(--ink3)", missed:"var(--red)" };
-  const statusBg = { done:"rgba(26,140,74,0.1)", pending:"rgba(192,112,16,0.1)", upcoming:"rgba(30,10,2,0.05)", missed:"rgba(196,48,30,0.1)" };
+  const statusColor = { done:"var(--green)", pending:"var(--gold)", upcoming:"var(--ink3)", missed:"var(--accent)" };
+  const statusBg = { done:"rgba(26,140,74,0.1)", pending:"rgba(192,112,16,0.1)", upcoming:"var(--cream2)", missed:"rgba(192,112,16,0.1)" };
   const statusLabel = { done:"Nainom", pending:"Naghihintay", upcoming:"Mamaya", missed:"Nalaktawan" };
   const doneCount = meds.filter(m=>m.status==="done").length;
   const missedCount = meds.filter(m=>m.status==="missed").length;
@@ -1347,10 +1560,10 @@ function MedsPanel({ senior, patch }) {
       {meds.length>0 && (
         <div className="stat-grid">
           <div className="stat-card">
-            <div className="ic" style={{background:missedCount>0?"rgba(196,48,30,0.09)":"rgba(26,140,74,0.09)",color:missedCount>0?"var(--red)":"var(--green)"}}><Icon name="checkmark" size={18}/></div>
+            <div className="ic" style={{background:missedCount>0?"rgba(192,112,16,0.09)":"rgba(26,140,74,0.09)",color:missedCount>0?"var(--gold)":"var(--green)"}}><Icon name="checkmark" size={18}/></div>
             <div className="val"><CountUp value={adherence} suffix="%"/></div>
             <div className="lbl">Adherence Ngayon</div>
-            <div className="stat-bar"><div className="stat-bar-fill" style={{width:adherence+"%",background:missedCount>0?"var(--red)":"var(--green)"}}></div></div>
+            <div className="stat-bar"><div className="stat-bar-fill" style={{width:adherence+"%",background:missedCount>0?"var(--accent)":"var(--green)"}}></div></div>
           </div>
           <div className="stat-card">
             <div className="ic" style={{background:"rgba(192,112,16,0.09)",color:"var(--gold)"}}><Icon name="clock" size={18}/></div>
@@ -1363,16 +1576,16 @@ function MedsPanel({ senior, patch }) {
             <div className="lbl">Nainom Ngayong Araw</div>
           </div>
           <div className="stat-card">
-            <div className="ic" style={{background:missedCount>0?"rgba(196,48,30,0.09)":"var(--cream2)",color:missedCount>0?"var(--red)":"var(--ink3)"}}><Icon name="alert_tri" size={18}/></div>
+            <div className="ic" style={{background:missedCount>0?"rgba(192,112,16,0.09)":"var(--cream2)",color:missedCount>0?"var(--gold)":"var(--ink3)"}}><Icon name="alert_tri" size={18}/></div>
             <div className="val"><CountUp value={missedCount}/></div>
             <div className="lbl">Nalaktawan</div>
           </div>
         </div>
       )}
       {lowRefills.length>0 && (
-        <div style={{background:"rgba(196,48,30,0.08)",border:"1.5px solid rgba(196,48,30,0.25)",borderRadius:16,padding:"12px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:12}}>
-          <Icon name="alert_tri" size={18} color="var(--red)"/>
-          <div style={{fontSize:12.5,fontWeight:700,color:"var(--red-dark)"}}>Paubos na: {lowRefills.map(m=>`${m.name} (${m.refillCount} na lang)`).join(", ")}</div>
+        <div style={{background:"rgba(192,112,16,0.08)",border:"1.5px solid rgba(192,112,16,0.25)",borderRadius:16,padding:"12px 16px",marginBottom:16,display:"flex",alignItems:"center",gap:12}}>
+          <Icon name="alert_tri" size={18} color="var(--gold)"/>
+          <div style={{fontSize:12.5,fontWeight:700,color:"var(--gold)"}}>Paubos na: {lowRefills.map(m=>`${m.name} (${m.refillCount} na lang)`).join(", ")}</div>
         </div>
       )}
       <div className="panel">
@@ -1396,7 +1609,7 @@ function MedsPanel({ senior, patch }) {
               <div style={{fontSize:13,fontWeight:800,color:"var(--ink)"}}>Kapag kinakailangan lang (PRN)</div>
               <div style={{fontSize:11,color:"var(--ink3)",fontWeight:600,marginTop:2}}>Walang fixed na oras — hal. pampakalma ng sakit</div>
             </div>
-            <button type="button" className={"toggle"+(form.prn?" on":"")} onClick={()=>setForm({...form,prn:!form.prn})} style={{background:form.prn?"var(--red)":"var(--card-border)"}}><span className="knob"></span></button>
+            <button type="button" className={"toggle"+(form.prn?" on":"")} onClick={()=>setForm({...form,prn:!form.prn})} style={{background:form.prn?"var(--accent)":"var(--card-border)"}}><span className="knob"></span></button>
           </div>
 
           {!form.prn && (
@@ -1412,7 +1625,7 @@ function MedsPanel({ senior, patch }) {
               <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
                 {DOW_SHORT_TL.map((d,idx)=>(
                   <button key={idx} type="button" onClick={()=>toggleDay(idx)}
-                    style={{width:40,height:34,borderRadius:9,border:`1.5px solid ${form.daysOfWeek.includes(idx)?"var(--red)":"var(--card-border)"}`,background:form.daysOfWeek.includes(idx)?"var(--red)":"var(--card-bg)",color:form.daysOfWeek.includes(idx)?"#fff":"var(--ink2)",fontSize:11,fontWeight:800,cursor:"pointer"}}>{d}</button>
+                    style={{width:40,height:34,borderRadius:9,border:`1.5px solid ${form.daysOfWeek.includes(idx)?"var(--accent)":"var(--card-border)"}`,background:form.daysOfWeek.includes(idx)?"var(--accent)":"var(--card-bg)",color:form.daysOfWeek.includes(idx)?"#fff":"var(--ink2)",fontSize:11,fontWeight:800,cursor:"pointer"}}>{d}</button>
                 ))}
               </div>
             </div>
@@ -1509,7 +1722,7 @@ function ContactsPanel({ senior, patch, plan }) {
         <div className="empty-state"><Icon name="phone" size={36}/><p>Wala pang naka-listang contact.</p></div>
       ) : contacts.map(c=>(
         <div className="row-item" key={c.id}>
-          <div className="row-avatar" style={{background:"var(--cream2)",color:"var(--red)",fontFamily:"var(--font-display)",fontWeight:700}}>{c.name[0]}</div>
+          <div className="row-avatar" style={{background:"var(--cream2)",color:"var(--accent)",fontFamily:"var(--font-display)",fontWeight:700}}>{c.name[0]}</div>
           <div className="row-body"><div className="t1">{c.name}</div><div className="t2">{c.rel} · {c.num}</div></div>
           <div className="row-actions">
             <button className="icon-btn" onClick={()=>setForm(c)}><Icon name="settings" size={14}/></button>
@@ -1598,10 +1811,10 @@ function SafeZonePanel({ senior, patch }) {
             </div>
           </div>
           {z && (
-            <div className="map-status-chip" style={{background:inZone===false?"rgba(196,48,30,0.09)":"rgba(26,140,74,0.09)"}}>
-              <Icon name={inZone===false?"alert_tri":"checkmark"} size={16} color={inZone===false?"var(--red)":"var(--green)"}/>
+            <div className="map-status-chip" style={{background:inZone===false?"rgba(192,112,16,0.09)":"rgba(26,140,74,0.09)"}}>
+              <Icon name={inZone===false?"alert_tri":"checkmark"} size={16} color={inZone===false?"var(--gold)":"var(--green)"}/>
               <div>
-                <div style={{fontSize:11.5,fontWeight:800,color:inZone===false?"var(--red)":"var(--green)"}}>{inZone===false?"Labas sa Safe Zone":inZone===true?"Nasa loob ng Safe Zone":"—"}</div>
+                <div style={{fontSize:11.5,fontWeight:800,color:inZone===false?"var(--gold)":"var(--green)"}}>{inZone===false?"Labas sa Safe Zone":inZone===true?"Nasa loob ng Safe Zone":"—"}</div>
                 <div style={{fontSize:11,color:"var(--ink3)",fontWeight:700}}>{dist!==null?`${dist.toFixed(2)} km mula sa ${z.label}`:"—"}</div>
               </div>
             </div>
@@ -1686,7 +1899,7 @@ function VitalsPanel({ senior, patch }) {
       <div className="panel">
         <div className="panel-head"><div><h2><Icon name="activity" size={17}/>Mga Trend</h2><p>Batay sa mga huling entry — gabay lamang, hindi panghalili sa doktor</p></div></div>
         <div className="vital-chart-grid">
-          <VitalChart label="Blood Pressure (systolic)" points={byType("bp")} unit="mmHg" color="var(--red)" extractValue={v=>parseFloat(String(v).split("/")[0])}/>
+          <VitalChart label="Blood Pressure (systolic)" points={byType("bp")} unit="mmHg" color="var(--accent)" extractValue={v=>parseFloat(String(v).split("/")[0])}/>
           <VitalChart label="Blood Sugar" points={byType("sugar")} unit="mg/dL" color="var(--gold)"/>
           <VitalChart label="Pulse" points={byType("pulse")} unit="bpm" color="#E91E8C"/>
           <VitalChart label="Timbang" points={byType("weight")} unit="kg" color="#6B35C4"/>
@@ -1699,7 +1912,7 @@ function VitalsPanel({ senior, patch }) {
         {vitals.length===0 ? <div className="empty-state"><Icon name="droplet" size={36}/><p>Wala pang naka-log na vitals.</p></div> :
         vitals.slice(0,15).map(v=>(
           <div className="row-item" key={v.id}>
-            <div className="row-avatar" style={{background:"rgba(196,48,30,0.08)",color:"var(--red)"}}><Icon name="droplet" size={16}/></div>
+            <div className="row-avatar" style={{background:"rgba(15,155,142,0.08)",color:"var(--accent)"}}><Icon name="droplet" size={16}/></div>
             <div className="row-body"><div className="t1">{v.value} {v.unit}</div><div className="t2">{TYPE_LABEL[v.type]||v.type} · {fmtTime(v.time)}</div></div>
           </div>
         ))}
@@ -1772,9 +1985,9 @@ function LettersPanel({ household, session }) {
     <>
       <div className="panel" style={{background:"linear-gradient(160deg,var(--card-bg) 0%,var(--cream2) 100%)"}}>
         <div className="panel-head">
-          <div><h2><Icon name="heart" size={17} color="var(--red)"/>Naks, My Letter</h2><p>Isang pribadong sulat para sa 'yo, caregiver</p></div>
+          <div><h2><Icon name="heart" size={17} color="var(--accent)"/>Naks, My Letter</h2><p>Isang pribadong sulat para sa 'yo, caregiver</p></div>
         </div>
-        <div style={{fontFamily:"var(--font-display)",fontSize:15,fontStyle:"italic",fontWeight:600,color:"var(--red-dark)",marginBottom:16,minHeight:24}}>
+        <div style={{fontFamily:"var(--font-display)",fontSize:15,fontStyle:"italic",fontWeight:600,color:"var(--accent-dark)",marginBottom:16,minHeight:24}}>
           "{NAKS_PROMPTS_DASH[promptIdx]}"
         </div>
         {justSent ? (
@@ -1785,7 +1998,7 @@ function LettersPanel({ household, session }) {
         ) : (
           <>
             <textarea value={text} onChange={e=>setText(e.target.value)} placeholder="Isulat ang nasa isip at puso mo ngayon…"
-              style={{width:"100%",minHeight:100,borderRadius:14,border:"1.5px solid var(--card-border)",padding:"14px 16px",fontSize:14,fontWeight:600,color:"var(--ink)",background:"var(--card-bg)",outline:"none",resize:"vertical",fontFamily:"var(--font-body)"}}/>
+              style={{width:"100%",minHeight:100,borderRadius:18,border:"1.5px solid var(--card-border)",padding:"14px 16px",fontSize:14,fontWeight:600,color:"var(--ink)",background:"var(--card-bg)",outline:"none",resize:"vertical",fontFamily:"var(--font-body)"}}/>
             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginTop:12}}>
               <span style={{fontSize:11.5,color:"var(--ink3)",fontWeight:700}}><Icon name="lock" size={11} color="var(--ink3)"/> Pribado — tanging ikaw at kapwa caregiver dito ang makakabasa</span>
               <button className="btn-save" disabled={!text.trim()||busy} onClick={send}>{busy?"…":"Ipadala"}</button>
@@ -1801,7 +2014,7 @@ function LettersPanel({ household, session }) {
         ) : letters.length===0 ? (
           <div className="empty-state"><Icon name="heart" size={36}/><p>Wala pang liham. Simulan ang una mo sa itaas.</p></div>
         ) : letters.map(l=>(
-          <div key={l.id} style={{background:"var(--cream2)",borderRadius:16,padding:"16px 18px",marginBottom:12,borderLeft:"4px solid var(--red)"}}>
+          <div key={l.id} style={{background:"var(--cream2)",borderRadius:16,padding:"16px 18px",marginBottom:12,borderLeft:"4px solid var(--accent)"}}>
             <p style={{fontSize:13.5,color:"var(--ink)",fontWeight:600,lineHeight:1.7,whiteSpace:"pre-wrap"}}>{l.content}</p>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:10}}>
               <span style={{fontSize:11,color:"var(--ink3)",fontWeight:700}}>{l.author_email} · {fmtTime(l.created_at)}</span>
@@ -2050,7 +2263,7 @@ function CalEventModal({ initial, onSave, onDelete, onClose }) {
             <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
               {DOW_SHORT_TL.map((d,idx)=>(
                 <button key={idx} type="button" onClick={()=>toggleDay(idx)}
-                  style={{width:42,height:36,borderRadius:10,border:`1.5px solid ${f.daysOfWeek.includes(idx)?"var(--red)":"var(--card-border)"}`,background:f.daysOfWeek.includes(idx)?"var(--red)":"var(--cream2)",color:f.daysOfWeek.includes(idx)?"#fff":"var(--ink2)",fontSize:11.5,fontWeight:800,cursor:"pointer"}}>{d}</button>
+                  style={{width:42,height:36,borderRadius:10,border:`1.5px solid ${f.daysOfWeek.includes(idx)?"var(--accent)":"var(--card-border)"}`,background:f.daysOfWeek.includes(idx)?"var(--accent)":"var(--cream2)",color:f.daysOfWeek.includes(idx)?"#fff":"var(--ink2)",fontSize:11.5,fontWeight:800,cursor:"pointer"}}>{d}</button>
               ))}
             </div>
             <p style={{fontSize:11,color:"var(--ink3)",fontWeight:600,marginTop:6}}>Halimbawa: piliin ang Lunes, Miyerkules, Biyernes para sa 3x isang linggo.</p>
@@ -2097,7 +2310,7 @@ function DevicesPanel({ household }) {
       <div className="panel">
         <div className="panel-head"><div><h2><Icon name="phone" size={17}/>Family Code</h2><p>Ilagay ito sa NakNak app ng senior, sa Settings → Cloud Sync</p></div></div>
         <div style={{display:"flex",alignItems:"center",gap:12}}>
-          <div style={{fontFamily:"var(--font-mono)",fontSize:28,fontWeight:700,letterSpacing:6,color:"var(--red)",background:"var(--cream2)",borderRadius:14,padding:"14px 22px",flex:1,textAlign:"center"}}>{code}</div>
+          <div style={{fontFamily:"var(--font-mono)",fontSize:28,fontWeight:700,letterSpacing:6,color:"var(--accent)",background:"var(--cream2)",borderRadius:14,padding:"14px 22px",flex:1,textAlign:"center"}}>{code}</div>
           <button className="btn-add" onClick={copy}><Icon name="copy" size={14}/>{copied?"Nakopya!":"Kopyahin"}</button>
           <button className="btn-cancel" disabled={busy} onClick={regenerate}>{busy?"…":"Gumawa ng Bago"}</button>
         </div>
@@ -2120,8 +2333,8 @@ function DevicesPanel({ household }) {
 
 /* ── TIMELINE: full scrollable event history ────────────────────────────── */
 function TimelinePanel({ senior }) {
-  const EVENT_COLOR = { checkin:"var(--green)", sos:"var(--red)", fall:"var(--red)", med_taken:"var(--green)", med_missed:"var(--red)", med_snoozed:"var(--gold)", gps:"var(--gold)", notif:"var(--ink2)", vitals:"#E91E8C" };
-  const EVENT_BG = { checkin:"rgba(26,140,74,0.1)", sos:"rgba(196,48,30,0.1)", fall:"rgba(196,48,30,0.1)", med_taken:"rgba(26,140,74,0.1)", med_missed:"rgba(196,48,30,0.1)", med_snoozed:"rgba(192,112,16,0.1)", gps:"rgba(192,112,16,0.1)", notif:"var(--cream2)", vitals:"rgba(233,30,140,0.1)" };
+  const EVENT_COLOR = { checkin:"var(--green)", sos:"var(--red)", fall:"var(--red)", med_taken:"var(--green)", med_missed:"var(--gold)", med_snoozed:"var(--gold)", gps:"var(--gold)", notif:"var(--ink2)", vitals:"#E91E8C" };
+  const EVENT_BG = { checkin:"rgba(26,140,74,0.1)", sos:"rgba(196,48,30,0.1)", fall:"rgba(196,48,30,0.1)", med_taken:"rgba(26,140,74,0.1)", med_missed:"rgba(192,112,16,0.1)", med_snoozed:"rgba(192,112,16,0.1)", gps:"rgba(192,112,16,0.1)", notif:"var(--cream2)", vitals:"rgba(233,30,140,0.1)" };
   const log = senior.eventLog||[];
   return (
     <div className="panel">
@@ -2243,13 +2456,13 @@ function SettingsPanel({ theme, plan, session, onDisconnect, setPlan }) {
         <div className="panel-head"><h2><Icon name="sun" size={17}/>Display Mode</h2></div>
         <div className="theme-picker">
           <div className={"theme-opt"+(theme.mode==="light"?" on":"")} onClick={()=>theme.setMode("light")}>
-            <Icon name="sun" size={22} color={theme.mode==="light"?"var(--red)":"var(--ink3)"}/><span>Light</span>
+            <Icon name="sun" size={22} color={theme.mode==="light"?"var(--accent)":"var(--ink3)"}/><span>Light</span>
           </div>
           <div className={"theme-opt"+(theme.mode==="dark"?" on":"")} onClick={()=>theme.setMode("dark")}>
-            <Icon name="moon" size={22} color={theme.mode==="dark"?"var(--red)":"var(--ink3)"}/><span>Dark</span>
+            <Icon name="moon" size={22} color={theme.mode==="dark"?"var(--accent)":"var(--ink3)"}/><span>Dark</span>
           </div>
           <div className={"theme-opt"+(theme.mode==="auto"?" on":"")} onClick={()=>theme.setMode("auto")}>
-            <Icon name="clock" size={22} color={theme.mode==="auto"?"var(--red)":"var(--ink3)"}/><span>Auto</span>
+            <Icon name="clock" size={22} color={theme.mode==="auto"?"var(--accent)":"var(--ink3)"}/><span>Auto</span>
           </div>
         </div>
         <p style={{fontSize:11.5,color:"var(--ink3)",fontWeight:600,marginTop:12}}>Ang Auto ay sumusunod sa oras — Dark mula 6PM hanggang 6AM, kagaya ng app sa telepono.</p>
