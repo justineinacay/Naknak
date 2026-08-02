@@ -40,8 +40,8 @@ const { useState, useEffect, useRef, useCallback } = React;
 // ─── PLANS ───────────────────────────────────────────────────────────────────
 const PLANS = {
  free:   { id:"free",   name:"Libre",    price:"₱0",  tag:"palagi",   medications:false, fall:false, multiMember:false, smartAlerts:false, vitals:false, safeZone:false, maxContacts:1 },
- essential: { id:"essential", name:"Essential",  price:"₱100", tag:"isang bayad", medications:true, fall:false, multiMember:false, smartAlerts:false, vitals:true, safeZone:false, maxContacts:2 },
- family:  { id:"family",  name:"Family Plan", price:"₱199", tag:"/buwan",   medications:true, fall:true, multiMember:true, smartAlerts:true, vitals:true, safeZone:true, maxContacts:3 },
+ essential: { id:"essential", name:"Kailangan",  price:"₱100", tag:"isang bayad", medications:true, fall:false, multiMember:false, smartAlerts:false, vitals:true, safeZone:false, maxContacts:2 },
+ family:  { id:"family",  name:"Pamilya", price:"₱199", tag:"/buwan",   medications:true, fall:true, multiMember:true, smartAlerts:true, vitals:true, safeZone:true, maxContacts:3 },
 };
 const canUse = (plan, feat) =>PLANS[plan]?.[feat] ?? true;
 
@@ -331,7 +331,7 @@ const I18N = {
   updatesConditions:"Kondisyon",
   updatesAllergies:"Allergies",
   // Plan names
-  planFree:"Libre", planEssential:"Essential", planFamily:"Family Plan",
+  planFree:"Libre", planEssential:"Kailangan", planFamily:"Pamilya",
   // Settings screen
   settingsTitle:"Settings", settingsSub:"I-customize ang NakNak.",
   displayModeLabel:"DISPLAY MODE", lightLabel:"Light", darkLabel:"Dark", autoLabel:"Auto",
@@ -347,7 +347,7 @@ const I18N = {
   takenLabel:"Nainom", missedLabel:"Nag-miss", pendingLabel:"Naghihintay",
   noMedsLabel:"Walang gamot ngayon.", addMedBtnLabel:"Dagdag Gamot", uploadRxBtnLabel:"Upload Reseta",
   // Dashboard screen
-  dashSub:"Isang tingin sa lahat.",
+  dashTitlePrefix:"Dashboard ni", dashSub:"Isang tingin sa lahat.",
   allowNotifTitle:"I-allow ang Notifications", allowNotifDesc:"Para matanggap ang medication alarms at SOS alerts",
   allowBtnLabel:"I-allow",
   allSeniorLabel:"LAHAT NG SENIOR", activeLabel:"AKTIBO", noCheckinLabel:"Wala pang check-in",
@@ -363,6 +363,10 @@ const I18N = {
   contactsAtLimitTitle:(planName)=>`Umabot na sa limitasyon ng ${planName}`,
   contactsAtLimitDesc:"I-upgrade para magdagdag pa ng emergency contact →",
   callLabel:"Tawagan", smsLabel:"SMS",
+  medStatusDone:"Nainom ✓", medStatusPending:"Naghihintay", medStatusUpcoming:"Mamaya pa", medStatusSnoozed:"Snoozed", medStatusMissed:"Nalaktawan",
+  progressNowLabel:"Progress ngayon", missedAlertTitle:"May gamot na hindi nainom!",
+  notifySentLabel:"✓ Naipadala", notifyBtnLabel:"I-notify", takenAtPrefix:"Nainom ng", removeLabel:"Tanggalin",
+  takenBtnLabel:"Nainom na", uploadedLabel:"Na-upload ✓", snoozeBtnLabel:"I-snooze",
  },
  en: {
   code:"en", flag:"EN", name:"English",
@@ -467,7 +471,7 @@ const I18N = {
   updatesAllergies:"Allergies",
   navHome:"Home", navMed:"Meds", navContacts:"Contacts", navId:"My ID", navVault:"Vault", navPrep:"Prep",
   navDash:"Dashboard", navSettings:"Settings",
-  planFree:"Free", planEssential:"Essential", planFamily:"Family Plan",
+  planFree:"Libre", planEssential:"Kailangan", planFamily:"Pamilya",
   settingsTitle:"Settings", settingsSub:"Customize NakNak.",
   displayModeLabel:"DISPLAY MODE", lightLabel:"Light", darkLabel:"Dark", autoLabel:"Auto",
   currentPlanLabel:"CURRENT PLAN", upgradeLabel:"Upgrade",
@@ -480,7 +484,7 @@ const I18N = {
   addBtnLabel:"+ Add", medsStatusLabel:"MEDICATION STATUS TODAY",
   takenLabel:"Taken", missedLabel:"Missed", pendingLabel:"Pending",
   noMedsLabel:"No medications yet.", addMedBtnLabel:"Add Medication", uploadRxBtnLabel:"Upload Prescription",
-  dashSub:"One view of everything.",
+  dashTitlePrefix:"Dashboard for", dashSub:"One view of everything.",
   allowNotifTitle:"Allow Notifications", allowNotifDesc:"To receive medication alarms and SOS alerts",
   allowBtnLabel:"Allow",
   allSeniorLabel:"ALL SENIORS", activeLabel:"ACTIVE", noCheckinLabel:"No check-in yet",
@@ -494,6 +498,10 @@ const I18N = {
   contactsAtLimitTitle:(planName)=>`Reached the ${planName} limit`,
   contactsAtLimitDesc:"Upgrade to add more emergency contacts →",
   callLabel:"Call", smsLabel:"SMS",
+  medStatusDone:"Taken ✓", medStatusPending:"Pending", medStatusUpcoming:"Later", medStatusSnoozed:"Snoozed", medStatusMissed:"Missed",
+  progressNowLabel:"Progress today", missedAlertTitle:"A medication was missed!",
+  notifySentLabel:"✓ Sent", notifyBtnLabel:"Notify", takenAtPrefix:"Taken at", removeLabel:"Remove",
+  takenBtnLabel:"Taken", uploadedLabel:"Uploaded ✓", snoozeBtnLabel:"Snooze",
  },
  ceb: {
   code:"ceb", flag:"CEB", name:"Bisaya",
@@ -598,7 +606,7 @@ const I18N = {
   updatesAllergies:"Allergies",
   navHome:"Home", navMed:"Tambal", navContacts:"Contacts", navId:"ID ko", navVault:"Vault", navPrep:"Prep",
   navDash:"Dashboard", navSettings:"Settings",
-  planFree:"Libre", planEssential:"Essential", planFamily:"Family Plan",
+  planFree:"Libre", planEssential:"Kailangan", planFamily:"Pamilya",
   settingsTitle:"Mga Setting", settingsSub:"I-customize ang NakNak.",
   displayModeLabel:"DISPLAY MODE", lightLabel:"Light", darkLabel:"Dark", autoLabel:"Auto",
   currentPlanLabel:"KASAMTANGANG PLANO", upgradeLabel:"I-upgrade",
@@ -611,7 +619,7 @@ const I18N = {
   addBtnLabel:"+ Dugang", medsStatusLabel:"KAHIMTANG SA TAMBAL KARON",
   takenLabel:"Na-inom", missedLabel:"Na-miss", pendingLabel:"Naghulat",
   noMedsLabel:"Wala pay tambal karon.", addMedBtnLabel:"Dugang Tambal", uploadRxBtnLabel:"I-upload ang Reseta",
-  dashSub:"Usa ka tan-aw sa tanan.",
+  dashTitlePrefix:"Dashboard ni", dashSub:"Usa ka tan-aw sa tanan.",
   allowNotifTitle:"I-allow ang Notifications", allowNotifDesc:"Para madawat ang medication alarms ug SOS alerts",
   allowBtnLabel:"I-allow",
   allSeniorLabel:"TANANG SENIOR", activeLabel:"AKTIBO", noCheckinLabel:"Wala pay check-in",
@@ -625,6 +633,10 @@ const I18N = {
   contactsAtLimitTitle:(planName)=>`Naabot na ang limitasyon sa ${planName}`,
   contactsAtLimitDesc:"I-upgrade para makadugang og emergency contact →",
   callLabel:"Tawagan", smsLabel:"SMS",
+  medStatusDone:"Nainom ✓", medStatusPending:"Naghihintay", medStatusUpcoming:"Mamaya pa", medStatusSnoozed:"Snoozed", medStatusMissed:"Nalaktawan",
+  progressNowLabel:"Progress ngayon", missedAlertTitle:"May gamot na hindi nainom!",
+  notifySentLabel:"✓ Naipadala", notifyBtnLabel:"I-notify", takenAtPrefix:"Nainom ng", removeLabel:"Tanggalin",
+  takenBtnLabel:"Nainom na", uploadedLabel:"Na-upload ✓", snoozeBtnLabel:"I-snooze",
  },
 };
 
@@ -748,13 +760,13 @@ function groupMedsByTime(meds, lang) {
  });
  return g;
 }
-function medStatusCfg(status, t) {
+function medStatusCfg(status, t, tr) {
  return ({
-  done:  { label:"Nainom ✓",    color:t.green, bg:t.greenBg, border:t.greenBorder },
-  pending: { label:"Naghihintay", color:t.warn, bg:t.warnBg, border:t.warnBorder },
-  upcoming:{ label:"Mamaya pa",    color:t.text3, bg:t.bg2,   border:t.cardBorder },
-  snoozed: { label:"Snoozed",    color:t.text3, bg:t.bg2,   border:t.cardBorder },
-  missed: { label:"Nalaktawan",  color:t.red,  bg:t.redBg,  border:t.redBorder  },
+  done:  { label:tr("medStatusDone"),    color:t.green, bg:t.greenBg, border:t.greenBorder },
+  pending: { label:tr("medStatusPending"), color:t.warn, bg:t.warnBg, border:t.warnBorder },
+  upcoming:{ label:tr("medStatusUpcoming"),    color:t.text3, bg:t.bg2,   border:t.cardBorder },
+  snoozed: { label:tr("medStatusSnoozed"),    color:t.text3, bg:t.bg2,   border:t.cardBorder },
+  missed: { label:tr("medStatusMissed"),  color:t.red,  bg:t.redBg,  border:t.redBorder  },
  })[status] || { label:status, color:t.text3, bg:t.bg2, border:t.cardBorder };
 }
 // ─── GPS ─────────────────────────────────────────────────────────────────────
@@ -1371,6 +1383,7 @@ function EmergencyCallOverlay({ contact, onCancel, onComplete, t, gps }) {
 
 // ─── NOTIFICATION PERMISSION BANNER ──────────────────────────────────────────
 function NotifBanner({ t, onGranted }) {
+ const tr = useTr();
  const [vis, setVis] = useState(true);
  if (!('Notification' in window) || Notification.permission === 'granted' || !vis) return null;
  if (Notification.permission === 'denied') return null;
@@ -1384,10 +1397,10 @@ function NotifBanner({ t, onGranted }) {
   <div style={{margin:"0 0 8px",padding:"12px 16px",background:t.warnBg,border:`1.5px solid ${t.warnBorder}`,borderRadius:18,display:"flex",alignItems:"center",gap:12}}>
    <span style={{flexShrink:0}}><Icon name="bell" size={22} color={t.warn}/></span>
    <div style={{flex:1}}>
-    <div style={{fontSize:13,fontWeight:800,color:t.warn}}>I-allow ang Notifications</div>
-    <div style={{fontSize:11,color:t.text3,fontWeight:600,marginTop:2}}>Para matanggap ang medication alarms at SOS alerts</div>
+    <div style={{fontSize:13,fontWeight:800,color:t.warn}}>{tr("allowNotifTitle")}</div>
+    <div style={{fontSize:11,color:t.text3,fontWeight:600,marginTop:2}}>{tr("allowNotifDesc")}</div>
    </div>
-   <button onClick={request} style={{background:t.warn,border:"none",borderRadius:12,padding:"8px 14px",cursor:"pointer",fontSize:12,fontWeight:900,color:"#fff",flexShrink:0}}>I-allow</button>
+   <button onClick={request} style={{background:t.warn,border:"none",borderRadius:12,padding:"8px 14px",cursor:"pointer",fontSize:12,fontWeight:900,color:"#fff",flexShrink:0}}>{tr("allowBtnLabel")}</button>
    <button onClick={()=>setVis(false)} style={{background:"none",border:"none",cursor:"pointer",color:t.text3,fontSize:18,padding:0,flexShrink:0}}>×</button>
   </div>
  );
@@ -1452,7 +1465,7 @@ function GPSChip({ gps, t, onRefresh }) {
 function MedicalIDSenior({ senior, t, goTo, a11y, lang }) {
  const p = senior?.medicalProfile || {};
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Ang Aking ID" sub="Ipakita sa doctor o rescue." back={()=>goTo('home')}/>
    <div style={{flex:1,overflow:"auto",padding:"16px",display:"flex",flexDirection:"column",gap:14}}>
     {/* ID Card */}
@@ -1507,7 +1520,7 @@ function MedicalIDEditCare({ goTo, t }) {
  const addCondition = () =>{ if(!newCondition.trim())return; setP(x=>({...x,conditions:[...x.conditions,newCondition.trim()]})); setNewCondition(""); };
  const inp = {width:"100%",height:48,borderRadius:14,border:`1.5px solid ${t.cardBorder}`,padding:"0 16px",fontSize:14,fontWeight:600,background:t.bg,color:t.text,outline:"none"};
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Medical Profile" sub={`Para kay ${s?.name}`} back={()=>goTo('dash')} right={
     <button onClick={save} style={{background:saved?t.greenBg:t.red,border:saved?`1.5px solid ${t.greenBorder}`:"none",borderRadius:14,padding:"7px 16px",cursor:"pointer",fontSize:13,fontWeight:900,color:saved?t.green:"#fff",transition:"all 0.3s"}}>
      {saved?" Saved!":"I-save"}
@@ -1610,7 +1623,7 @@ function QRCodeCareReal({ goTo, t }) {
   } catch(e) { console.warn("QR:", e); }
  }, [qrData, t.isDark]);
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="QR Code" sub={`Para kay ${s?.name}`} back={()=>goTo('dash')}/>
    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,gap:20}}>
     {qrFailed&&<div style={{padding:"16px 18px",background:t.warnBg,border:`1.5px solid ${t.warnBorder}`,borderRadius:18,maxWidth:280,textAlign:"center"}}><div style={{fontSize:13,fontWeight:900,color:t.warn}}>Hindi ma-load ang QR generator</div><div style={{fontSize:11.5,color:t.text3,fontWeight:600,marginTop:6,lineHeight:1.5}}>Kailangan ng internet sa unang pag-load. Naka-save pa rin ang emergency info sa ibaba.</div></div>}
@@ -1697,7 +1710,7 @@ function VitalsLogCare({ goTo, t, plan }) {
 
  const inp = {height:48,borderRadius:14,border:`1.5px solid ${t.cardBorder}`,padding:"0 14px",fontSize:15,fontWeight:700,background:t.bg,color:t.text,outline:"none",width:"100%"};
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Health Vitals" sub={`Para kay ${s?.name||"Senior"}`} back={()=>goTo('dash')}/>
    {/* Tabs */}
    <div style={{display:"flex",gap:0,background:t.bg2,borderBottom:`1px solid ${t.cardBorder}`,flexShrink:0}}>
@@ -1711,7 +1724,7 @@ function VitalsLogCare({ goTo, t, plan }) {
     {/* Add new reading */}
     {!canUse(plan,"vitals") ? (
      <div style={{background:t.warnBg,border:`1.5px solid ${t.warnBorder}`,borderRadius:18,padding:"14px 16px",marginBottom:14}}>
-      <div style={{fontSize:13,fontWeight:800,color:t.warn}}>Vitals Log — Essential Plan</div>
+      <div style={{fontSize:13,fontWeight:800,color:t.warn}}>Vitals Log — Kailangan Plan</div>
       <div style={{fontSize:12,color:t.text2,fontWeight:600,marginTop:4}}>I-upgrade para ma-track ang health vitals ni Senior.</div>
       <button onClick={()=>goTo('pricing')} style={{marginTop:10,height:36,borderRadius:18,background:t.warn,border:"none",cursor:"pointer",fontSize:12,fontWeight:900,color:"#fff",padding:"0 16px"}}>I-upgrade</button>
      </div>
@@ -1771,12 +1784,12 @@ function MedAdherenceReport({ goTo, t, plan }) {
  const countTaken = (data) =>data.filter(d=>d.taken).length;
 
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Med Report" sub={`Linggu-linggong ulat ni ${s?.name||"Senior"}`} back={()=>goTo('dash')}/>
    <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px"}}>
     {!canUse(plan,"medications") && (
      <div style={{background:t.warnBg,border:`1.5px solid ${t.warnBorder}`,borderRadius:18,padding:"14px",marginBottom:14}}>
-      <div style={{fontSize:13,fontWeight:800,color:t.warn}}>Med Report — Essential Plan</div>
+      <div style={{fontSize:13,fontWeight:800,color:t.warn}}>Med Report — Kailangan Plan</div>
       <div style={{fontSize:12,color:t.text2,fontWeight:600,marginTop:4}}>I-upgrade para makita ang medication compliance report.</div>
       <button onClick={()=>goTo('pricing')} style={{marginTop:10,height:36,borderRadius:18,background:t.warn,border:"none",cursor:"pointer",fontSize:12,fontWeight:900,color:"#fff",padding:"0 16px"}}>I-upgrade</button>
      </div>
@@ -1857,13 +1870,13 @@ function SafeZoneCare({ goTo, t, plan }) {
 
  const inp = {height:48,borderRadius:14,border:`1.5px solid ${t.cardBorder}`,padding:"0 14px",fontSize:14,fontWeight:700,background:t.bg,color:t.text,outline:"none",width:"100%"};
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Safe Zone" sub={`Para kay ${s?.name||"Senior"}`} back={()=>goTo('dash')}/>
    <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px"}}>
     {!canUse(plan,"safeZone") ? (
      <div style={{background:t.warnBg,border:`1.5px solid ${t.warnBorder}`,borderRadius:18,padding:"14px"}}>
-      <div style={{fontSize:13,fontWeight:800,color:t.warn}}>Safe Zone — Family Plan</div>
-      <div style={{fontSize:12,color:t.text2,fontWeight:600,marginTop:4}}>I-upgrade sa Family Plan para ma-set ang safe zone ng Senior.</div>
+      <div style={{fontSize:13,fontWeight:800,color:t.warn}}>Safe Zone — Pamilya Plan</div>
+      <div style={{fontSize:12,color:t.text2,fontWeight:600,marginTop:4}}>I-upgrade sa Pamilya Plan para ma-set ang safe zone ng Senior.</div>
       <button onClick={()=>goTo('pricing')} style={{marginTop:10,height:36,borderRadius:18,background:t.warn,border:"none",cursor:"pointer",fontSize:12,fontWeight:900,color:"#fff",padding:"0 16px"}}>I-upgrade</button>
      </div>
     ) : (
@@ -1947,7 +1960,7 @@ function NotesCare({ goTo, t }) {
   setText("");
  };
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Mga Tala" sub={`Para kay ${s?.name||"Senior"}`} back={()=>goTo('dash')}/>
    <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px"}}>
     {/* Add note */}
@@ -1995,7 +2008,7 @@ function TimelineScreen({ goTo, t }) {
  const typeColor = { checkin:t.green, sos:t.red, fall:t.warn, med_taken:t.text, med_missed:t.red, med_snoozed:t.text3, gps:"#2196A8", notif:t.warn, vitals:"#E91E8C", notes:t.text2 };
  const typeBg = { checkin:t.greenBg, sos:t.redBg, fall:t.warnBg, med_taken:t.bg2, med_missed:t.redBg, med_snoozed:t.bg2, gps:"rgba(33,150,168,0.08)", notif:t.warnBg, vitals:"rgba(233,30,140,0.08)", notes:t.bg2 };
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Timeline" sub={`Kasaysayan ni ${s?.name||"Senior"}`} back={()=>goTo('dash')}/>
    <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:0}}>
     {events.length === 0 && (
@@ -2029,6 +2042,7 @@ function TimelineScreen({ goTo, t }) {
 
 // ─── MULTI-SENIOR MANAGER (Caregiver · Family Plan) ───────────────────────────
 function MultiSeniorManager({ goTo, t, plan }) {
+ const tr = useTr();
  const store = useStore();
  const [adding, setAdding] = useState(false);
  const [newName, setNewName] = useState("");
@@ -2037,34 +2051,34 @@ function MultiSeniorManager({ goTo, t, plan }) {
  if (!canUse(plan, 'multiMember')) {
   return (
    <div style={{background:t.warnBg,border:`1.5px solid ${t.warnBorder}`,borderRadius:18,padding:"14px 16px",margin:"0 16px 12px"}}>
-    <div style={{fontSize:13,fontWeight:800,color:t.warn,marginBottom:4}}>Multiple Seniors — Family Plan</div>
-    <div style={{fontSize:12,color:t.text2,fontWeight:600}}>I-upgrade sa Family Plan para mapamahalaan ang hanggang 4 na senior sa iisang account.</div>
+    <div style={{fontSize:13,fontWeight:800,color:t.warn,marginBottom:4}}>Multiple Seniors — Pamilya Plan</div>
+    <div style={{fontSize:12,color:t.text2,fontWeight:600}}>I-upgrade sa Pamilya Plan para mapamahalaan ang hanggang 4 na senior sa iisang account.</div>
     <button onClick={()=>goTo('pricing')} style={{marginTop:10,height:38,borderRadius:19,background:t.warn,border:"none",cursor:"pointer",fontSize:12,fontWeight:900,color:"#fff",padding:"0 16px"}}>I-upgrade ngayon</button>
    </div>
   );
  }
  return (
   <div style={{padding:"0 16px 12px"}}>
-   <div style={{fontSize:11,fontWeight:800,color:t.text3,letterSpacing:1.5,marginBottom:10}}>LAHAT NG SENIOR</div>
+   <div style={{fontSize:11,fontWeight:800,color:t.text3,letterSpacing:1.5,marginBottom:10}}>{tr("allSeniorLabel")}</div>
    {seniors.map(s=>(
     <div key={s.id} onClick={()=>STORE.setActiveSenior(s.id)} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",borderRadius:16,background:active===s.id?t.redBg:t.card,border:`1.5px solid ${active===s.id?t.red:t.cardBorder}`,cursor:"pointer",marginBottom:8}}>
      <div style={{width:38,height:38,borderRadius:19,background:`linear-gradient(135deg,${t.red}55,${t.warn}55)`,display:"flex",alignItems:"center",justifyContent:"center"}}><Icon name="senior_person" size={20} color={t.red}/></div>
      <div style={{flex:1}}>
       <div style={{fontSize:14,fontWeight:800,color:active===s.id?t.red:t.text}}>{s.name}</div>
-      <div style={{fontSize:11,color:t.text3,fontWeight:600}}>{s.battery}% · {s.lastCheckin?"Check-in:"+s.lastCheckin:"Wala pang check-in"}</div>
+      <div style={{fontSize:11,color:t.text3,fontWeight:600}}>{s.battery}% · {s.lastCheckin?"Check-in:"+s.lastCheckin:tr("noCheckinLabel")}</div>
      </div>
-     {active===s.id&&<div style={{fontSize:11,fontWeight:900,color:t.red}}>AKTIBO ✓</div>}
+     {active===s.id&&<div style={{fontSize:11,fontWeight:900,color:t.red}}>{tr("activeLabel")} ✓</div>}
     </div>
    ))}
    {seniors.length < 4 && (
     adding ? (
      <div style={{display:"flex",gap:8,marginTop:8}}>
       <input value={newName} onChange={e=>setNewName(e.target.value)} placeholder="Buong pangalan ng senior" style={{flex:1,height:44,borderRadius:14,border:`1.5px solid ${t.cardBorder}`,padding:"0 14px",fontSize:13,fontWeight:600,background:t.bg,color:t.text,outline:"none"}}/>
-      <button onClick={()=>{if(newName.trim()){STORE.addSeniorProfile({name:newName.trim()});setNewName("");setAdding(false);}}} style={{height:44,padding:"0 16px",borderRadius:14,background:t.green,border:"none",cursor:"pointer",color:"#fff",fontSize:13,fontWeight:800}}>+ Dagdag</button>
+      <button onClick={()=>{if(newName.trim()){STORE.addSeniorProfile({name:newName.trim()});setNewName("");setAdding(false);}}} style={{height:44,padding:"0 16px",borderRadius:14,background:t.green,border:"none",cursor:"pointer",color:"#fff",fontSize:13,fontWeight:800}}>{tr("addBtnLabel")}</button>
       <button onClick={()=>setAdding(false)} style={{height:44,padding:"0 12px",borderRadius:14,background:t.bg2,border:`1px solid ${t.cardBorder}`,cursor:"pointer",color:t.text3,fontSize:13}}>✕</button>
      </div>
     ) : (
-     <button onClick={()=>setAdding(true)} style={{width:"100%",height:44,borderRadius:22,background:"none",border:`2px dashed ${t.cardBorder}`,cursor:"pointer",fontSize:13,fontWeight:800,color:t.text3}}>+ Dagdag na Senior</button>
+     <button onClick={()=>setAdding(true)} style={{width:"100%",height:44,borderRadius:22,background:"none",border:`2px dashed ${t.cardBorder}`,cursor:"pointer",fontSize:13,fontWeight:800,color:t.text3}}>{tr("addSeniorLabel")}</button>
     )
    )}
   </div>
@@ -2295,7 +2309,7 @@ function CaregiverUpdatesSenior({ senior, goTo, t, plan, a11y, lang }) {
  const hasContent = notes.length>0 || vitals.length>0 || zone || meds.length>0 || p.doctorName;
 
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title={i.updatesTitle} sub={i.updatesSub} back={()=>goTo(SR.HOME)}/>
    <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:14}}>
 
@@ -2474,6 +2488,26 @@ function SOSButton({ onPress, t, a11y }) {
  );
 }
 
+function PillNav({ items, active, goTo, t }) {
+ return (
+  <div style={{padding:"8px 10px 12px",background:t.bg,flexShrink:0}}>
+   <div style={{display:"flex",background:t.nav,borderRadius:999,padding:6,boxShadow:`0 8px 20px ${t.shadow}`,border:`1px solid ${t.navBorder}`,gap:2}}>
+    {items.map(item=>{
+     const on = active===item.id;
+     return (
+      <button key={item.id} onClick={()=>!item.locked&&goTo(item.s)} style={{flex:1,minWidth:0,background:"none",border:"none",cursor:item.locked?"default":"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:3,padding:"6px 2px"}}>
+       <div style={{width:30,height:30,borderRadius:15,display:"flex",alignItems:"center",justifyContent:"center",background:on?t.red:"transparent",transition:"background 0.2s ease"}}>
+        <Icon name={item.locked?"lock":item.icon} size={17} color={on?"#fff":item.locked?t.bg3:t.text3}/>
+       </div>
+       <span style={{fontSize:9,fontWeight:on?900:600,letterSpacing:0.3,color:on?t.red:item.locked?t.bg3:t.text3,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:"100%"}}>{item.label}</span>
+      </button>
+     );
+    })}
+   </div>
+  </div>
+ );
+}
+
 function SeniorNav({ active, goTo, t, plan, lang }) {
  const in_ = I18N[lang||"tl"] || I18N.tl;
  const items = [
@@ -2484,19 +2518,7 @@ function SeniorNav({ active, goTo, t, plan, lang }) {
   { id:"vault",  s:SR.VAULT,  label:in_.navVault,  icon:"folder" },
   { id:"prep",   s:SR.PREP,   label:in_.navPrep,   icon:"backpack" },
  ];
- return (
-  <div style={{height:62,display:"flex",background:t.nav,borderTop:`1px solid ${t.navBorder}`,flexShrink:0}}>
-   {items.map(item =>{
-    const on = active === item.id;
-    return (
-     <button key={item.id} onClick={()=>!item.locked&&goTo(item.s)} style={{flex:1,background:"none",border:"none",cursor:item.locked?"default":"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:on?t.red:item.locked?t.bg3:t.text3,borderTop:on?`2.5px solid ${t.red}`:"2.5px solid transparent"}}>
-      <Icon name={item.locked?"lock":item.icon} size={on?20:17} color={on?t.red:item.locked?t.bg3:t.text3}/>
-      <span style={{fontSize:9,fontWeight:on?900:600,letterSpacing:0.3}}>{item.label}</span>
-     </button>
-    );
-   })}
-  </div>
- );
+ return <PillNav items={items} active={active} goTo={goTo} t={t}/>;
 }
 
 function SeniorHome({ name, goTo, t, plan, senior, a11y, lang, textScale, setTextScale }) {
@@ -2511,7 +2533,7 @@ function SeniorHome({ name, goTo, t, plan, senior, a11y, lang, textScale, setTex
  const inZone = zoneDist!==null ? zoneDist <= zone.radiusKm : null;
  const updateCount = noteCount + ((senior?.vitals||[]).length>0?1:0) + (zone?1:0);
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <div style={{padding:"14px 20px 8px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
     <div>
      <div style={{fontSize:12.5,color:t.text3,fontWeight:600}}>{i ? i.goodMorning :"Magandang umaga,"}</div>
@@ -2671,12 +2693,12 @@ function CheckInSenior({ name, onOo, onHindi, t, a11y, lang }) {
 function MedReminderSenior({ senior, goTo, t, plan, a11y, lang }) {
  const meds = senior?.medications || [];
  if (!canUse(plan,"medications")) return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Gamot" sub="Medication Reminders"/>
    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,gap:20,textAlign:"center"}}>
     <Icon name="lock" size={48} color={t.text3} strokeWidth={1.5}/>
     <div style={{fontSize:20,fontWeight:900,color:t.text}}>I-unlock ang Gamot</div>
-    <div style={{fontSize:14,color:t.text3,fontWeight:600,lineHeight:1.7}}>Available sa Essential Plan (₱100).</div>
+    <div style={{fontSize:14,color:t.text3,fontWeight:600,lineHeight:1.7}}>Available sa Kailangan Plan (₱100).</div>
    </div>
    <SeniorNav active="med" goTo={goTo} t={t} plan={plan} lang={lang}/>
   </div>
@@ -2684,7 +2706,7 @@ function MedReminderSenior({ senior, goTo, t, plan, a11y, lang }) {
  const sc={done:t.green,pending:t.warn,upcoming:t.text3,snoozed:t.text3,missed:t.red};
  const sl={done:"Nainom ✓",pending:"Nainom na",upcoming:"Mamaya",snoozed:"Snoozed",missed:"Nalaktawan"};
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Gamot" sub="Paalala sa gamot mo ngayon."/>
    <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:12}}>
     {meds.map(m=>{
@@ -2718,7 +2740,7 @@ function MedReminderSenior({ senior, goTo, t, plan, a11y, lang }) {
 function ContactsListSenior({ senior, goTo, t, plan, a11y, onEmergencyCall, lang }) {
  const contacts = senior?.contacts || [];
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Emergency Contacts" sub="Sila ang tatawagan kung may emergency."/>
    <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:12}}>
     {contacts.length===0&&<div style={{textAlign:"center",padding:"40px 0",color:t.text3,fontSize:14}}>Walang contacts pa. Hilingin sa caregiver mo.</div>}
@@ -2751,7 +2773,7 @@ function ContactsListSenior({ senior, goTo, t, plan, a11y, onEmergencyCall, lang
 
 function QuickIDSenior({ senior, goTo, t, lang }) {
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Ang Aking ID" sub="Ipakita ito sa doctor o rescuer."/>
    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,gap:20}}>
     {senior?.idImage?(<>
@@ -2794,7 +2816,7 @@ function RescueBridge({ goTo, t, a11y, lang }) {
   </button>
  );
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Rescue Bridge" sub="Tumawag agad — 911, 112, LGU" back={()=>goTo(SR.HOME)}/>
    <div style={{flex:1,overflow:"auto",padding:18,display:"flex",flexDirection:"column",gap:14}}>
     <div style={{background:t.warnBg,border:`1.5px solid ${t.warnBorder}`,borderRadius:16,padding:"12px 16px",fontSize:12.5,fontWeight:700,color:t.text2,lineHeight:1.5}}>
@@ -2842,7 +2864,7 @@ function VaultSenior({ senior, goTo, t, a11y, onViewDoc, lang }) {
   setPendingType(null);
  };
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Vault" sub="Mga dokumento mo, ligtas at offline."/>
    <input ref={fileRef} type="file" accept="image/*" capture="environment" style={{display:"none"}} onChange={onFile}/>
    <div style={{flex:1,overflow:"auto",padding:18,display:"flex",flexDirection:"column",gap:14}}>
@@ -2887,7 +2909,7 @@ function VaultDocViewer({ doc, onBack, t, seniorId }) {
   }
  };
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:"#000",overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:"#000",overflow:"hidden"}}>
    <Hdr t={t} title={doc.label} sub="Buong-screen na view para sa responder" back={onBack}/>
    <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",padding:14,overflow:"auto"}}>
     <img src={doc.image} style={{maxWidth:"100%",maxHeight:"100%",borderRadius:14,objectFit:"contain"}}/>
@@ -2908,7 +2930,7 @@ function PrepGoBagSenior({ senior, goTo, t, a11y, lang }) {
  const reset = () =>{ if (window.confirm("I-reset ang Go-Bag checklist?")) STORE.resetGoBag(senior?.id||"s1"); };
  const cats = [...new Set(GO_BAG_ITEMS.map(i=>i.cat))];
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Go-Bag Checklist" sub="Paghahanda para sa kalamidad"/>
    <div style={{flex:1,overflow:"auto",padding:18,display:"flex",flexDirection:"column",gap:14}}>
     <Card t={t} style={{padding:16}}>
@@ -3023,10 +3045,10 @@ function SeniorApp({ onSwitchRole, t, plan, a11y, userName, lang }) {
   goTo(SR.SOS_ACTIVE);
  };
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",position:"relative"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,overflow:"hidden",position:"relative"}}>
    <MedAlarmEngine seniorId={senior?.id||"s1"} meds={senior?.medications||[]} plan={plan}/>
    <SBar t={t} battery={senior?.battery||76} flash={a11y.hearing && screen===SR.SOS_ACTIVE}/>
-   <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden",zoom:textScale}}>
+   <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,overflow:"hidden",zoom:textScale}}>
     {screen===SR.HOME   && <SeniorHome name={name} goTo={s=>s===SR.SOS_ACTIVE?handleSOS():goTo(s)} t={t} plan={plan} senior={senior} a11y={a11y} lang={lang} textScale={textScale} setTextScale={setTextScale}/>}
     {screen===SR.SOS_ACTIVE && <SOSActiveSenior name={name} onCancel={()=>goTo(SR.HOME)} t={t} a11y={a11y} lang={lang}/>}
     {screen===SR.SOS_SENT && <SOSSentSenior name={name} contacts={senior?.contacts} onBack={()=>goTo(SR.HOME)} t={t} lang={lang}/>}
@@ -3154,7 +3176,7 @@ function CalendarCare({ goTo, t }) {
  const deleteEvent = (id) => { if(s) STORE.deleteEvent(s.id, id); setModal(null); };
 
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Calendar" sub={`Para kay ${s?.name||"Senior"}`} back={()=>goTo(CR.DASH)} right={
     <button onClick={()=>setModal({date:calYmd(today)})} style={{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:14,padding:"6px 12px",cursor:"pointer",color:"#fff",fontSize:12,fontWeight:800}}>+ Event</button>
    }/>
@@ -3274,7 +3296,7 @@ function SeniorViewPanel({ goTo, t, plan, lang }) {
  const statusLabels = {ok:"Ayos",warn:"Nag-miss",sos:"SOS",responded:"↩ Sinagot",fall:"Fall"};
 
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Senior View"
     sub={`Live na status ni ${senior.name}`}
     back={()=>goTo(CR.DASH)}
@@ -3481,19 +3503,11 @@ function CaregiverNav({ active, goTo, t }) {
   {id:"contacts", s:CR.CONTACTS, label:"Contacts", icon:"phone"},
   {id:"settings", s:CR.SETTINGS, label:"Settings", icon:"settings"},
  ];
- return (
-  <div style={{height:62,display:"flex",background:t.nav,borderTop:`1px solid ${t.navBorder}`,flexShrink:0}}>
-   {items.map(item=>{const on=active===item.id;return(
-    <button key={item.id} onClick={()=>goTo(item.s)} style={{flex:1,background:"none",border:"none",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:2,color:on?t.red:t.text3,borderTop:on?`2.5px solid ${t.red}`:"2.5px solid transparent"}}>
-     <Icon name={item.icon} size={on?20:17} color={on?t.red:t.text3}/>
-     <span style={{fontSize:9,fontWeight:on?900:600,letterSpacing:0.3}}>{item.label}</span>
-    </button>
-   );})}
-  </div>
- );
+ return <PillNav items={items} active={active} goTo={goTo} t={t}/>;
 }
 
 function CaregiverDash({ goTo, t, plan, caregiverName }) {
+ const tr = useTr();
  const store = useStore();
  if (!store) return null;
  const { seniors, alerts } = store;
@@ -3501,8 +3515,8 @@ function CaregiverDash({ goTo, t, plan, caregiverName }) {
  const active = alerts.filter(a=>a.status==="active");
  const responded = alerts.filter(a=>a.status==="responded");
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
-   <Hdr t={t} title={`Dashboard ni ${caregiverName||"Caregiver"}`} sub="Isang tingin sa lahat." right={
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
+   <Hdr t={t} title={`${tr("dashTitlePrefix")} ${caregiverName||"Caregiver"}`} sub={tr("dashSub")} right={
     <button onClick={()=>goTo(CR.PRICING)} style={{background:"rgba(255,255,255,0.22)",border:"none",borderRadius:14,padding:"6px 12px",cursor:"pointer",color:"#fff",fontSize:11,fontWeight:800}}>{PLANS[plan]?.name}</button>
    }/>
    <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:12}}>
@@ -3510,7 +3524,7 @@ function CaregiverDash({ goTo, t, plan, caregiverName }) {
     <MultiSeniorManager goTo={goTo} t={t} plan={plan}/>
     {/* Stats — Gamot count reflects the ACTIVE senior */}
     <div style={{display:"flex",gap:10}}>
-     {[{l:"Miyembro",v:seniors.length,c:t.red},{l:"SOS",v:active.length,c:active.length>0?t.red:t.text3},{l:"Ayos",v:seniors.filter(s=>s.status==="ok").length,c:t.green},{l:"Gamot",v:`${activeSenior?.medications.filter(m=>m.status==="done").length||0}/${activeSenior?.medications.length||0}`,c:t.warn}].map((s,i)=>(
+     {[{l:tr("memberStatLabel"),v:seniors.length,c:t.red},{l:tr("sosStatLabel"),v:active.length,c:active.length>0?t.red:t.text3},{l:tr("okStatLabel"),v:seniors.filter(s=>s.status==="ok").length,c:t.green},{l:tr("medStatLabel"),v:`${activeSenior?.medications.filter(m=>m.status==="done").length||0}/${activeSenior?.medications.length||0}`,c:t.warn}].map((s,i)=>(
       <div key={i} style={{flex:1,background:t.card,borderRadius:14,padding:"10px 6px",textAlign:"center",border:`1px solid ${t.cardBorder}`,boxShadow:`0 1px 6px ${t.shadow}`}}>
        <div style={{fontSize:20,fontWeight:900,color:s.c}}>{s.v}</div>
        <div style={{fontSize:9.5,color:t.text3,fontWeight:700,marginTop:1}}>{s.l}</div>
@@ -3528,20 +3542,20 @@ function CaregiverDash({ goTo, t, plan, caregiverName }) {
       <button onClick={()=>goTo(CR.ALERT)} style={{background:t.red,border:"none",borderRadius:14,padding:"9px 18px",color:"#fff",fontSize:13,fontWeight:900,cursor:"pointer",boxShadow:`0 4px 16px ${t.redGlow}`}}>Sagutin</button>
      </div>
     )}
-    <div style={{fontSize:11,fontWeight:800,color:t.text3,letterSpacing:1.5}}>MGA MIYEMBRO NG PAMILYA</div>
+    <div style={{fontSize:11,fontWeight:800,color:t.text3,letterSpacing:1.5}}>{tr("familyMembersLabel")}</div>
     {seniors.map(s=>(
      <Card key={s.id} t={t} onClick={()=>{STORE.setActiveSenior(s.id);goTo(CR.SENIOR_VIEW);}} glow={s.status==="sos"?t.redGlow:null}>
       <div style={{display:"flex",alignItems:"center",gap:14}}>
        <div style={{width:50,height:50,borderRadius:25,background:`linear-gradient(135deg,${t.red}55,${t.warn}55)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,border:`1.5px solid ${t.cardBorder}`}}><Icon name="senior_person" size={26} color={t.red}/></div>
        <div style={{flex:1}}>
         <div style={{fontSize:16,fontWeight:900,color:t.text}}>{s.name}</div>
-        <div style={{fontSize:11.5,color:t.text3,fontWeight:600,marginTop:2}}>{s.lastCheckin?`Check-in: ${s.lastCheckin}`:"Wala pang check-in"} · {s.battery}%</div>
+        <div style={{fontSize:11.5,color:t.text3,fontWeight:600,marginTop:2}}>{s.lastCheckin?`Check-in: ${s.lastCheckin}`:tr("noCheckinLabel")} · {s.battery}%</div>
        </div>
        <StatusBadge status={s.status} t={t}/>
       </div>
      </Card>
     ))}
-    <div style={{fontSize:11,fontWeight:800,color:t.text3,letterSpacing:1.5,marginTop:4}}>MABILIS NA AKSYON</div>
+    <div style={{fontSize:11,fontWeight:800,color:t.text3,letterSpacing:1.5,marginTop:4}}>{tr("quickActionsLabel")}</div>
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
      {[
       {label:"Medical Profile", icon:"file_text", s:CR.MEDICAL_ID},
@@ -3603,7 +3617,7 @@ function AlertDetailCare({ goTo, t, caregiverName }) {
   setTimeout(()=>{ setResponding(false); goTo(CR.DASH); }, 1800);
  };
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden",position:"relative"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden",position:"relative"}}>
    <Hdr t={t} title="Alert na Natanggap" sub={a.seniorName} back={()=>goTo(CR.DASH)}/>
    <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:12}}>
     {/* Primary action */}
@@ -3676,6 +3690,7 @@ function AlertDetailCare({ goTo, t, caregiverName }) {
 
 function MedMonitorCare({ goTo, t, plan }) {
  const tr = useTr();
+ const lang = React.useContext(LangContext);
  const store = useStore();
  const [notifSent, setNotifSent] = useState({});
  const [prescUploaded, setPrescUploaded] = useState(false);
@@ -3685,22 +3700,22 @@ function MedMonitorCare({ goTo, t, plan }) {
  const name = senior?.nickname ||"Nanay";
  const countDone=meds.filter(m=>m.status==="done").length, countMissed=meds.filter(m=>m.status==="missed").length, countPending=meds.filter(m=>m.status==="pending").length;
  const missedMeds = meds.filter(m=>m.status==="missed");
- const groups = groupMedsByTime(meds);
+ const groups = groupMedsByTime(meds, lang);
  const handleNotify=(mid)=>{ if(notifSent[mid])return; setNotifSent(p=>({...p,[mid]:true})); STORE.missedMed(senior?.id||"s1",mid); setTimeout(()=>setNotifSent(p=>({...p,[mid]:false})),4000); };
  if (!canUse(plan,"medications")) return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Gamot" sub="Medication Monitoring"/>
    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,gap:20,textAlign:"center"}}>
     <Icon name="lock" size={48} color={t.text3} strokeWidth={1.5}/>
     <div style={{fontSize:20,fontWeight:900,color:t.text}}>I-unlock ang Gamot</div>
-    <div style={{fontSize:14,color:t.text3,fontWeight:600,lineHeight:1.7}}>I-upgrade sa Essential Plan (₱100).</div>
+    <div style={{fontSize:14,color:t.text3,fontWeight:600,lineHeight:1.7}}>I-upgrade sa Kailangan Plan (₱100).</div>
     <button onClick={()=>goTo(CR.PRICING)} style={{height:52,borderRadius:26,background:t.redGrad,border:"none",cursor:"pointer",fontSize:17,fontWeight:900,color:"#fff",padding:"0 28px"}}>Tingnan ang mga Plano</button>
    </div>
    <CaregiverNav active="med_mon" goTo={goTo} t={t}/>
   </div>
  );
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title={tr("medsTitle")} sub={`${tr("medsSubPrefix")} ${name}`} right={<button onClick={()=>goTo(CR.ADD_MED)} style={{background:"rgba(255,255,255,0.22)",border:"none",borderRadius:14,padding:"6px 13px",cursor:"pointer",color:"#fff",fontSize:12,fontWeight:800}}>{tr("addBtnLabel")}</button>}/>
    <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:14}}>
     {/* Summary */}
@@ -3716,7 +3731,7 @@ function MedMonitorCare({ goTo, t, plan }) {
       ))}
      </div>
      {meds.length>0&&<div>
-      <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:11,color:t.text3,fontWeight:700}}>Progress ngayon</span><span style={{fontSize:11,fontWeight:800,color:t.green}}>{countDone}/{meds.length}</span></div>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}><span style={{fontSize:11,color:t.text3,fontWeight:700}}>{tr("progressNowLabel")}</span><span style={{fontSize:11,fontWeight:800,color:t.green}}>{countDone}/{meds.length}</span></div>
       <div style={{height:8,background:t.bg2,borderRadius:4,overflow:"hidden"}}><div style={{height:"100%",borderRadius:4,width:`${meds.length?(countDone/meds.length)*100:0}%`,background:`linear-gradient(90deg,${t.green},${t.green}BB)`,transition:"width 0.6s ease"}}/></div>
      </div>}
     </Card>
@@ -3724,7 +3739,7 @@ function MedMonitorCare({ goTo, t, plan }) {
     {missedMeds.length>0&&<div style={{background:t.redBg,border:`2px solid ${t.redBorder}`,borderRadius:20,padding:"16px 18px"}}>
      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
       <div style={{width:12,height:12,borderRadius:6,background:t.red,boxShadow:`0 0 8px ${t.red}`,animation:"pDot 1s infinite",flexShrink:0}}/>
-      <div style={{fontSize:15,fontWeight:900,color:t.red}}>May gamot na hindi nainom!</div>
+      <div style={{fontSize:15,fontWeight:900,color:t.red}}>{tr("missedAlertTitle")}</div>
      </div>
      {missedMeds.map(m=>(
       <div key={m.id} style={{background:t.card,borderRadius:14,padding:"12px 14px",marginBottom:8,border:`1px solid ${t.redBorder}`}}>
@@ -3736,7 +3751,7 @@ function MedMonitorCare({ goTo, t, plan }) {
          </div>
         </div>
         <button onClick={()=>handleNotify(m.id)} disabled={notifSent[m.id]} style={{background:notifSent[m.id]?t.greenBg:t.red,border:notifSent[m.id]?`1.5px solid ${t.greenBorder}`:"none",borderRadius:14,padding:"8px 14px",cursor:notifSent[m.id]?"default":"pointer",color:notifSent[m.id]?t.green:"#fff",fontSize:12,fontWeight:800,flexShrink:0}}>
-         {notifSent[m.id]?"✓ Naipadala":`I-notify`}
+         {notifSent[m.id]?tr("notifySentLabel"):tr("notifyBtnLabel")}
         </button>
        </div>
       </div>
@@ -3753,7 +3768,7 @@ function MedMonitorCare({ goTo, t, plan }) {
       </div>
       <div style={{display:"flex",flexDirection:"column",gap:10}}>
        {group.items.map(m=>{
-        const cfg=medStatusCfg(m.status,t);
+        const cfg=medStatusCfg(m.status,t,tr);
         const times=m.schedule||[m.time||"08:00"];
         return <div key={m.id} style={{background:t.card,borderRadius:20,padding:"16px 16px",border:`1px solid ${m.status==="missed"?t.redBorder:t.cardBorder}`,borderLeft:`5px solid ${cfg.color}`,boxShadow:`0 2px 10px ${t.shadow}`}}>
          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:10,marginBottom:10}}>
@@ -3762,30 +3777,30 @@ function MedMonitorCare({ goTo, t, plan }) {
            <div style={{display:"flex",gap:5,marginTop:5,flexWrap:"wrap"}}>
             {times.map((tm,i)=><span key={i} style={{background:t.bg2,border:`1px solid ${t.cardBorder}`,borderRadius:7,padding:"2px 8px",fontSize:11,fontWeight:800,color:t.text2}}>{fmt24to12(tm)}</span>)}
            </div>
-           <div style={{fontSize:11,color:t.text3,fontWeight:600,marginTop:4}}>{m.freq} {m.takenAt&&<span style={{color:t.green}}>· Nainom ng {m.takenAt}</span>}</div>
+           <div style={{fontSize:11,color:t.text3,fontWeight:600,marginTop:4}}>{m.freq} {m.takenAt&&<span style={{color:t.green}}>· {tr("takenAtPrefix")} {m.takenAt}</span>}</div>
           </div>
           <div style={{background:cfg.bg,border:`1px solid ${cfg.border}`,borderRadius:10,padding:"4px 10px",fontSize:11,fontWeight:800,color:cfg.color,flexShrink:0}}>{cfg.label}</div>
          </div>
          {m.status==="pending"&&<div style={{display:"flex",gap:8}}>
-          <button onClick={()=>STORE.takeMed(senior?.id||"s1",m.id)} style={{flex:2,height:40,borderRadius:12,background:t.green,border:"none",cursor:"pointer",color:"#fff",fontSize:13,fontWeight:900}}>Nainom na</button>
-          <button onClick={()=>STORE.snoozeMed(senior?.id||"s1",m.id)} style={{flex:1,height:40,borderRadius:12,background:t.bg2,border:`1px solid ${t.cardBorder}`,cursor:"pointer",color:t.text2,fontSize:12,fontWeight:700}}> </button>
-          <button onClick={()=>STORE.missedMed(senior?.id||"s1",m.id)} style={{flex:1,height:40,borderRadius:12,background:t.redBg,border:`1px solid ${t.redBorder}`,cursor:"pointer",color:t.red,fontSize:12,fontWeight:700}}> </button>
+          <button onClick={()=>STORE.takeMed(senior?.id||"s1",m.id)} style={{flex:2,height:40,borderRadius:12,background:t.green,border:"none",cursor:"pointer",color:"#fff",fontSize:13,fontWeight:900}}>{tr("takenBtnLabel")}</button>
+          <button onClick={()=>STORE.snoozeMed(senior?.id||"s1",m.id)} style={{flex:1,height:40,borderRadius:12,background:t.bg2,border:`1px solid ${t.cardBorder}`,cursor:"pointer",color:t.text2,fontSize:12,fontWeight:700}}>{tr("snoozeBtnLabel")}</button>
+          <button onClick={()=>STORE.missedMed(senior?.id||"s1",m.id)} style={{flex:1,height:40,borderRadius:12,background:t.redBg,border:`1px solid ${t.redBorder}`,cursor:"pointer",color:t.red,fontSize:12,fontWeight:700}}>{tr("medStatusMissed")}</button>
          </div>}
          <div style={{marginTop:8,textAlign:"right"}}>
-          <button onClick={()=>STORE.deleteMed(senior?.id||"s1",m.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:10.5,color:t.text3,textDecoration:"underline"}}>Tanggalin</button>
+          <button onClick={()=>STORE.deleteMed(senior?.id||"s1",m.id)} style={{background:"none",border:"none",cursor:"pointer",fontSize:10.5,color:t.text3,textDecoration:"underline"}}>{tr("removeLabel")}</button>
          </div>
         </div>;
        })}
       </div>
      </div>;
     })}
-    {meds.length===0&&<div style={{textAlign:"center",color:t.text3,fontSize:14,padding:"40px 0"}}>Walang gamot ngayon. </div>}
+    {meds.length===0&&<div style={{textAlign:"center",color:t.text3,fontSize:14,padding:"40px 0"}}>{tr("noMedsLabel")}</div>}
     <div style={{display:"flex",gap:10,marginTop:4}}>
      <button onClick={()=>goTo(CR.ADD_MED)} style={{flex:1,height:52,borderRadius:16,background:t.card,border:`1.5px solid ${t.cardBorder}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:`0 2px 8px ${t.shadow}`}}>
-      <Icon name="pill" size={20} color={t.red}/><span style={{fontSize:13,fontWeight:800,color:t.text2}}>Dagdag Gamot</span>
+      <Icon name="pill" size={20} color={t.red}/><span style={{fontSize:13,fontWeight:800,color:t.text2}}>{tr("addMedBtnLabel")}</span>
      </button>
      <button onClick={()=>setPrescUploaded(v=>!v)} style={{flex:1,height:52,borderRadius:16,background:prescUploaded?t.greenBg:t.card,border:`1.5px solid ${prescUploaded?t.greenBorder:t.cardBorder}`,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:`0 2px 8px ${t.shadow}`}}>
-      <Icon name="upload" size={20} color={prescUploaded?t.green:t.text2}/><span style={{fontSize:13,fontWeight:800,color:prescUploaded?t.green:t.text2}}>{prescUploaded?"Na-upload ✓":"Upload Reseta"}</span>
+      <Icon name="upload" size={20} color={prescUploaded?t.green:t.text2}/><span style={{fontSize:13,fontWeight:800,color:prescUploaded?t.green:t.text2}}>{prescUploaded?tr("uploadedLabel"):tr("uploadRxBtnLabel")}</span>
      </button>
     </div>
     <div style={{height:8}}/>
@@ -3814,17 +3829,17 @@ function AddMedCare({ goTo, t, plan }) {
  const toggleDay=(d)=>setMed(m=>({...m,daysOfWeek:m.daysOfWeek.includes(d)?m.daysOfWeek.filter(v=>v!==d):[...m.daysOfWeek,d].sort()}));
  const inputStyle={width:"100%",height:52,borderRadius:16,border:`1.5px solid ${t.cardBorder}`,padding:"0 16px",fontSize:15,fontWeight:700,background:t.bg2,color:t.text,outline:"none",fontFamily:"'Nunito',sans-serif",boxSizing:"border-box"};
  if (!canUse(plan,"medications")) return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Dagdag na Gamot" back={()=>goTo(CR.DASH)}/>
    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:32,gap:20,textAlign:"center"}}>
     <Icon name="lock" size={48} color={t.text3} strokeWidth={1.5}/>
-    <div style={{fontSize:20,fontWeight:900,color:t.text}}>Essential Plan ang kailangan</div>
+    <div style={{fontSize:20,fontWeight:900,color:t.text}}>Kailangan Plan ang kailangan</div>
     <button onClick={()=>goTo(CR.PRICING)} style={{height:52,borderRadius:26,background:t.redGrad,border:"none",cursor:"pointer",fontSize:17,fontWeight:900,color:"#fff",padding:"0 28px"}}>Tingnan ang mga Plano</button>
    </div>
   </div>
  );
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="Dagdag na Gamot" sub={`Para kay ${activeSenior?.name||"Senior"}`} back={()=>goTo(CR.MED_MON)}/>
    <div style={{flex:1,overflow:"auto",padding:"16px 16px",display:"flex",flexDirection:"column",gap:14}}>
     <Card t={t}>
@@ -3982,7 +3997,7 @@ function ContactsCare({ goTo, t, plan }) {
  };
  const inputStyle = { width:"100%", height:48, borderRadius:14, border:`1.5px solid ${t.cardBorder}`, padding:"0 14px", fontSize:14, fontWeight:700, background:t.bg2, color:t.text, outline:"none", fontFamily:"'Nunito',sans-serif", boxSizing:"border-box" };
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden",position:"relative"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden",position:"relative"}}>
    <Hdr t={t} title="Emergency Contacts" sub={`${contacts.length}/${maxContacts} na-gamit sa ${PLANS[plan]?.name||plan} plan`} right={
     <button onClick={()=>atLimit?goTo(CR.PRICING):setAdding(a=>!a)} style={{background:"rgba(255,255,255,0.2)",border:"none",borderRadius:14,padding:"6px 12px",cursor:"pointer",color:"#fff",fontSize:12,fontWeight:700}}>
      {adding?"✕ Isara":atLimit?"🔒 Dagdag":"+ Dagdag"}
@@ -4086,7 +4101,7 @@ function IDUploadCare({ goTo, t }) {
   </div>
  );
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="I-upload ang ID" sub="Senior Citizen ID at PWD ID" back={()=>goTo(CR.DASH)}/>
    <div style={{flex:1,overflow:"auto",padding:"16px 16px",display:"flex",flexDirection:"column"}}>
     <IdCard label="Senior Citizen ID" sub="JPG, PNG – malinaw na larawan" image={s?.seniorIdImage} docType="senior" inputRef={seniorInputRef}/>
@@ -4103,7 +4118,7 @@ function QRCodeCare({ goTo, t }) {
  const store=useStore();
  const s = store?.seniors?.find(x=>x.id===(store?.activeSeniorId||"s1")) || store?.seniors?.[0];
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title="QR Code" sub={`Para kay ${s?.name}`} back={()=>goTo(CR.DASH)}/>
    <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",padding:24,gap:22}}>
     <div style={{width:180,height:180,background:t.card,borderRadius:24,border:`2.5px solid ${t.red}44`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 8px 32px ${t.shadow}`,overflow:"hidden"}}>
@@ -4134,37 +4149,43 @@ function PricingCare({ goTo, t, plan, onUpgrade }) {
  const plans=[
   {id:"free",name:tr("planFree"),price:"₱0",period:tr("periodAlways"),color:t.text2,feats:["SOS Button","Daily Check-in","Emergency Contacts (3)","Offline Access"]},
   {id:"essential",name:tr("planEssential"),price:"₱100",period:tr("periodOnce"),color:t.red,feats:["Lahat ng Libre +","Medication Monitoring","Alerto kung hindi nainom","Smart escalation","Multi-time medication schedule"]},
-  {id:"family",name:tr("planFamily"),price:"₱199",period:tr("periodMonth"),color:t.warn,best:true,feats:["Lahat ng Essential +","Fall Detection","Multiple seniors (hanggang 4)","Health reports","Priority support"]},
+  {id:"family",name:tr("planFamily"),price:"₱199",period:tr("periodMonth"),color:t.warn,best:true,feats:["Lahat ng Kailangan +","Fall Detection","Multiple seniors (hanggang 4)","Health reports","Priority support"]},
  ];
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title={tr("pricingTitle")} sub={tr("pricingSub")} back={()=>goTo(CR.SETTINGS)}/>
-   <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:14}}>
+   <div style={{flex:1,minHeight:0,position:"relative"}}>
+   <div style={{position:"absolute",inset:0,overflow:"auto",padding:"12px 16px",display:"flex",flexDirection:"column",gap:10}}>
     {plans.map(p=>{
      const isActive=plan===p.id;
-     return <div key={p.id} style={{background:t.card,borderRadius:24,padding:"20px 20px 18px",border:isActive?`2px solid ${t.green}`:p.best?`2px solid ${t.warn}55`:`1px solid ${t.cardBorder}`,boxShadow:isActive?`0 0 0 4px ${t.greenBg},0 4px 18px ${t.shadow}`:`0 2px 12px ${t.shadow}`,position:"relative",overflow:"hidden"}}>
-      {p.best&&!isActive&&<div style={{position:"absolute",top:14,right:-28,background:t.warn,color:"#fff",fontSize:9,fontWeight:900,padding:"4px 34px",transform:"rotate(35deg)",letterSpacing:1}}>{tr("bestValueLabel")}</div>}
-      {isActive&&<div style={{position:"absolute",top:14,right:-28,background:t.green,color:"#fff",fontSize:9,fontWeight:900,padding:"4px 34px",transform:"rotate(35deg)",letterSpacing:1}}>{tr("activeLabel")}</div>}
-      <div style={{marginBottom:14}}>
-       <div style={{fontSize:19,fontWeight:900,color:t.text}}>{p.name}</div>
-       <div style={{display:"flex",alignItems:"baseline",gap:3,marginTop:2}}><span style={{fontSize:30,fontWeight:900,color:p.color,lineHeight:1}}>{p.price}</span><span style={{fontSize:12,color:t.text3,fontWeight:600}}>{p.period}</span></div>
+     return <div key={p.id} style={{background:t.card,borderRadius:22,padding:"16px 18px 14px",border:isActive?`2px solid ${t.green}`:p.best?`2px solid ${t.warn}55`:`1px solid ${t.cardBorder}`,boxShadow:isActive?`0 0 0 4px ${t.greenBg},0 4px 18px ${t.shadow}`:`0 2px 12px ${t.shadow}`,position:"relative",overflow:"hidden"}}>
+      {p.best&&!isActive&&<div style={{position:"absolute",top:12,right:-28,background:t.warn,color:"#fff",fontSize:9,fontWeight:900,padding:"3px 34px",transform:"rotate(35deg)",letterSpacing:1}}>{tr("bestValueLabel")}</div>}
+      {isActive&&<div style={{position:"absolute",top:12,right:-28,background:t.green,color:"#fff",fontSize:9,fontWeight:900,padding:"3px 34px",transform:"rotate(35deg)",letterSpacing:1}}>{tr("activeLabel")}</div>}
+      <div style={{marginBottom:10}}>
+       <div style={{fontSize:17,fontWeight:900,color:t.text}}>{p.name}</div>
+       <div style={{display:"flex",alignItems:"baseline",gap:3,marginTop:1}}><span style={{fontSize:26,fontWeight:900,color:p.color,lineHeight:1}}>{p.price}</span><span style={{fontSize:11,color:t.text3,fontWeight:600}}>{p.period}</span></div>
       </div>
-      <div style={{height:1,background:t.cardBorder,marginBottom:14}}/>
-      <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:18}}>
+      <div style={{height:1,background:t.cardBorder,marginBottom:10}}/>
+      <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:14}}>
        {p.feats.map((f,j)=>(
-        <div key={j} style={{display:"flex",alignItems:"center",gap:10}}>
-         <div style={{width:18,height:18,borderRadius:9,background:isActive?t.green:p.color,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="9" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1 4 3.5 6.5 9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
-         <span style={{fontSize:13,color:t.text,fontWeight:600}}>{f}</span>
+        <div key={j} style={{display:"flex",alignItems:"center",gap:9}}>
+         <div style={{width:16,height:16,borderRadius:8,background:isActive?t.green:p.color,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}><svg width="8" height="7" viewBox="0 0 10 8" fill="none"><polyline points="1 4 3.5 6.5 9 1" stroke="white" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg></div>
+         <span style={{fontSize:12.5,color:t.text,fontWeight:600}}>{f}</span>
         </div>
        ))}
       </div>
-      <button onClick={()=>!isActive&&onUpgrade(p.id)} disabled={isActive} style={{width:"100%",height:50,borderRadius:25,background:isActive?t.greenBg:p.id==="family"?t.warn:p.id==="essential"?t.red:t.bg2,border:isActive?`1.5px solid ${t.greenBorder}`:"none",cursor:isActive?"default":"pointer",fontSize:15,fontWeight:900,color:isActive?t.green:p.id==="free"?t.text2:"#fff"}}>
+      <button onClick={()=>!isActive&&onUpgrade(p.id)} disabled={isActive} style={{width:"100%",height:46,borderRadius:23,background:isActive?t.greenBg:p.id==="family"?t.warn:p.id==="essential"?t.red:t.bg2,border:isActive?`1.5px solid ${t.greenBorder}`:"none",cursor:isActive?"default":"pointer",fontSize:14,fontWeight:900,color:isActive?t.green:p.id==="free"?t.text2:"#fff"}}>
        {isActive?tr("currentPlanBtnLabel"):tr("upgradeLabel")}
       </button>
      </div>;
     })}
-    <div style={{textAlign:"center",padding:"4px 0 8px"}}><div style={{fontSize:11.5,color:t.text3,fontWeight:600,lineHeight:1.7}}>{tr("allPaymentNote")}</div></div>
+    <div style={{textAlign:"center",padding:"2px 0 6px"}}><div style={{fontSize:11.5,color:t.text3,fontWeight:600,lineHeight:1.7}}>{tr("allPaymentNote")}</div></div>
    </div>
+   <div style={{position:"absolute",bottom:0,left:0,right:0,height:44,background:`linear-gradient(transparent, ${t.bg} 75%)`,pointerEvents:"none",display:"flex",alignItems:"flex-end",justifyContent:"center",paddingBottom:4}}>
+    <div style={{transform:"rotate(90deg)"}}><Icon name="arrow_right" size={16} color={t.text3}/></div>
+   </div>
+   </div>
+   <CaregiverNav active="settings" goTo={goTo} t={t}/>
   </div>
  );
 }
@@ -4232,7 +4253,7 @@ function CareSettings({ goTo, t, displayMode, setDisplayMode, onSwitchRole, plan
  const delayOpts = [{v:30,l:tr("delay30")},{v:60,l:tr("delay60")},{v:90,l:tr("delay90")},{v:120,l:tr("delay120")}];
  const applyDelay=(v)=>{ setDelay(v); STORE.setEscalationDelay(v*1000); };
  return (
-  <div style={{flex:1,display:"flex",flexDirection:"column",background:t.bg,overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,background:t.bg,overflow:"hidden"}}>
    <Hdr t={t} title={tr("settingsTitle")} sub={tr("settingsSub")}/>
    <div style={{flex:1,minHeight:0,overflow:"auto",padding:"14px 16px",display:"flex",flexDirection:"column",gap:14}}>
     {/* Cloud Sync */}
@@ -4322,9 +4343,9 @@ function CaregiverApp({ onSwitchRole, t, plan, onUpgradePlan, displayMode, setDi
  };
  return (
   <LangContext.Provider value={lang}>
-  <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+  <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,overflow:"hidden"}}>
    <SBar t={t} battery={76}/>
-   <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>{screens[screen]||screens[CR.DASH]}</div>
+   <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,overflow:"hidden"}}>{screens[screen]||screens[CR.DASH]}</div>
   </div>
   </LangContext.Provider>
  );
@@ -4415,4 +4436,3 @@ root.render(<AppErrorBoundary><NakNak/></AppErrorBoundary>);
 </script>
 </body>
 </html>
-
