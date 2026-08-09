@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard — NakNak</title>
 <meta name="description" content="Ang NakNak caregiver dashboard. I-manage ang gamot, contacts, safe zone, at SOS alerts ng iyong senior — naka-sync sa totoong oras sa app.">
+<link rel="icon" type="image/png" href="Assets/logo-mark.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Dandelion&family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -1440,7 +1441,7 @@ function Dashboard({ household, onDisconnect, theme, session }) {
   const senior = seniors.find(s=>s.id===activeSid) || seniors[0];
   const patch = (fn) => { const next = { ...state, seniors: state.seniors.map(s => s.id===senior.id ? fn({...s}) : s) }; pushState(next); };
   const setPlan = (newPlan) => { pushState({ ...state, plan: newPlan }); };
-  const addSenior = () => { const s=newSenior("Bagong Senior"); const next={...state, seniors:[...state.seniors, s]}; setActiveSid(s.id); pushState(next); };
+  const addSenior = () => { const nm=(window.prompt("Pangalan ng bagong senior:")||"").trim(); const s=newSenior(nm||"Bagong Senior"); const next={...state, seniors:[...state.seniors, s]}; setActiveSid(s.id); pushState(next); };
   const ackSOS = () => patch(s => { s.status="ok"; s.eventLog=[{id:nid(),type:"checkin",icon:"checkmark",title:"SOS na-acknowledge ng caregiver",time:tNow(),detail:""},...(s.eventLog||[])]; return s; });
 
   const NAV = [
@@ -2733,12 +2734,14 @@ function SettingsPanel({ theme, plan, session, onDisconnect, setPlan, household 
 function ProfilePanel({ senior, patch }) {
   const p = senior.medicalProfile||{};
   const [f, setF] = useState(p);
+  const [name, setName] = useState(senior.name||"");
+  const [nickname, setNickname] = useState(senior.nickname||"");
   const [newAllergy, setNewAllergy] = useState("");
   const [newCond, setNewCond] = useState("");
   const [justSaved, setJustSaved] = useState(false);
-  useEffect(()=>setF(senior.medicalProfile||{}), [senior.id]);
-  const dirty = JSON.stringify(f) !== JSON.stringify(p);
-  const save = () => { patch(s=>({...s, medicalProfile:f})); setJustSaved(true); setTimeout(()=>setJustSaved(false),1800); };
+  useEffect(()=>{ setF(senior.medicalProfile||{}); setName(senior.name||""); setNickname(senior.nickname||""); }, [senior.id]);
+  const dirty = JSON.stringify(f) !== JSON.stringify(p) || name.trim()!==(senior.name||"") || nickname.trim()!==(senior.nickname||"");
+  const save = () => { patch(s=>({...s, name:name.trim()||s.name, nickname:nickname.trim(), medicalProfile:f})); setJustSaved(true); setTimeout(()=>setJustSaved(false),1800); };
   const addAllergy = () => { if(!newAllergy.trim())return; setF({...f,allergies:[...(f.allergies||[]),newAllergy.trim()]}); setNewAllergy(""); };
   const addCond = () => { if(!newCond.trim())return; setF({...f,conditions:[...(f.conditions||[]),newCond.trim()]}); setNewCond(""); };
 
@@ -2755,6 +2758,10 @@ function ProfilePanel({ senior, patch }) {
               <span>{filled}/6</span>
             </div>
           </div>
+        </div>
+        <div className="form-row">
+          <div className="form-field"><label><Icon name="user" size={12}/> Buong Pangalan</label><input value={name} onChange={e=>setName(e.target.value)} placeholder="hal. Inacay Reyes"/></div>
+          <div className="form-field"><label><Icon name="user" size={12}/> Palayaw</label><input value={nickname} onChange={e=>setNickname(e.target.value)} placeholder="hal. Nanay"/></div>
         </div>
         <div className="form-row">
           <div className="form-field"><label><Icon name="droplet" size={12}/> Blood Type</label><select value={f.bloodType||""} onChange={e=>setF({...f,bloodType:e.target.value})}><option value="">Wala pang napipili</option>{["A+","A-","B+","B-","AB+","AB-","O+","O-"].map(b=><option key={b}>{b}</option>)}</select></div>
