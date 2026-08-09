@@ -1409,9 +1409,15 @@ function Dashboard({ household, onDisconnect, theme, session }) {
   const [tab, setTab] = useState("overview");
   const [lastSync, setLastSync] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  // In-progress name/nickname edit for the active senior, so the tab bar and sidebar
+  // can reflect keystrokes live without waiting for Save. null = not being edited right
+  // now, so display falls back to the committed value. Cleared whenever the active
+  // senior changes or the edit is saved.
+  const [profileDraft, setProfileDraft] = useState({ name: null, nickname: null });
   const revRef = useRef(0);
   const chanRef = useRef(null);
   useTicker(5000);
+  useEffect(() => { setProfileDraft({ name: null, nickname: null }); }, [activeSid]);
 
   const pushState = useCallback(async (next) => {
     setState(next);
@@ -1439,6 +1445,15 @@ function Dashboard({ household, onDisconnect, theme, session }) {
 
   const seniors = state.seniors || [];
   const senior = seniors.find(s=>s.id===activeSid) || seniors[0];
+  // Live display name for the active senior, merging in an in-progress Medical Profile
+  // edit (profileDraft) so the sidebar card and tab bar update as the caregiver types,
+  // without waiting for Save. Any other senior in the tab bar still shows its committed name.
+  const liveTabLabel = (s) => {
+    if (s.id !== senior.id || (profileDraft.name===null && profileDraft.nickname===null)) return s.nickname||s.name;
+    const n = profileDraft.nickname!==null ? profileDraft.nickname : s.nickname;
+    const fn = profileDraft.name!==null ? profileDraft.name : s.name;
+    return n||fn||"?";
+  };
   const patch = (fn) => { const next = { ...state, seniors: state.seniors.map(s => s.id===senior.id ? fn({...s}) : s) }; pushState(next); };
   const setPlan = (newPlan) => { pushState({ ...state, plan: newPlan }); };
   const addSenior = () => { const nm=(window.prompt("Pangalan ng bagong senior:")||"").trim(); const s=newSenior(nm||"Bagong Senior"); const next={...state, seniors:[...state.seniors, s]}; setActiveSid(s.id); pushState(next); };
@@ -1446,6 +1461,7 @@ function Dashboard({ household, onDisconnect, theme, session }) {
 
   const NAV = [
     ["overview","Overview","dashboard",null],
+    ["profile","Medical Profile","file_text",null],
     ["calendar","Calendar","clock",null],
     ["timeline","Timeline","activity",null],
     ["meds","Gamot","pill",null],
@@ -1454,7 +1470,6 @@ function Dashboard({ household, onDisconnect, theme, session }) {
     ["vitals","Vitals","heart_pulse","vitals"],
     ["notes","Mga Tala","notes",null],
     ["letters","Naks, My Letter","heart",null],
-    ["profile","Medical Profile","file_text",null],
     ["idupload","ID Upload","id_card",null],
     ["qr","QR Code","qr",null],
     ["devices","Mga Device","phone",null],
@@ -1479,11 +1494,11 @@ function Dashboard({ household, onDisconnect, theme, session }) {
         </div>
         <div className="sb-senior">
           <div className="sb-senior-avatar" style={{background:senior.status==="sos"?"var(--red-hot)":"var(--accent-bright)"}}>
-            {(senior.nickname||senior.name||"?")[0]}
+            {liveTabLabel(senior)[0]}
             <span className="sb-senior-pulse" style={{background:senior.status==="sos"?"var(--red-hot)":"var(--green-bright)"}}></span>
           </div>
           <div className="sb-senior-txt">
-            <div className="nm">{senior.nickname||senior.name}</div>
+            <div className="nm">{liveTabLabel(senior)}</div>
             <div className="st">{senior.status==="sos"?"SOS Active":senior.checkedIn?"Ayos · "+timeAgo(senior.lastCheckin):"Walang check-in"}</div>
           </div>
         </div>
@@ -1517,7 +1532,7 @@ function Dashboard({ household, onDisconnect, theme, session }) {
               {seniors.map(s=>(
                 <button key={s.id} className={"senior-tab"+(s.id===senior.id?" on":"")} onClick={()=>setActiveSid(s.id)}>
                   <span className="st-dot" style={{background:s.status==="sos"?"var(--red)":s.status==="ok"?"var(--green-bright)":"var(--gold-bright)"}}></span>
-                  {s.nickname||s.name}
+                  {liveTabLabel(s)}
                 </button>
               ))}
             </div>
@@ -1543,7 +1558,7 @@ function Dashboard({ household, onDisconnect, theme, session }) {
           {tab==="vitals" && <div key="vitals" className="panel-enter">{canUse(state.plan,"vitals") ? <VitalsPanel senior={senior} patch={patch}/> : <UpsellPanel feature="Vitals Tracking" needPlan="Essential o Family Plan" icon="heart_pulse"/>}</div>}
           {tab==="notes" && <div key="notes" className="panel-enter"><NotesPanel senior={senior} patch={patch}/></div>}
           {tab==="letters" && <div key="letters" className="panel-enter"><LettersPanel household={household} session={session}/></div>}
-          {tab==="profile" && <div key="profile" className="panel-enter"><ProfilePanel senior={senior} patch={patch}/></div>}
+          {tab==="profile" && <div key="profile" className="panel-enter"><ProfilePanel senior={senior} patch={patch} draft={profileDraft} setDraft={setProfileDraft}/></div>}
           {tab==="devices" && <div key="devices" className="panel-enter"><DevicesPanel household={household}/></div>}
           {tab==="calendar" && <div key="calendar" className="panel-enter"><CalendarPanel senior={senior} patch={patch}/></div>}
           {tab==="timeline" && <div key="timeline" className="panel-enter"><TimelinePanel senior={senior}/></div>}
@@ -1568,9 +1583,32 @@ function OverviewPanel({ senior, session }) {
   const EVENT_BG = { checkin:"rgba(26,140,74,0.1)", sos:"rgba(196,48,30,0.1)", fall:"rgba(196,48,30,0.1)", med_taken:"rgba(26,140,74,0.1)", med_missed:"rgba(192,112,16,0.1)", med_snoozed:"rgba(192,112,16,0.1)", gps:"rgba(192,112,16,0.1)", notif:"var(--cream2)" };
 
   // Personalized, time-of-day-aware greeting — Philippine local time regardless of viewer's own timezone.
-  const phHour = new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Manila"})).getHours();
+  // The sub-line rotates through a small pool instead of one static sentence — picked deterministically
+  // from the PH calendar day + senior id, so it feels alive across visits but never flickers mid-session
+  // (this component re-renders every 15s via useTicker).
+  const phDate = new Date(new Date().toLocaleString("en-US",{timeZone:"Asia/Manila"}));
+  const phHour = phDate.getHours();
   const greetWord = phHour<12 ? "Magandang umaga" : phHour<18 ? "Magandang hapon" : "Magandang gabi";
+  const greetEmoji = phHour<12 ? "🌅" : phHour<18 ? "☀️" : "🌙";
   const emailName = session?.user?.email ? session.user.email.split("@")[0].replace(/[._-]+/g," ").replace(/\b\w/g,c=>c.toUpperCase()) : null;
+  const nm = senior.nickname||senior.name;
+  const NORMAL_SUBS = [
+    `Narito ang buod ng pag-aalaga kay ${nm} ngayong araw.`,
+    `Kumusta kaya si ${nm} ngayon? Tignan natin.`,
+    `Isang tingin lang, alam mo na kung ayos si ${nm}.`,
+    `${nm} muna bago lahat — heto ang latest.`,
+    `Malapit ka kay ${nm} kahit malayo — ito ang update.`,
+    `Ilang segundo lang, updated ka na tungkol kay ${nm}.`,
+  ];
+  const NUDGE_SUBS = [
+    `Medyo tahimik pa ngayong araw — siguraduhin lang na ayos si ${nm}.`,
+    `Wala pang check-in si ${nm} — isang tawag o mensahe ay malaking tulong.`,
+    `Bago ka pumunta sa araw mo, siguraduhin munang ayos si ${nm}.`,
+  ];
+  const daySeed = Array.from(phDate.toDateString()+senior.id).reduce((a,c)=>a+c.charCodeAt(0),0);
+  const greetSub = isSOS
+    ? `🚨 Kailangan ni ${nm} ng agarang tulong ngayon — buksan ang SOS alert sa ibaba.`
+    : (senior.checkedIn ? NORMAL_SUBS : NUDGE_SUBS)[daySeed % (senior.checkedIn ? NORMAL_SUBS.length : NUDGE_SUBS.length)];
 
   // Fills the reclaimed desktop width with real content instead of empty space:
   // upcoming calendar events + a compact vitals snapshot, both genuinely useful.
@@ -1583,10 +1621,10 @@ function OverviewPanel({ senior, session }) {
     <>
       {emailName && (
         <div className="greeting-bar">
-          <span className="greeting-wave">👋</span>
+          <span className="greeting-wave">{isSOS ? "🚨" : greetEmoji}</span>
           <div>
             <div className="greeting-text">{greetWord}, {emailName}!</div>
-            <div className="greeting-sub">Narito ang buod ng pag-aalaga kay {senior.nickname||senior.name} ngayong araw.</div>
+            <div className="greeting-sub">{greetSub}</div>
           </div>
         </div>
       )}
@@ -2731,17 +2769,21 @@ function SettingsPanel({ theme, plan, session, onDisconnect, setPlan, household 
   );
 }
 
-function ProfilePanel({ senior, patch }) {
+function ProfilePanel({ senior, patch, draft, setDraft }) {
   const p = senior.medicalProfile||{};
   const [f, setF] = useState(p);
-  const [name, setName] = useState(senior.name||"");
-  const [nickname, setNickname] = useState(senior.nickname||"");
+  // name/nickname live in the parent (Dashboard) as `draft`, not local state, so the tab
+  // bar and sidebar can mirror keystrokes in real time. null means "not edited this visit".
+  const name = draft.name!==null ? draft.name : (senior.name||"");
+  const nickname = draft.nickname!==null ? draft.nickname : (senior.nickname||"");
+  const setName = (v) => setDraft(d=>({...d, name:v}));
+  const setNickname = (v) => setDraft(d=>({...d, nickname:v}));
   const [newAllergy, setNewAllergy] = useState("");
   const [newCond, setNewCond] = useState("");
   const [justSaved, setJustSaved] = useState(false);
-  useEffect(()=>{ setF(senior.medicalProfile||{}); setName(senior.name||""); setNickname(senior.nickname||""); }, [senior.id]);
+  useEffect(()=>{ setF(senior.medicalProfile||{}); }, [senior.id]);
   const dirty = JSON.stringify(f) !== JSON.stringify(p) || name.trim()!==(senior.name||"") || nickname.trim()!==(senior.nickname||"");
-  const save = () => { patch(s=>({...s, name:name.trim()||s.name, nickname:nickname.trim(), medicalProfile:f})); setJustSaved(true); setTimeout(()=>setJustSaved(false),1800); };
+  const save = () => { patch(s=>({...s, name:name.trim()||s.name, nickname:nickname.trim(), medicalProfile:f})); setDraft({name:null,nickname:null}); setJustSaved(true); setTimeout(()=>setJustSaved(false),1800); };
   const addAllergy = () => { if(!newAllergy.trim())return; setF({...f,allergies:[...(f.allergies||[]),newAllergy.trim()]}); setNewAllergy(""); };
   const addCond = () => { if(!newCond.trim())return; setF({...f,conditions:[...(f.conditions||[]),newCond.trim()]}); setNewCond(""); };
 
