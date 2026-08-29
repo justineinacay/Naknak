@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+<title>NakNak v12</title>
+<style>
+html,body{margin:0;min-height:100%;background:#080402;font-family:system-ui,-apple-system,sans-serif;color:#fff}
+#boot{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box;background:radial-gradient(ellipse at 25% 25%,#2A0A00 0%,#080402 65%)}
+#boot strong{display:block;font-size:24px;margin-bottom:8px}#boot span{font-size:13px;opacity:.7}
+</style>
+</head>
+<body>
+<div id="boot"><div><strong>NakNak v12</strong><span>Loading Senior/PWD + Caregiver/Anak experience…</span></div></div>
+<script>
+(async function(){
+ try{
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('./naknak-sw.js').catch(()=>{});}
+  const LEGACY='https://raw.githubusercontent.com/justineinacay/Naknak/eee6ce2ea9792263fa9420f980353cc108fc3123/app.html';
+  const res=await fetch(LEGACY,{cache:'no-store'});
+  if(!res.ok) throw new Error('Unable to load NakNak core');
+  let src=await res.text();
+
+  const replacements=[
+   ['roleSenior:"Kailangan ko ng tulong"','roleSenior:"Senior / PWD User"'],
+   ['roleCare:"Binabantayan ko ang pamilya ko"','roleCare:"Caregiver / Anak User"'],
+   ['roleSeniorSub:"Para sa Senior Citizens at PWDs"','roleSeniorSub:"Para sa Senior Citizens at Persons with Disabilities"'],
+   ['roleCareSub:"Para sa mga Anak at Caregivers"','roleCareSub:"Para sa anak, caregiver, o taong nag-aalaga"'],
+   ['roleSenior:"I need help"','roleSenior:"Senior / PWD User"'],
+   ["roleCare:\"I'm watching over my family\"",'roleCare:"Caregiver / Anak User"'],
+   ['roleSeniorSub:"For Senior Citizens and PWDs"','roleSeniorSub:"For Senior Citizens and Persons with Disabilities"'],
+   ['roleCareSub:"For Children and Caregivers"','roleCareSub:"For children, caregivers, and family supporters"'],
+   ['roleSenior:"Nagkinahanglan ko og tabang"','roleSenior:"Senior / PWD User"'],
+   ['roleCare:"Gibantayan nako ang akong pamilya"','roleCare:"Caregiver / Anak User"'],
+   ['roleSeniorSub:"Para sa mga Tigulang ug PWD"','roleSeniorSub:"Para sa Senior Citizens ug Persons with Disabilities"'],
+   ['roleCareSub:"Para sa mga Anak ug Caregiver"','roleCareSub:"Para sa anak, caregiver, o tig-atiman sa pamilya"'],
+   ['allSeniorLabel:"LAHAT NG SENIOR"','allSeniorLabel:"MGA BINABANTAYAN KO"'],
+   ['addSeniorLabel:"+ Dagdag na Senior"','addSeniorLabel:"+ Dagdag na Family Member"'],
+   ['allSeniorLabel:"ALL SENIORS"','allSeniorLabel:"FAMILY MEMBERS I SUPPORT"'],
+   ['addSeniorLabel:"+ Add a Senior"','addSeniorLabel:"+ Add Family Member"'],
+   ['allSeniorLabel:"TANANG SENIOR"','allSeniorLabel:"MGA GIBANTAYAN NAKO"'],
+   ['addSeniorLabel:"+ Dugang og Senior"','addSeniorLabel:"+ Dugang Family Member"'],
+   ['Emergency Contacts (3)','Emergency Contacts (1)'],
+   ['"Smart escalation"','"Escalation alerts (beta)"'],
+   ['"Fall Detection"','"Fall Detection (Coming Soon)"'],
+   ['log(`SMS → ${s.contacts[0]?.name}`,"ok");','log(`Alert queued → ${s.contacts[0]?.name}`,"ok");'],
+   ['a.history.push(`${tNow()} — Escalation #${lvl+1}: SMS → ${c.name}`);','a.history.push(`${tNow()} — Escalation #${lvl+1}: alert queued → ${c.name}`);'],
+   ['a.history.push(`${tNow()} — Auto-call → ${s.contacts[0]?.name}`);','a.history.push(`${tNow()} — Call escalation ready → ${s.contacts[0]?.name}`);'],
+   ['log(`Auto-call → ${s.contacts[0]?.name}`,"red");','log(`Call escalation ready → ${s.contacts[0]?.name}`,"warn");'],
+   ['NakNak v10 — Cloud Sync · Web Dashboard Companion','NakNak v12 — Senior/PWD + Caregiver/Anak']
+  ];
+  for(const [a,b] of replacements) src=src.split(a).join(b);
+
+  src=src.replace(/function getA11y\(profile\) \{[\s\S]*?\n\}/,`function getA11y(profile) {
+ const a = profile || {};
+ return {
+  vision: !!a.vision,
+  hearing: !!a.hearing,
+  mobility: !!a.mobility,
+  cognitive: !!a.cognitive,
+  general: !!a.general,
+  btnH: a.mobility ? 88 : (a.vision ? 74 : 64),
+  fs: a.vision ? 22 : 16,
+  bigBtn: a.mobility || a.vision,
+  highContrast: !!a.vision,
+  visualAlerts: !!a.hearing,
+  simplified: !!a.cognitive,
+ };
+}`);
+
+  src=src.replace('const a11y = getA11y(a11yProfile);',`const a11y = getA11y(a11yProfile);
+ useEffect(()=>{
+  try{
+   window.__naknakA11y=a11y;
+   document.body.dataset.nakVision=a11y.vision?'1':'0';
+   document.body.dataset.nakHearing=a11y.hearing?'1':'0';
+   document.body.dataset.nakMobility=a11y.mobility?'1':'0';
+   document.body.dataset.nakCognitive=a11y.cognitive?'1':'0';
+  }catch(e){}
+ },[a11yProfile]);`);
+
+  src=src.replace(/function showLocalNotif\(title, body, tag = 'naknak', requireInteraction = false\) \{[\s\S]*?\n\}/,`function showLocalNotif(title, body, tag = 'naknak', requireInteraction = false) {
+ const prof = (typeof window!=="undefined" && window.__naknakA11y) || {};
+ if (prof.hearing) {
+  try { haptic([250,100,250,100,450]); } catch(e) {}
+  try {
+   const old=document.getElementById('naknak-visual-alert'); if(old) old.remove();
+   const el=document.createElement('div'); el.id='naknak-visual-alert';
+   el.innerHTML='<div style="font-size:11px;font-weight:900;letter-spacing:1.4px;opacity:.8;margin-bottom:5px">NAKNAK ALERT</div><div style="font-size:22px;font-weight:900;margin-bottom:5px"></div><div style="font-size:14px;font-weight:700;line-height:1.4"></div>';
+   el.children[1].textContent=title; el.children[2].textContent=body;
+   Object.assign(el.style,{position:'fixed',left:'12px',right:'12px',top:'52px',zIndex:'100000',background:'#111',color:'#fff',border:'4px solid #F0C040',borderRadius:'18px',padding:'18px',boxShadow:'0 10px 40px rgba(0,0,0,.45)',animation:'nakFlash .55s ease 0s 3'});
+   document.body.appendChild(el); setTimeout(()=>el.remove(),9000);
+  } catch(e) {}
+ }
+ if (!('Notification' in window) || Notification.permission !== 'granted') return;
+ try {
+  if(navigator.serviceWorker && navigator.serviceWorker.controller){
+   navigator.serviceWorker.controller.postMessage({type:'NAKNAK_NOTIFY',title,body,tag,requireInteraction});
+   return;
+  }
+  const n = new Notification(title, { body, tag, requireInteraction, icon: '' });
+  if (!requireInteraction) setTimeout(() =>n.close(), 9000);
+ } catch(e) {}
+}`);
+
+  const adaptive=`<style id="naknak-v12-adaptive">
+@keyframes nakFlash{0%,100%{filter:none;transform:scale(1)}50%{filter:brightness(1.8);transform:scale(1.01)}}
+body[data-nak-vision="1"] button,body[data-nak-vision="1"] input,body[data-nak-vision="1"] select{font-size:max(17px,1em)!important;border-width:2px!important}
+body[data-nak-vision="1"] button{font-weight:900!important}
+body[data-nak-vision="1"] [style*="font-size:10"],body[data-nak-vision="1"] [style*="font-size:11"],body[data-nak-vision="1"] [style*="fontSize:10"],body[data-nak-vision="1"] [style*="fontSize:11"]{font-size:15px!important}
+body[data-nak-mobility="1"] button{min-height:64px!important;touch-action:manipulation}
+body[data-nak-mobility="1"] input,body[data-nak-mobility="1"] select{min-height:58px!important}
+body[data-nak-hearing="1"] .beta-banner{box-shadow:inset 0 -3px 0 #F0C040}
+body[data-nak-cognitive="1"] button{font-weight:900!important}
+body[data-nak-cognitive="1"] [role="button"]{outline-offset:3px}
+</style>`;
+  src=src.replace('</head>',adaptive+'\n</head>');
+
+  const safety=`<div id="naknak-v12-safety" style="position:fixed;left:10px;right:10px;bottom:10px;z-index:99999;background:rgba(20,8,4,.95);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:9px 12px;color:#fff;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;line-height:1.35;box-shadow:0 8px 26px rgba(0,0,0,.28)"><button onclick="this.parentElement.remove()" style="float:right;margin-left:10px;border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:10px;padding:4px 8px;font-size:10px;font-weight:800">OK</button><b>V12 BETA:</b> Direct call buttons are active. Browser/service-worker notifications are enabled when permission is granted. Remote push, carrier SMS, automatic calling, and fall detection are not guaranteed yet.</div>`;
+  src=src.replace('</body>',safety+'\n</body>');
+  document.open();document.write(src);document.close();
+ }catch(err){document.getElementById('boot').innerHTML='<div><strong>Hindi ma-load ang NakNak</strong><span>'+String(err.message||err)+'</span></div>';}
+})();
+</script>
+</body>
+</html>
