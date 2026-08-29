@@ -1,4 +1,4 @@
-const CACHE='naknak-v15-shell';
+const CACHE='naknak-v15-hotfix-shell';
 const SHELL=['./','./app.html','./app-v15.html','./app-v14.html','./app-v13.html'];
 
 self.addEventListener('install',event=>{

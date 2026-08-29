@@ -46,9 +46,13 @@ body[data-nak-mobility="1"] [data-nak-home-v14="1"] .nak-home-nav button{min-hei
   rep('NakNak v14 — One-screen Emergency Home','NakNak v15 — Pinned Emergency Navigation');
 `;
 
-  const marker='</script>\n\n<script>\n(async function(){';
+  // Never place a literal closing-script token inside this script block.
+  // HTML parsers terminate a script element even when that token appears inside a JS string.
+  const closeScript='<'+'/script>';
+  const openScript='<script>';
+  const marker=closeScript+'\n\n'+openScript+'\n(async function(){';
   if(!wrapper.includes(marker)) throw new Error('NakNak v14 patch marker not found');
-  wrapper=wrapper.replace(marker,navPatch+'\n</script>\n\n<script>\n(async function(){');
+  wrapper=wrapper.replace(marker,navPatch+'\n'+closeScript+'\n\n'+openScript+'\n(async function(){');
   wrapper=wrapper.replace(/NakNak v14/g,'NakNak v15');
   document.open();document.write(wrapper);document.close();
  }catch(err){document.getElementById('boot').innerHTML='<div><strong>Hindi ma-load ang NakNak</strong><span>'+String(err.message||err)+'</span></div>';}
