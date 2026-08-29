@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+<title>NakNak v13</title>
+<style>
+html,body{margin:0;min-height:100%;background:#080402;font-family:system-ui,-apple-system,sans-serif;color:#fff}
+#boot{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box;background:radial-gradient(ellipse at 25% 25%,#2A0A00 0%,#080402 65%)}
+#boot strong{display:block;font-size:24px;margin-bottom:8px}#boot span{font-size:13px;opacity:.7}
+</style>
+</head>
+<body>
+<div id="boot"><div><strong>NakNak v13</strong><span>Loading the accessibility and caregiver safety update…</span></div></div>
+<script>
+(async function(){
+ try{
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('./naknak-sw.js').catch(()=>{});}
+  const CORE='https://raw.githubusercontent.com/justineinacay/Naknak/eee6ce2ea9792263fa9420f980353cc108fc3123/app.html';
+  const res=await fetch(CORE,{cache:'no-store'});
+  if(!res.ok) throw new Error('Unable to load NakNak core');
+  let src=await res.text();
+  const rep=(a,b)=>{src=src.split(a).join(b);};
+
+  // Inclusive, purpose-led onboarding.
+  rep('roleSenior:"Kailangan ko ng tulong"','roleSenior:"Senior / PWD User"');
+  rep('roleCare:"Binabantayan ko ang pamilya ko"','roleCare:"Caregiver / Anak User"');
+  rep('roleSeniorSub:"Para sa Senior Citizens at PWDs"','roleSeniorSub:"Para sa iyong safety, reminders, at emergency support"');
+  rep('roleCareSub:"Para sa mga Anak at Caregivers"','roleCareSub:"Para maalalayan at mabantayan ang kapamilya mo"');
+  rep('Parang tawag mo sa anak mo.','Tulong at alaga,');
+  rep('Laging may sasagot.','laging abot-kamay.');
+  rep('roleSenior:"I need help"','roleSenior:"Senior / PWD User"');
+  rep("roleCare:\"I'm watching over my family\"",'roleCare:"Caregiver / Anak User"');
+  rep('roleSeniorSub:"For Senior Citizens and PWDs"','roleSeniorSub:"For your safety, reminders, and emergency support"');
+  rep('roleCareSub:"For Children and Caregivers"','roleCareSub:"To support and look after a family member"');
+  rep('Like calling your child.','Care and support,');
+  rep('Someone will always answer.','always within reach.');
+  rep('roleSenior:"Nagkinahanglan ko og tabang"','roleSenior:"Senior / PWD User"');
+  rep('roleCare:"Gibantayan nako ang akong pamilya"','roleCare:"Caregiver / Anak User"');
+  rep('roleSeniorSub:"Para sa mga Tigulang ug PWD"','roleSeniorSub:"Para sa imong safety, reminders, ug emergency support"');
+  rep('roleCareSub:"Para sa mga Anak ug Caregiver"','roleCareSub:"Para maatiman ug mabantayan ang imong kapamilya"');
+
+  // Inclusive family labels.
+  rep('allSeniorLabel:"LAHAT NG SENIOR"','allSeniorLabel:"MGA BINABANTAYAN KO"');
+  rep('addSeniorLabel:"+ Dagdag na Senior"','addSeniorLabel:"+ Dagdag na Family Member"');
+  rep('allSeniorLabel:"ALL SENIORS"','allSeniorLabel:"FAMILY MEMBERS I SUPPORT"');
+  rep('addSeniorLabel:"+ Add a Senior"','addSeniorLabel:"+ Add Family Member"');
+  rep('allSeniorLabel:"TANANG SENIOR"','allSeniorLabel:"MGA GIBANTAYAN NAKO"');
+  rep('addSeniorLabel:"+ Dugang og Senior"','addSeniorLabel:"+ Dugang Family Member"');
+
+  // Emergency contacts: preserve a practical free safety allowance without cascading replacements.
+  rep('maxContacts:1 }','maxContacts:__NAK_FREE__ }');
+  rep('maxContacts:2 }','maxContacts:__NAK_ESSENTIAL__ }');
+  rep('maxContacts:3 }','maxContacts:__NAK_FAMILY__ }');
+  rep('__NAK_FREE__','3');
+  rep('__NAK_ESSENTIAL__','5');
+  rep('__NAK_FAMILY__','8');
+  rep('contactsAtLimitDesc:"I-upgrade para magdagdag pa ng emergency contact →"','contactsAtLimitDesc:"Naka-save na ang maximum emergency contacts para sa plan na ito."');
+  rep('I-upgrade para magdagdag pa ng emergency contact →','Naka-save na ang maximum emergency contacts para sa plan na ito.');
+  rep('sub={`${contacts.length}/${maxContacts} na-gamit sa ${PLANS[plan]?.name||plan} plan`}','sub={`${contacts.length} emergency contacts • ${PLANS[plan]?.name||plan}`}');
+
+  // A caregiver should not create a false SOS on behalf of a family member from the contact-management screen.
+  src=src.replace(/<button onClick=\{\(\)=>\{haptic\(\[300,100,300\]\);STORE\.triggerSOS\(activeSid,"manual"\);\}\}[\s\S]*?>SOS<\/button>/,'');
+
+  // Family-friendly Settings language.
+  rep('>CLOUD SYNC<','>IKONEKTA ANG PAMILYA<');
+  rep('Ilagay ang 6-character Family Code mula sa NakNak web dashboard para i-sync ang device na ito.','Ilagay ang 6-character Family Code para i-connect ang device na ito sa kapamilya mo.');
+  rep('{busy?"…":"I-connect"}','{busy?"…":"Ikonekta"}');
+  rep('currentPlanLabel:"KASALUKUYANG PLANO"','currentPlanLabel:"IYONG PLANO"');
+
+  // Honest beta capability states.
+  rep('"Smart escalation"','"Caregiver escalation (beta)"');
+  rep('"Fall Detection"','"Fall Detection (Coming Soon)"');
+  rep('log(`SMS → ${s.contacts[0]?.name}`,"ok");','log(`Alert queued → ${s.contacts[0]?.name}`,"ok");');
+  rep('a.history.push(`${tNow()} — Escalation #${lvl+1}: SMS → ${c.name}`);','a.history.push(`${tNow()} — Escalation #${lvl+1}: alert queued → ${c.name}`);');
+  rep('a.history.push(`${tNow()} — Auto-call → ${s.contacts[0]?.name}`);','a.history.push(`${tNow()} — Call escalation ready → ${s.contacts[0]?.name}`);');
+  rep('log(`Auto-call → ${s.contacts[0]?.name}`,"red");','log(`Call escalation ready → ${s.contacts[0]?.name}`,"warn");');
+  rep('NakNak v10 — Cloud Sync · Web Dashboard Companion','NakNak v13 — Senior/PWD + Caregiver/Anak');
+
+  // Flexible medication windows.
+  rep('f==="4x"?"4x (apat na beses)":"Custom"','f==="4x"?"4x (apat na beses)":"Flexible / Custom"');
+  rep('>+ Idagdag</button>','>+ Exact Time</button>');
+  src=src.replace('function fmt24to12(t24) {',`const NAKNAK_FLEX_WINDOWS={
+ morning:{label:"Umaga",range:"6–10 AM",start:360,end:600},
+ noon:{label:"Tanghali",range:"11 AM–2 PM",start:660,end:840},
+ afternoon:{label:"Hapon",range:"3–5 PM",start:900,end:1020},
+ evening:{label:"Gabi",range:"6–9 PM",start:1080,end:1260},
+ bedtime:{label:"Bago matulog",range:"9–11 PM",start:1260,end:1380}
+};
+function nakFlexWindow(slot){return typeof slot==="string"&&slot.startsWith("window:")?NAKNAK_FLEX_WINDOWS[slot.slice(7)]||null:null;}
+function fmt24to12(t24) {
+ const fw=nakFlexWindow(t24); if(fw)return fw.label+" ("+fw.range+")";`);
+  rep('function parseTimeMins(t24) { const [h,m] = (t24||"08:00").split(":").map(Number); return h*60+m; }','function parseTimeMins(t24) { const fw=nakFlexWindow(t24); if(fw)return fw.start; const [h,m]=(t24||"08:00").split(":").map(Number); return h*60+m; }');
+  rep('const h = parseInt(earliest.split(":")[0]);','const h = Math.floor(parseTimeMins(earliest)/60);');
+  rep('const slotMins = parseTimeMins(slot);','const slotMins = parseTimeMins(slot);\n     const fw = nakFlexWindow(slot);\n     const windowEnd = fw ? fw.end : slotMins + 60;');
+  rep('const diff = cur - slotMins; // positive = overdue\n     if (diff >= 0 && diff <= 2 && !notifiedRef.current[key]) {','const diff = cur - slotMins;\n     const reminderDue = fw ? (cur >= fw.start && cur <= fw.end) : (diff >= 0 && diff <= 2);\n     if (reminderDue && !notifiedRef.current[key]) {');
+  rep("if (diff > 60 && !notifiedRef.current[key+'-missed']) {","if (cur > windowEnd && !notifiedRef.current[key+'-missed']) {");
+  rep('const FREQ_OPTS = ["1x","2x","3x","4x","custom"];','const FREQ_OPTS = ["1x","2x","3x","4x","custom"];\n const FLEX_TIME_OPTS=[{id:"morning",label:"Umaga",sub:"6–10 AM"},{id:"noon",label:"Tanghali",sub:"11 AM–2 PM"},{id:"afternoon",label:"Hapon",sub:"3–5 PM"},{id:"evening",label:"Gabi",sub:"6–9 PM"},{id:"bedtime",label:"Bago matulog",sub:"9–11 PM"}];');
+  rep('const slots = f==="custom" ? med.schedule : freqToSlots(f);','const slots = f==="custom" ? (med.freq==="custom"?med.schedule:[]) : freqToSlots(f);');
+  rep('const addSlot=()=>{ if(customTime&&!med.schedule.includes(customTime)) { setMed(m=>({...m,schedule:[...m.schedule,customTime].sort()})); setCustomTime(""); } };','const addSlot=()=>{ if(customTime&&!med.schedule.includes(customTime)) { setMed(m=>({...m,schedule:[...m.schedule,customTime].sort((a,b)=>parseTimeMins(a)-parseTimeMins(b))})); setCustomTime(""); } };\n const addFlexSlot=(id)=>{const token="window:"+id;setMed(m=>{const next=m.schedule.includes(token)?m.schedule.filter(x=>x!==token):[...m.schedule,token];return {...m,schedule:next.sort((a,b)=>parseTimeMins(a)-parseTimeMins(b))};});};');
+
+  const customMarker='       )}\n      </div>\n      {/* Days of week */}';
+  const customExtra=`       )}
+       {med.freq==="custom"&&(
+        <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:10}}>
+         <div style={{fontSize:11,fontWeight:800,color:t.text3,textTransform:"uppercase",letterSpacing:0.7}}>O pumili ng flexible na oras</div>
+         <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+          {FLEX_TIME_OPTS.map(w=>{const token="window:"+w.id;const active=med.schedule.includes(token);return <button key={w.id} onClick={()=>addFlexSlot(w.id)} style={{padding:"9px 11px",borderRadius:12,border:active?("1.5px solid "+t.green):("1.5px solid "+t.cardBorder),background:active?t.greenBg:t.bg2,color:active?t.green:t.text2,fontSize:11,fontWeight:800,cursor:"pointer"}}>{w.label}<span style={{display:"block",fontSize:9,opacity:.72,marginTop:2}}>{w.sub}</span></button>})}
+         </div>
+         <div style={{fontSize:10.5,color:t.text3,lineHeight:1.45,fontWeight:600}}>Piliin lamang ang timing na nakasulat sa reseta o ibinigay ng healthcare professional. Ang flexible window ay para sa reminder timing, hindi pagbabago ng dosage.</div>
+        </div>
+       )}
+      </div>
+      {/* Days of week */}`;
+  if(src.includes(customMarker))src=src.replace(customMarker,customExtra);
+
+  // Disability selections visibly alter the experience.
+  src=src.replace(/function getA11y\(profile\) \{[\s\S]*?\n\}/,`function getA11y(profile) {
+ const a=profile||{};
+ return {vision:!!a.vision,hearing:!!a.hearing,mobility:!!a.mobility,cognitive:!!a.cognitive,general:!!a.general,
+  btnH:a.mobility?90:(a.vision?78:64),fs:a.vision?22:16,bigBtn:!!(a.mobility||a.vision),highContrast:!!a.vision,visualAlerts:!!a.hearing,simplified:!!a.cognitive};
+}`);
+  rep('<TextSizeControl scale={textScale} setScale={setTextScale} t={t} i={i}/>','{(a11y.vision || (!a11y.mobility && !a11y.cognitive))&&<TextSizeControl scale={textScale} setScale={setTextScale} t={t} i={i}/>}');
+  rep('fontSize:10.5,fontWeight:700,textAlign:"center"','fontSize:a11y.bigBtn?14:11,fontWeight:800,textAlign:"center"');
+  rep('const a11y = getA11y(a11yProfile);','const a11y=getA11y(a11yProfile);\n useEffect(()=>{try{window.__naknakA11y=a11y;window.__naknakRole=role;document.body.dataset.nakVision=a11y.vision?"1":"0";document.body.dataset.nakHearing=a11y.hearing?"1":"0";document.body.dataset.nakMobility=a11y.mobility?"1":"0";document.body.dataset.nakCognitive=a11y.cognitive?"1":"0";}catch(e){}},[a11yProfile,role]);');
+
+  // Visual + vibration alerts for hearing profiles and service-worker notification handoff.
+  src=src.replace(/function showLocalNotif\(title, body, tag = 'naknak', requireInteraction = false\) \{[\s\S]*?\n\}/,`function showLocalNotif(title,body,tag='naknak',requireInteraction=false){
+ const prof=(typeof window!=="undefined"&&window.__naknakA11y)||{};
+ if(prof.hearing){try{haptic([250,100,250,100,450]);}catch(e){}try{const old=document.getElementById('naknak-visual-alert');if(old)old.remove();const el=document.createElement('div');el.id='naknak-visual-alert';el.innerHTML='<div style="font-size:11px;font-weight:900;letter-spacing:1.4px;opacity:.8;margin-bottom:5px">NAKNAK ALERT</div><div></div><div></div>';el.children[1].textContent=title;el.children[2].textContent=body;Object.assign(el.children[1].style,{fontSize:'22px',fontWeight:'900',marginBottom:'5px'});Object.assign(el.children[2].style,{fontSize:'14px',fontWeight:'700',lineHeight:'1.4'});Object.assign(el.style,{position:'fixed',left:'12px',right:'12px',top:'52px',zIndex:'100000',background:'#111',color:'#fff',border:'4px solid #F0C040',borderRadius:'18px',padding:'18px',boxShadow:'0 10px 40px rgba(0,0,0,.45)',animation:'nakFlash .55s ease 0s 3'});document.body.appendChild(el);setTimeout(()=>el.remove(),9000);}catch(e){}}
+ if(!('Notification'in window)||Notification.permission!=='granted')return;
+ try{if(navigator.serviceWorker&&navigator.serviceWorker.controller){navigator.serviceWorker.controller.postMessage({type:'NAKNAK_NOTIFY',title,body,tag,requireInteraction});return;}const n=new Notification(title,{body,tag,requireInteraction,icon:''});if(!requireInteraction)setTimeout(()=>n.close(),9000);}catch(e){}
+}`);
+
+  // Caregiver notification engine for paired devices while NakNak is active.
+  rep('if(remote.alerts) st.alerts=remote.alerts;\n      STORE._pub();','const prevActive=new Set((st.alerts||[]).filter(a=>a.status==="active").map(a=>a.id));\n      if(remote.alerts) st.alerts=remote.alerts;\n      if(remote.alerts&&typeof window!=="undefined"&&window.__naknakRole==="caregiver"){const fresh=remote.alerts.find(a=>a.status==="active"&&!prevActive.has(a.id));if(fresh){showLocalNotif("SOS mula kay "+(fresh.seniorName||"kapamilya"),(fresh.location?"Lokasyon: "+fresh.location+". ":"")+"Buksan ang NakNak at pindutin ang I’m Responding.","remote-sos-"+fresh.id,true);}}\n      STORE._pub();');
+  rep('const SYNC_POLL_MS = 12000;','const SYNC_POLL_MS = 8000;');
+
+  const adaptive=`<style id="naknak-v13-adaptive">
+@keyframes nakFlash{0%,100%{filter:none;transform:scale(1)}50%{filter:brightness(1.8);transform:scale(1.01)}}
+#root button,#root a{min-height:44px}
+body[data-nak-vision="1"] button,body[data-nak-vision="1"] input,body[data-nak-vision="1"] select{font-size:max(17px,1em)!important;border-width:2px!important}
+body[data-nak-vision="1"] button{font-weight:900!important}
+body[data-nak-vision="1"] [style*="font-size:10"],body[data-nak-vision="1"] [style*="font-size:11"],body[data-nak-vision="1"] [style*="fontSize:10"],body[data-nak-vision="1"] [style*="fontSize:11"]{font-size:15px!important}
+body[data-nak-mobility="1"] button{min-height:68px!important;touch-action:manipulation}
+body[data-nak-mobility="1"] input,body[data-nak-mobility="1"] select{min-height:60px!important}
+body[data-nak-hearing="1"] .beta-banner{box-shadow:inset 0 -3px 0 #F0C040}
+body[data-nak-cognitive="1"] button{font-weight:900!important}
+body[data-nak-cognitive="1"] [role="button"]{outline-offset:3px}
+</style>`;
+  src=src.replace('</head>',adaptive+'\n</head>');
+
+  const safety=`<div id="naknak-v13-safety" style="position:fixed;left:10px;right:10px;bottom:10px;z-index:99999;background:rgba(20,8,4,.95);border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:9px 12px;color:#fff;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;line-height:1.35;box-shadow:0 8px 26px rgba(0,0,0,.28)"><button onclick="this.parentElement.remove()" style="float:right;margin-left:10px;border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:10px;padding:4px 8px;font-size:10px;font-weight:800">OK</button><b>V13 BETA:</b> Direct call and SMS buttons use your phone. Paired caregiver alerts can sync while NakNak is running. Carrier SMS automation, automatic calling, guaranteed terminated-app push, and fall detection are not yet guaranteed.</div>`;
+  src=src.replace('</body>',safety+'\n</body>');
+  document.open();document.write(src);document.close();
+ }catch(err){document.getElementById('boot').innerHTML='<div><strong>Hindi ma-load ang NakNak</strong><span>'+String(err.message||err)+'</span></div>';}
+})();
+</script>
+</body>
+</html>
