@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>NakNak v11 Beta</title>
+  <style>
+    html,body{margin:0;min-height:100%;background:#080402;font-family:system-ui,-apple-system,sans-serif;color:white}
+    #boot{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box;background:radial-gradient(ellipse at 25% 25%,#2A0A00 0%,#080402 65%)}
+    #boot strong{display:block;font-size:22px;margin-bottom:8px}
+    #boot span{font-size:13px;opacity:.68}
+  </style>
+</head>
+<body>
+<div id="boot"><div><strong>NakNak v11 Beta</strong><span>Loading the inclusive safety update…</span></div></div>
+<script>
+(async function(){
+  try {
+    const res = await fetch('./app.html', { cache: 'no-store' });
+    if (!res.ok) throw new Error('Unable to load app.html');
+    let src = await res.text();
+
+    const replacements = [
+      // Role naming: Filipino
+      ['roleSenior:"Kailangan ko ng tulong"','roleSenior:"Senior / PWD User"'],
+      ['roleCare:"Binabantayan ko ang pamilya ko"','roleCare:"Caregiver / Anak User"'],
+      ['roleSeniorSub:"Para sa Senior Citizens at PWDs"','roleSeniorSub:"Para sa Senior Citizens at Persons with Disabilities"'],
+      ['roleCareSub:"Para sa mga Anak at Caregivers"','roleCareSub:"Para sa anak, caregiver, o taong nag-aalaga"'],
+
+      // Role naming: English
+      ['roleSenior:"I need help"','roleSenior:"Senior / PWD User"'],
+      ['roleCare:"I\'m watching over my family"','roleCare:"Caregiver / Anak User"'],
+      ['roleSeniorSub:"For Senior Citizens and PWDs"','roleSeniorSub:"For Senior Citizens and Persons with Disabilities"'],
+      ['roleCareSub:"For Children and Caregivers"','roleCareSub:"For children, caregivers, and family supporters"'],
+
+      // Role naming: Cebuano
+      ['roleSenior:"Nagkinahanglan ko og tabang"','roleSenior:"Senior / PWD User"'],
+      ['roleCare:"Gibantayan nako ang akong pamilya"','roleCare:"Caregiver / Anak User"'],
+      ['roleSeniorSub:"Para sa mga Tigulang ug PWD"','roleSeniorSub:"Para sa Senior Citizens ug Persons with Disabilities"'],
+      ['roleCareSub:"Para sa mga Anak ug Caregiver"','roleCareSub:"Para sa anak, caregiver, o tig-atiman sa pamilya"'],
+
+      // Inclusive caregiver labels
+      ['allSeniorLabel:"LAHAT NG SENIOR"','allSeniorLabel:"MGA BINABANTAYAN KO"'],
+      ['addSeniorLabel:"+ Dagdag na Senior"','addSeniorLabel:"+ Dagdag na Family Member"'],
+      ['allSeniorLabel:"ALL SENIORS"','allSeniorLabel:"FAMILY MEMBERS I SUPPORT"'],
+      ['addSeniorLabel:"+ Add a Senior"','addSeniorLabel:"+ Add Family Member"'],
+      ['allSeniorLabel:"TANANG SENIOR"','allSeniorLabel:"MGA GIBANTAYAN NAKO"'],
+      ['addSeniorLabel:"+ Dugang og Senior"','addSeniorLabel:"+ Dugang Family Member"'],
+
+      // Honest beta capability labels
+      ['Emergency Contacts (3)','Emergency Contacts (1)'],
+      ['"Smart escalation"','"Escalation alerts (beta)"'],
+      ['"Fall Detection"','"Fall Detection (Coming Soon)"'],
+
+      // Never claim an SMS or automatic phone call occurred when this build only simulates it
+      ['log(`SMS → ${s.contacts[0]?.name}`,"ok");','log(`Alert queued → ${s.contacts[0]?.name}`,"ok");'],
+      ['a.history.push(`${tNow()} — Escalation #${lvl+1}: SMS → ${c.name}`);','a.history.push(`${tNow()} — Escalation #${lvl+1}: alert queued → ${c.name}`);'],
+      ['a.history.push(`${tNow()} — Auto-call → ${s.contacts[0]?.name}`);','a.history.push(`${tNow()} — Call escalation ready → ${s.contacts[0]?.name}`);'],
+      ['log(`Auto-call → ${s.contacts[0]?.name}`,"red");','log(`Call escalation ready → ${s.contacts[0]?.name}`,"warn");']
+    ];
+
+    for (const [from,to] of replacements) src = src.split(from).join(to);
+
+    // Update visible build label without changing the underlying architecture.
+    src = src.split('NakNak v10 — Cloud Sync · Web Dashboard Companion').join('NakNak v11 Beta — Senior/PWD + Caregiver/Anak');
+
+    // Add a transparent beta disclosure for safety-critical features.
+    const disclosure = `
+<style>
+#naknak-beta-disclosure{position:fixed;left:10px;right:10px;bottom:10px;z-index:99999;background:rgba(20,8,4,.94);border:1px solid rgba(255,255,255,.16);border-radius:14px;padding:9px 12px;color:#fff;font-family:'Nunito',sans-serif;font-size:10px;font-weight:700;line-height:1.35;box-shadow:0 8px 26px rgba(0,0,0,.28)}
+#naknak-beta-disclosure button{float:right;margin-left:10px;border:0;background:rgba(255,255,255,.14);color:#fff;border-radius:10px;padding:4px 8px;font-size:10px;font-weight:800;cursor:pointer}
+</style>
+<div id="naknak-beta-disclosure"><button onclick="this.parentElement.remove()">OK</button><b>BETA SAFETY NOTICE:</b> Emergency calling uses your phone's call function. SMS delivery, remote push escalation, automatic calling, and fall detection are not yet guaranteed in this beta.</div>`;
+    src = src.replace('</body>', disclosure + '\n</body>');
+
+    document.open();
+    document.write(src);
+    document.close();
+  } catch (err) {
+    document.getElementById('boot').innerHTML = '<div><strong>Hindi ma-load ang NakNak</strong><span>'+String(err.message||err)+'</span></div>';
+  }
+})();
+</script>
+</body>
+</html>
