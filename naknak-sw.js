@@ -1,5 +1,5 @@
-const CACHE='naknak-v14-shell';
-const SHELL=['./','./app.html','./app-v14.html','./app-v13.html'];
+const CACHE='naknak-v15-shell';
+const SHELL=['./','./app.html','./app-v15.html','./app-v14.html','./app-v13.html'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>{})));
