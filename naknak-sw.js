@@ -1,5 +1,5 @@
-const CACHE='naknak-v13-shell';
-const SHELL=['./','./app.html','./app-v13.html'];
+const CACHE='naknak-v14-shell';
+const SHELL=['./','./app.html','./app-v14.html','./app-v13.html'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL).catch(()=>{})));
@@ -22,25 +22,15 @@ self.addEventListener('message',event=>{
   const d=event.data||{};
   if(d.type!=='NAKNAK_NOTIFY')return;
   event.waitUntil(self.registration.showNotification(d.title||'NakNak',{
-    body:d.body||'',
-    tag:d.tag||'naknak',
-    requireInteraction:!!d.requireInteraction,
-    data:d.data||{},
-    vibrate:[250,100,250,100,450]
+    body:d.body||'',tag:d.tag||'naknak',requireInteraction:!!d.requireInteraction,data:d.data||{},vibrate:[250,100,250,100,450]
   }));
 });
 
-// Future-ready remote Web Push handler. A server-side push subscription sender
-// is still required before this can wake a terminated app remotely.
 self.addEventListener('push',event=>{
   let data={};
   try{data=event.data?event.data.json():{};}catch(e){data={body:event.data?event.data.text():''};}
   event.waitUntil(self.registration.showNotification(data.title||'NakNak Alert',{
-    body:data.body||'May bagong alert mula sa iyong kapamilya.',
-    tag:data.tag||'naknak-remote-alert',
-    requireInteraction:data.requireInteraction!==false,
-    data:data.data||{},
-    vibrate:[300,100,300,100,500]
+    body:data.body||'May bagong alert mula sa iyong kapamilya.',tag:data.tag||'naknak-remote-alert',requireInteraction:data.requireInteraction!==false,data:data.data||{},vibrate:[300,100,300,100,500]
   }));
 });
 
