@@ -2,9 +2,9 @@
 
 **Always close, even from afar.**
 
-NakNak is a landing page for a Filipino family-safety and caregiving app that connects seniors, PWDs, and their families through real-time check-ins, SOS alerts, medication reminders, and a live family dashboard.
+NakNak is a Filipino safety and support app for Senior Citizens, Persons with Disabilities (PWDs), and their Caregiver / Anak.
 
-This repo contains the marketing/landing site — a static, single-page site with no build step and no dependencies.
+This repository now contains the existing web experience and an Expo/React Native app under `native/`. Remote caregiver alerts are still in development; the product does not yet claim SMS, automatic calling, remote push, location sharing, or fall detection.
 
 ## Live Preview
 
@@ -19,6 +19,8 @@ https://justineinacay.github.io/Naknak/
 ```
 Naknak/
 ├── index.html          # Full landing page (hero, about, features, how it works, pricing, FAQ)
+├── app.html            # Stable entry for the current web app
+├── native/             # Expo/React Native app for iOS, Android, and web preview
 ├── assets/
 │   ├── logo-badge.png   # Navbar / footer mark — white heart on red
 │   ├── logo-mark.png    # Red heart mark (spare, for other brand touchpoints)
@@ -27,7 +29,7 @@ Naknak/
 └── README.md
 ```
 
-## Running Locally
+## Running the web experience locally
 
 No build tools or package manager required — it's plain HTML/CSS/JS.
 
@@ -43,6 +45,19 @@ python3 -m http.server 8000
 npx serve .
 ```
 Then visit `http://localhost:8000`.
+
+The public app entry is `app.html`. It opens the self-contained `naknak-app.html` build, so the safety home no longer depends on the v13 to v15 wrapper chain or a runtime GitHub source fetch.
+
+When editing the legacy web experience, update `web-src/naknak-app.builder.html`, then rebuild the direct app document:
+
+```bash
+node scripts/build-web.mjs
+node scripts/verify-web.mjs
+```
+
+## Running the native app
+
+See [`native/README.md`](native/README.md) for setup, device builds, and the current capability boundaries.
 
 ## Deploying with GitHub Pages
 

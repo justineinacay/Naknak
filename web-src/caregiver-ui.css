@@ -1,0 +1,77 @@
+<style id="naknak-caregiver-ui">
+.nak-care-shell{flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.nak-care-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:14px 16px calc(24px + env(safe-area-inset-bottom));scrollbar-width:thin}
+.nak-care-stack{display:flex;flex-direction:column;gap:12px}
+.nak-section-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 2px 0}
+.nak-section-title{font-size:11px;font-weight:900;letter-spacing:1.25px;text-transform:uppercase}
+.nak-care-card{border-radius:18px;padding:14px 15px}
+.nak-care-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1px;overflow:hidden}
+.nak-care-summary>div{padding:11px 8px;text-align:center}
+.nak-care-summary strong{display:block;font-size:20px;line-height:1;font-weight:900;font-variant-numeric:tabular-nums}
+.nak-care-summary span{display:block;margin-top:4px;font-size:10px;font-weight:750;line-height:1.2}
+.nak-care-member{width:100%;text-align:left;display:flex;align-items:flex-start;gap:12px;padding:14px;border-radius:18px;cursor:pointer}
+.nak-care-member-status{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px}
+.nak-care-chip{display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:8px;border:1px solid;font-size:9.5px;font-weight:850;line-height:1.1}
+.nak-care-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.nak-care-action{min-height:58px!important;padding:11px 12px;border-radius:16px;display:flex;align-items:center;gap:9px;text-align:left;cursor:pointer}
+.nak-care-action span{font-size:12px;font-weight:850;line-height:1.25}
+.nak-beta-summary{width:100%;min-height:44px!important;border-radius:14px;padding:9px 11px;display:flex;align-items:center;gap:9px;text-align:left;cursor:pointer}
+.nak-beta-summary-copy{flex:1;min-width:0;font-size:11.5px;font-weight:850;line-height:1.35}
+.nak-beta-detail{margin-top:8px;padding-top:8px;border-top:1px solid;font-size:10.5px;font-weight:650;line-height:1.45}
+.nak-care-nav{flex:0 0 auto;padding:7px 10px calc(8px + env(safe-area-inset-bottom));position:relative;z-index:20}
+.nak-care-nav-inner{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:3px;border-radius:20px;padding:5px}
+.nak-care-nav button{min-height:48px!important;border:0;border-radius:15px;background:transparent;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+.nak-care-nav button span{font-size:10px;font-weight:800;white-space:nowrap}
+.nak-sync-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}
+.nak-sync-field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.nak-sync-field label{font-size:10px;font-weight:850;letter-spacing:.8px;text-transform:uppercase}
+.nak-sync-field input{width:100%;height:48px;box-sizing:border-box;border-radius:13px;padding:0 12px;text-align:center;font-size:17px;font-weight:900;letter-spacing:5px;font-variant-numeric:tabular-nums;outline:none;text-transform:uppercase}
+.nak-sync-form>button{height:48px!important;min-width:104px;border-radius:13px;padding:0 15px;font-size:12px;font-weight:900;cursor:pointer}
+.nak-blood-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.nak-blood-grid button{height:46px!important;min-width:0;border-radius:12px;font-size:13px;font-weight:900;cursor:pointer;transition:transform .15s ease,background .15s ease,border-color .15s ease}
+.nak-blood-grid button:active{transform:scale(.97)}
+.nak-med-summary{border-radius:18px;padding:13px 15px}
+.nak-med-summary-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+.nak-med-summary-title{font-size:13px;font-weight:900}
+.nak-med-summary-copy{font-size:11px;font-weight:750}
+.nak-med-card{border-radius:17px;padding:13px 14px}
+.nak-med-card-main{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.nak-med-name{font-size:17px;font-weight:900;line-height:1.15}
+.nak-med-dose{font-size:12px;font-weight:750}
+.nak-med-times{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.nak-med-time{padding:3px 8px;border-radius:7px;border:1px solid;font-size:11px;font-weight:850;font-variant-numeric:tabular-nums}
+.nak-med-meta{margin-top:5px;font-size:10.5px;font-weight:650}
+.nak-med-status{flex-shrink:0;padding:5px 9px;border-radius:9px;border:1px solid;font-size:10.5px;font-weight:850}
+.nak-med-actions{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,1fr);gap:7px;margin-top:11px}
+.nak-med-actions button{height:44px!important;border-radius:12px;font-size:11.5px;font-weight:900;cursor:pointer}
+.nak-med-actions .nak-med-missed{grid-column:2}
+.nak-med-tertiary{display:flex;justify-content:flex-end;margin-top:5px}
+.nak-med-tertiary button{min-height:36px!important;background:none;border:0;padding:3px 5px;font-size:10.5px;font-weight:750;cursor:pointer}
+.nak-med-remove-confirm{margin-top:7px;padding:9px;border-radius:12px;display:flex;align-items:center;gap:7px}
+.nak-med-remove-confirm span{flex:1;font-size:10.5px;font-weight:750}
+.nak-med-remove-confirm button{min-height:36px!important;border-radius:10px;padding:0 10px;font-size:10.5px;font-weight:850;cursor:pointer}
+.nak-price-list{display:flex;flex-direction:column;gap:10px}
+.nak-price-card{border-radius:19px;padding:15px;position:relative}
+.nak-price-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.nak-price-name{font-size:18px;font-weight:900;line-height:1.1}
+.nak-price-badge{padding:5px 8px;border-radius:8px;font-size:9.5px;font-weight:900;line-height:1.1;white-space:nowrap}
+.nak-price-amount{display:flex;align-items:baseline;gap:5px;margin-top:5px}
+.nak-price-amount strong{font-size:27px;line-height:1;font-weight:900;font-variant-numeric:tabular-nums}
+.nak-price-amount span{font-size:11px;font-weight:700}
+.nak-price-features{display:flex;flex-direction:column;gap:7px;margin:12px 0}
+.nak-price-feature{display:flex;align-items:flex-start;gap:8px;font-size:11.5px;font-weight:700;line-height:1.3}
+.nak-price-feature-icon{width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:0}
+.nak-price-planned{margin-top:9px;padding-top:9px;border-top:1px dashed;font-size:10.5px;font-weight:750;line-height:1.4}
+.nak-price-card>button{width:100%;height:44px!important;border-radius:13px;font-size:12.5px;font-weight:900;cursor:pointer}
+@media(max-width:360px){
+ .nak-care-scroll{padding-left:12px;padding-right:12px}
+ .nak-care-actions{grid-template-columns:1fr}
+ .nak-med-actions{grid-template-columns:1fr}
+ .nak-med-actions .nak-med-missed{grid-column:auto}
+}
+@media(max-width:430px){
+ .nak-sync-form{grid-template-columns:1fr}
+ .nak-sync-form>button{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.nak-care-shell *{transition:none!important;animation:none!important}}
+</style>

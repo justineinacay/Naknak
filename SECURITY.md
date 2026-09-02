@@ -5,6 +5,62 @@ what's protected, how, and what genuinely isn't finished yet. The goal is
 that nothing here is a surprise to whoever reads this before relying on
 it with real family data.
 
+## GitHub Pages deployment boundary
+
+The repository is currently a static GitHub Pages site (`justineinacay.github.io/Naknak/`); no `CNAME` or custom production domain is configured in this checkout. GitHub Pages serves repository files and provides HTTPS, but it does not let this repository set arbitrary response headers. The `.well-known/security.txt` file, safe links, sensitive-URL review, and the HTML referrer fallback below are therefore direct project fixes. The response-header and DNS controls in the production checklist must be configured at GitHub Pages' supported settings, a reverse proxy/CDN such as Cloudflare, or another host that you control.
+
+### Direct repository fixes
+
+- `/.well-known/security.txt` is published with a monitored contact, an RFC 9116 `Expires` value, supported languages, and this policy link.
+- External links already carry `rel="noopener noreferrer"`. The PayMongo checkout `window.open` call now supplies `noopener,noreferrer` as well, so a payment tab cannot retain an opener reference.
+- Supabase magic-link tokens are accepted only in the callback hash and immediately removed with `history.replaceState`; the canonical redirect URL contains no query string. The `?tab=settings&paid=1` checkout return flag is non-sensitive. Location coordinates are placed in a Google Maps query only when a user explicitly opens a map link; they are not used as app authentication or identity parameters.
+- The generated app, dashboard, and landing page include `meta name="referrer" content="strict-origin-when-cross-origin"` as a browser-level fallback. This does not replace the HTTP response header.
+
+### Production DNS records
+
+These records belong to the actual sending/production domain, not to `github.io`:
+
+**If NakNak sends no email today** (the current product behavior):
+
+```text
+@       TXT  "v=spf1 -all"
+_dmarc  TXT  "v=DMARC1; p=quarantine; rua=mailto:naknak@gmail.com"
+```
+
+After monitored reports show that every legitimate sender passes SPF and DKIM, change only the DMARC policy to:
+
+```text
+_dmarc  TXT  "v=DMARC1; p=reject; rua=mailto:naknak@gmail.com"
+```
+
+If email is introduced later, replace the SPF value with exactly the provider's required mechanisms (for example, the provider's `include:` plus `-all`) and publish the provider-supplied DKIM record at its exact selector (`<selector>._domainkey`). Do not guess a DKIM key or combine unrelated providers. The provider's setup screen is authoritative for the selector and public key.
+
+### Production HTTP response headers
+
+Configure these on the final HTTPS origin or CDN. They cannot be made reliable by adding HTML tags to a GitHub Pages repository:
+
+```text
+Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob: https://*.tile.openstreetmap.org; connect-src 'self' https://louqshzgqutxydfqgnyz.supabase.co https://api.open-meteo.com https://*.supabase.co wss://*.supabase.co; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests
+X-Frame-Options: DENY
+Cross-Origin-Opener-Policy: same-origin
+Permissions-Policy: geolocation=(self), camera=(), microphone=()
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=63072000; includeSubDomains
+Referrer-Policy: strict-origin-when-cross-origin
+```
+
+The CSP is intentionally written for the current static implementation: it allows the existing inline React/Babel code, the three current CDN script hosts, Google Fonts, Supabase, Open-Meteo, user-selected images, the service worker, and Leaflet/OpenStreetMap resources used by the caregiver dashboard. Start it as `Content-Security-Policy-Report-Only` on a staging/custom-domain origin, inspect violations, then enforce it. Once the inline Babel build and CDN dependencies are moved to self-hosted assets, remove `unsafe-inline` and `unsafe-eval` and narrow `img-src`/`connect-src` to the exact origins. `frame-ancestors` is the authoritative clickjacking control; `X-Frame-Options` is the compatibility fallback.
+
+`Cross-Origin-Opener-Policy: same-origin` is compatible with the current passwordless Supabase flow because the callback is same-origin and the app does not use popup-based authentication. Re-test any future OAuth popup or cross-origin integration before enabling it on that flow.
+
+Geolocation remains enabled for the app's SOS, safe-zone, and caregiver location features, while camera and microphone are disabled by policy. Notifications and service-worker functionality do not require either capability. Do not change `geolocation=(self)` to `()` unless the emergency location product requirement is removed.
+
+HSTS `preload` is intentionally omitted. Add it only after the final production domain and every subdomain are permanently HTTPS-ready and the domain has been submitted/accepted for browser preload requirements.
+
+### Rowly findings and remaining infrastructure work
+
+No Rowly report/export is present in this repository, so this change does not claim that a Rowly scan is closed. Re-run Rowly against the deployed HTTPS origin after the CDN headers are active. Any findings about missing response headers, DNS authentication, GitHub Pages' default host, or provider-side rate limiting remain infrastructure work and cannot be resolved solely by editing this static repository.
+
 ## Reporting a vulnerability
 
 Email **naknak@gmail.com** with details. Please don't open a public

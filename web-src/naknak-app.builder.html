@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="tl">
+<head>
+<meta charset="UTF-8"/>
+<meta name="referrer" content="strict-origin-when-cross-origin"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,viewport-fit=cover"/>
+<title>NakNak</title>
+<style>
+html,body{margin:0;min-height:100%;background:#080402;font-family:system-ui,-apple-system,sans-serif;color:#fff}
+#boot{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box;background:radial-gradient(ellipse at 25% 25%,#2A0A00 0%,#080402 65%)}
+#boot strong{display:block;font-size:24px;margin-bottom:8px}#boot span{font-size:13px;opacity:.7}
+</style>
+</head>
+<body>
+<div id="boot"><div><strong>NakNak</strong><span>Loading your safety home…</span></div></div>
+
+<script type="text/plain" id="naknak-current-senior-home">
+function SeniorHome({ name, goTo, t, plan, senior, a11y, lang, textScale, setTextScale }) {
+ const i=I18N[lang]||I18N.tl;
+ const noteCount=(senior?.notes||[]).length;
+ const latestNote=(senior?.notes||[])[0];
+ const zone=senior?.safeZone;
+ const updateCount=noteCount+((senior?.vitals||[]).length>0?1:0)+(zone?1:0);
+ const badges=[
+  a11y.mobility&&{label:"Mobility",icon:"accessible",color:"#E65100"},
+  a11y.cognitive&&{label:"Cognitive",icon:"brain",color:"#2E7D32"},
+  a11y.vision&&{label:"Visual",icon:"eye",color:"#6B35C4"},
+  a11y.hearing&&{label:"Hearing",icon:"ear",color:"#147D8B"},
+  a11y.general&&{label:"General Assist",icon:"heart",color:t.red}
+ ].filter(Boolean);
+ useEffect(()=>{
+  document.body.classList.add("naknak-senior-home");
+  return ()=>document.body.classList.remove("naknak-senior-home");
+ },[]);
+ return (
+  <div data-nak-home-current="1" className="nak-home-current" style={{background:t.bg}}>
+   <header className="nak-home-head">
+    <div className="nak-home-identity">
+     <div style={{minWidth:0}}>
+      <div className="nak-home-greeting" style={{color:t.text3}}>{i.goodMorning}</div>
+      <div className="nak-home-name" style={{color:t.text,fontSize:a11y.vision?25:23}}>{name}<Icon name="heart" size={17} color={t.red}/></div>
+     </div>
+     {senior?.battery<20&&<div className="nak-home-battery" style={{background:t.warnBg,borderColor:t.warnBorder,color:t.warn}}><Icon name="alert_tri" size={13} color={t.warn}/><span>{i.batteryLow}</span></div>}
+    </div>
+    {badges.length>0&&<div className="nak-home-badges">{badges.map(b=><div key={b.label} style={{background:b.color+"12",borderColor:b.color+"55",color:b.color}}><Icon name={b.icon} size={11} color={b.color}/>{b.label}</div>)}</div>}
+   </header>
+
+   {a11y.cognitive&&<div className="nak-home-helper" style={{background:t.isDark?"rgba(46,125,50,0.12)":"#F1FFF5",borderColor:"#2E7D3244",color:"#2E7D32"}}><Icon name="brain" size={16} color="#2E7D32"/><span>{i.cognitiveHelper||"Kung kailangan mo ng tulong, pindutin ang malaking pulang bilog."}</span></div>}
+
+   {updateCount>0&&<button className="nak-home-update" onClick={()=>goTo(SR.UPDATES)} style={{background:t.isDark?"rgba(46,140,74,0.12)":"#F1FFF5",borderColor:t.greenBorder,color:t.green}}>
+    <Icon name="hand_heart" size={19} color={t.green}/>
+    <span className="nak-home-update-copy"><strong>{updateCount===1?i.updatesBannerOne:i.updatesBanner(updateCount)}</strong>{latestNote&&<small className="nak-home-note-preview" style={{color:t.text3}}>“{latestNote.text}”</small>}</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={t.green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+   </button>}
+
+   <main className="nak-home-main">
+    <div className="nak-home-sos-wrap">
+     <button className="nak-home-sos" onClick={()=>goTo(SR.SOS_ACTIVE)} style={{background:t.redGrad,boxShadow:`0 12px 34px ${t.redGlow},0 5px 14px rgba(0,0,0,0.16),inset 0 1px 0 rgba(255,255,255,0.22)`}}>
+      <span className="nak-home-sos-title" style={{fontSize:a11y.vision?42:39}}>NakNak</span>
+      <span className="nak-home-sos-copy">{a11y.cognitive?i.sosBtnCognitive:i.sosBtn}</span>
+     </button>
+    </div>
+    <div className="nak-home-actions">
+     <button className="nak-home-ok" onClick={()=>goTo(SR.CHECKIN)} style={{height:a11y.mobility?64:58,background:t.green,boxShadow:`0 6px 18px ${t.greenGlow}`,fontSize:a11y.vision?23:21}}><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>{i.ayosAko}</button>
+     <button className="nak-home-rescue" onClick={()=>goTo(SR.RESCUE)} style={{height:a11y.mobility?54:50,background:t.warnBg,borderColor:t.warnBorder,color:t.warn,fontSize:a11y.vision?16:14.5}}>{i.rescueBridge}</button>
+    </div>
+   </main>
+
+   <nav className="nak-home-nav" aria-label="Senior/PWD navigation"><SeniorNav active="home" goTo={goTo} t={t} plan={plan} lang={lang}/></nav>
+  </div>
+ );
+}
+</script>
+
+<script type="text/plain" id="naknak-current-css">
+<style id="naknak-current-layout">
+:root{--nak-beta-height:36px}
+.nak-home-current{position:relative;flex:1;display:flex;flex-direction:column;min-height:0;height:100%;max-height:100%;overflow:hidden;overscroll-behavior:none}
+.nak-home-head{flex:0 0 auto;padding:9px max(16px,env(safe-area-inset-right)) 4px max(16px,env(safe-area-inset-left))}
+.nak-home-identity{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.nak-home-greeting{font-size:12px;font-weight:700}
+.nak-home-name{font-weight:900;display:flex;align-items:center;gap:6px;line-height:1.05;min-width:0}
+.nak-home-battery{flex-shrink:0;border:1px solid;border-radius:12px;padding:6px 10px;display:flex;align-items:center;gap:5px}
+.nak-home-battery span{font-size:10.5px;font-weight:900}
+.nak-home-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.nak-home-badges>div{display:flex;align-items:center;gap:4px;padding:3px 8px;border-radius:999px;border:1px solid;font-size:9.5px;font-weight:900}
+.nak-home-helper{flex:0 0 auto;margin:3px 16px 4px;padding:8px 11px;border:1.5px solid;border-radius:13px;display:flex;align-items:center;gap:8px}
+.nak-home-helper span{font-size:11.5px;font-weight:850;line-height:1.3}
+.nak-home-update{flex:0 0 auto;margin:3px 16px 4px;padding:8px 11px;min-height:44px;border-radius:14px;border:1.5px solid;cursor:pointer;display:flex;align-items:center;gap:9px;text-align:left}
+.nak-home-update-copy{flex:1;min-width:0;display:flex;flex-direction:column}
+.nak-home-update-copy strong{font-size:12.5px;font-weight:900}
+.nak-home-update-copy small{display:block;font-size:10.5px;font-weight:650;margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nak-home-main{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;padding:3px max(16px,env(safe-area-inset-right)) 6px max(16px,env(safe-area-inset-left));gap:6px}
+.nak-home-sos-wrap{flex:1 1 auto;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.nak-home-sos{width:clamp(144px,25dvh,198px);height:clamp(144px,25dvh,198px);min-height:0;border-radius:50%;border:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:#fff;padding:16px;flex-shrink:0}
+.nak-home-sos-title{font-weight:900;letter-spacing:-1px;line-height:1}
+.nak-home-sos-copy{font-size:11.5px;font-weight:850;text-align:center;line-height:1.25;max-width:150px}
+.nak-home-actions{flex:0 0 auto;width:100%;display:flex;flex-direction:column;gap:6px}
+.nak-home-ok,.nak-home-rescue{min-height:0;border-radius:999px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:9px;font-weight:900}
+.nak-home-ok{border:0;color:#fff}
+.nak-home-rescue{border:2px solid}
+.nak-home-nav{flex:0 0 auto;min-height:0;padding-bottom:env(safe-area-inset-bottom)}
+.nak-home-nav>div{padding-top:5px!important;padding-bottom:7px!important;background:inherit!important}
+.nak-home-nav button,.nak-home-nav a{min-height:44px!important}
+.nak-home-nav span{font-size:10.5px!important;font-weight:700!important}
+body[data-nak-vision="1"] .nak-home-nav span{font-size:11.5px!important;font-weight:900!important}
+body[data-nak-mobility="1"] .nak-home-nav button{min-height:48px!important}
+body[data-nak-mobility="1"] .nak-home-rescue{min-height:54px!important}
+body[data-nak-mobility="1"] .nak-home-ok{min-height:64px!important}
+@media (max-width:700px),(max-width:960px) and (max-height:700px){
+ html,body{width:100%;height:100%;min-height:0;overflow:hidden}
+ .beta-banner{min-height:calc(var(--nak-beta-height) + env(safe-area-inset-top));padding-top:calc(7px + env(safe-area-inset-top));box-sizing:border-box}
+ #root{width:100%;height:100dvh;min-height:0!important;padding-top:calc(var(--nak-beta-height) + env(safe-area-inset-top))!important;align-items:stretch!important;justify-content:stretch!important;overflow:hidden!important;box-sizing:border-box}
+ .naknak-app-stage{width:100%;height:100%;min-height:0!important;padding:0!important;gap:0!important;align-items:stretch!important;justify-content:stretch!important}
+ .naknak-stage-header,.naknak-dev-controls,.naknak-stage-footer{display:none!important}
+ .naknak-phone{width:100%!important;height:100%!important;max-width:none!important;max-height:none!important;border-radius:0!important;box-shadow:none!important;animation:none!important}
+ body.naknak-senior-home .beta-banner{display:none!important}
+ body.naknak-senior-home #root{padding-top:env(safe-area-inset-top)!important}
+}
+@media (max-height:820px){
+ .nak-home-note-preview{display:none!important}
+ .nak-home-sos{width:clamp(140px,23dvh,178px);height:clamp(140px,23dvh,178px)}
+}
+@media (max-height:750px){
+ .nak-home-badges{display:none!important}
+ .nak-home-update{padding-top:6px;padding-bottom:6px;margin-top:2px;margin-bottom:3px}
+ .nak-home-main{padding-top:1px;padding-bottom:4px}
+ .nak-home-sos{width:148px;height:148px}
+}
+@media (max-height:700px){
+ .nak-home-helper,.nak-home-update{display:none!important}
+ .nak-home-head{padding-top:6px;padding-bottom:2px}
+ .nak-home-main{gap:4px}
+ .nak-home-sos{width:136px;height:136px;padding:12px}
+ .nak-home-sos-title{font-size:34px!important}
+ .nak-home-sos-copy{font-size:10.5px}
+ .nak-home-actions{gap:4px}
+ .nak-home-ok{height:54px!important}
+ .nak-home-rescue{height:46px!important}
+ .nak-home-nav>div{padding-top:3px!important;padding-bottom:4px!important}
+}
+@media (orientation:landscape) and (max-height:500px){
+ .nak-home-main{flex-direction:row;gap:12px;padding-top:2px;padding-bottom:3px}
+ .nak-home-sos-wrap{width:45%;height:100%}
+ .nak-home-sos{width:128px;height:128px}
+ .nak-home-actions{width:55%;gap:5px}
+}
+@media (prefers-reduced-motion:reduce){.naknak-phone,.nak-home-current *{animation:none!important;transition:none!important}}
+</style>
+</script>
+<script>
+(async function(){
+ try{
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('./naknak-sw.js').catch(()=>{});}
+  const CORE='https://raw.githubusercontent.com/justineinacay/Naknak/eee6ce2ea9792263fa9420f980353cc108fc3123/app.html';
+  const res=await fetch(CORE,{cache:'no-store'});
+  if(!res.ok) throw new Error('Unable to load NakNak core');
+  let src=await res.text();
+  const rep=(a,b)=>{src=src.split(a).join(b);};
+  const mustOnce=(label,a,b)=>{
+   if(!src.includes(a))throw new Error('NakNak source mismatch: '+label);
+   src=src.replace(a,b);
+  };
+
+  // Inclusive, purpose-led onboarding.
+  rep('roleSenior:"Kailangan ko ng tulong"','roleSenior:"Senior / PWD User"');
+  rep('roleCare:"Binabantayan ko ang pamilya ko"','roleCare:"Caregiver / Anak User"');
+  rep('roleSeniorSub:"Para sa Senior Citizens at PWDs"','roleSeniorSub:"Para sa iyong safety, reminders, at emergency support"');
+  rep('roleCareSub:"Para sa mga Anak at Caregivers"','roleCareSub:"Para maalalayan at mabantayan ang kapamilya mo"');
+  rep('Parang tawag mo sa anak mo.','Tulong at alaga,');
+  rep('Laging may sasagot.','laging abot-kamay.');
+  rep('roleSenior:"I need help"','roleSenior:"Senior / PWD User"');
+  rep("roleCare:\"I'm watching over my family\"",'roleCare:"Caregiver / Anak User"');
+  rep('roleSeniorSub:"For Senior Citizens and PWDs"','roleSeniorSub:"For your safety, reminders, and emergency support"');
+  rep('roleCareSub:"For Children and Caregivers"','roleCareSub:"To support and look after a family member"');
+  rep('Like calling your child.','Care and support,');
+  rep('Someone will always answer.','always within reach.');
+  rep('roleSenior:"Nagkinahanglan ko og tabang"','roleSenior:"Senior / PWD User"');
+  rep('roleCare:"Gibantayan nako ang akong pamilya"','roleCare:"Caregiver / Anak User"');
+  rep('roleSeniorSub:"Para sa mga Tigulang ug PWD"','roleSeniorSub:"Para sa imong safety, reminders, ug emergency support"');
+  rep('roleCareSub:"Para sa mga Anak ug Caregiver"','roleCareSub:"Para maatiman ug mabantayan ang imong kapamilya"');
+
+  // Inclusive family labels.
+  rep('allSeniorLabel:"LAHAT NG SENIOR"','allSeniorLabel:"MGA BINABANTAYAN KO"');
+  rep('addSeniorLabel:"+ Dagdag na Senior"','addSeniorLabel:"+ Dagdag na Family Member"');
+  rep('allSeniorLabel:"ALL SENIORS"','allSeniorLabel:"FAMILY MEMBERS I SUPPORT"');
+  rep('addSeniorLabel:"+ Add a Senior"','addSeniorLabel:"+ Add Family Member"');
+  rep('allSeniorLabel:"TANANG SENIOR"','allSeniorLabel:"MGA GIBANTAYAN NAKO"');
+  rep('addSeniorLabel:"+ Dugang og Senior"','addSeniorLabel:"+ Dugang Family Member"');
+
+  // Emergency contacts: preserve a practical free safety allowance without cascading replacements.
+  rep('maxContacts:1 }','maxContacts:__NAK_FREE__ }');
+  rep('maxContacts:2 }','maxContacts:__NAK_ESSENTIAL__ }');
+  rep('maxContacts:3 }','maxContacts:__NAK_FAMILY__ }');
+  rep('__NAK_FREE__','3');
+  rep('__NAK_ESSENTIAL__','5');
+  rep('__NAK_FAMILY__','8');
+  rep('contactsAtLimitDesc:"I-upgrade para magdagdag pa ng emergency contact →"','contactsAtLimitDesc:"Naka-save na ang maximum emergency contacts para sa plan na ito."');
+  rep('I-upgrade para magdagdag pa ng emergency contact →','Naka-save na ang maximum emergency contacts para sa plan na ito.');
+  rep('sub={`${contacts.length}/${maxContacts} na-gamit sa ${PLANS[plan]?.name||plan} plan`}','sub={`${contacts.length} emergency contacts • ${PLANS[plan]?.name||plan}`}');
+
+  // A caregiver should not create a false SOS on behalf of a family member from the contact-management screen.
+  src=src.replace(/<button onClick=\{\(\)=>\{haptic\(\[300,100,300\]\);STORE\.triggerSOS\(activeSid,"manual"\);\}\}[\s\S]*?>SOS<\/button>/,'');
+
+  // Family-friendly Settings language.
+  rep('>CLOUD SYNC<','>IKONEKTA ANG PAMILYA<');
+  rep('Ilagay ang 6-character Family Code mula sa NakNak web dashboard para i-sync ang device na ito.','Ilagay ang 6-character Family Code para i-connect ang device na ito sa kapamilya mo.');
+  rep('{busy?"…":"I-connect"}','{busy?"…":"Ikonekta"}');
+  rep('currentPlanLabel:"KASALUKUYANG PLANO"','currentPlanLabel:"IYONG PLANO"');
+
+  // Honest beta capability states.
+  rep('"Smart escalation"','"Caregiver escalation (beta)"');
+  rep('"Fall Detection"','"Fall Detection (Coming Soon)"');
+  rep('log(`SMS → ${s.contacts[0]?.name}`,"ok");','log(`Local beta alert recorded for ${s.contacts[0]?.name}`,"ok");');
+  rep('a.history.push(`${tNow()} — Escalation #${lvl+1}: SMS → ${c.name}`);','a.history.push(`${tNow()} — Demo escalation #${lvl+1}: ${c.name}`);');
+  rep('a.history.push(`${tNow()} — Auto-call → ${s.contacts[0]?.name}`);','a.history.push(`${tNow()} — Direct-call option ready for ${s.contacts[0]?.name}`);');
+  rep('log(`Auto-call → ${s.contacts[0]?.name}`,"red");','log(`Direct-call option ready for ${s.contacts[0]?.name}`,"warn");');
+  rep('smsLog: s.contacts.map((c,i) => ({ ...c, sent:i===0, sentAt:i===0?tNow():null }))','smsLog: s.contacts.map(c => ({ ...c, sent:false, sentAt:null }))');
+  rep('a.smsLog[lvl] = { ...a.smsLog[lvl], sent:true, sentAt:tNow() };','a.smsLog[lvl] = { ...a.smsLog[lvl], sent:false, sentAt:null };');
+  rep('sosSubtitle:"Humihingi na kami ng tulong para sa iyo."','sosSubtitle:"Naka-save sa phone ang SOS. Hindi pa garantisado ang remote alert o push."');
+  rep('sosLocationSent:"Napadala ang iyong lokasyon"','sosLocationSent:"Lokasyon: local lang, hindi pa naibabahagi"');
+  rep('sosMsgTemplate:(name)=>`"Nak… si ${name} ito. Kailangan kita."`','sosMsgTemplate:(name)=>`Caregiver alert para kay ${name}: beta, hindi pa garantisadong naipadala`');
+  rep('sosCallingFirst:"Tatawag na sa unang contact…"','sosCallingFirst:"Hindi awtomatikong tumatawag. Buksan ang Rescue Bridge."');
+  rep('sosSent:"Napadala na!"','sosSent:"Naka-save sa phone"');
+  rep('fallDemo:"Fall Detection Demo"','fallDemo:"Fall Detection (Coming Soon)"');
+  rep('fallSubtitle:(n)=>`Magpapadala ng tulong in ${n} segundo`','fallSubtitle:(n)=>`Demo lamang. Walang awtomatikong alert o tawag pagkatapos ng ${n} segundo`');
+  rep('sosSubtitle:"We are calling for help for you."','sosSubtitle:"SOS is saved on this phone. Remote alerts and push are not guaranteed yet."');
+  rep('sosLocationSent:"Your location was sent"','sosLocationSent:"Location is local only and has not been shared"');
+  rep('sosMsgTemplate:(name)=>`"Help needed. This is ${name}. Please come."`','sosMsgTemplate:(name)=>`Caregiver alert for ${name}: beta, not guaranteed to be sent`');
+  rep('sosCallingFirst:"Calling first contact…"','sosCallingFirst:"No automatic call. Open Rescue Bridge to call directly."');
+  rep('sosSent:"Sent!"','sosSent:"Saved on this phone"');
+  rep('fallSubtitle:(n)=>`Sending help in ${n} seconds`','fallSubtitle:(n)=>`Demo only. No automatic alert or call after ${n} seconds`');
+  rep('sosSubtitle:"Nangayo na kami og tabang para kanimo."','sosSubtitle:"Naka-save sa phone ang SOS. Dili pa garantiya ang remote alert o push."');
+  rep('sosLocationSent:"Gipadala ang imong lokasyon"','sosLocationSent:"Lokal ra ang lokasyon ug wala pa na-share"');
+  rep('sosMsgTemplate:(name)=>`"Nak… si ${name} ni. Kinahanglan tika."`','sosMsgTemplate:(name)=>`Caregiver alert para kang ${name}: beta, dili pa garantiya nga napadala`');
+  rep('sosCallingFirst:"Motawag na sa unang contact…"','sosCallingFirst:"Walay awtomatikong tawag. Ablihi ang Rescue Bridge."');
+  rep('sosSent:"Napadala na!"','sosSent:"Naka-save sa phone"');
+  rep('fallSubtitle:(n)=>`Magpadala og tabang sa ${n} segundo`','fallSubtitle:(n)=>`Demo ra. Walay awtomatikong alert o tawag human sa ${n} segundo`');
+  rep('STATUS NG SMS AT ESCALATION','LOCAL BETA ALERT STATUS');
+  rep('SMS naipadala ${s.sentAt}','Hindi pa naipadala');
+  rep('Simulate Fall Detection','Fall Detection Demo (Coming Soon)');
+  rep('showLocalNotif("SOS Triggered!",`GPS: ${gps.lat}, ${gps.lng} — Nagpapadala sa mga contact.`,"sos", true);','showLocalNotif("SOS saved on this phone",`GPS saved locally: ${gps.lat}, ${gps.lng}. Remote caregiver alert and push are not guaranteed yet.`,"sos", true);');
+  rep('showLocalNotif("SOS Triggered!","Nagpapadala ng alerto sa mga contact.","sos", true);','showLocalNotif("SOS saved on this phone","Open Rescue Bridge to call directly. Remote caregiver alert and push are not guaranteed yet.","sos", true);');
+  rep('Active SOS Alert!','Local Beta SOS Record');
+  rep('title="Alert na Natanggap"','title="Local Beta Alert"');
+  rep('"✓ Ipinapadala ang tugon…"','"✓ Naka-save ang tugon"');
+  rep('{label:"SOS Trigger",','{label:"Local SOS Demo",');
+  rep('NakNak v10 — Cloud Sync · Web Dashboard Companion','NakNak Beta — Senior/PWD + Caregiver/Anak');
+
+  // Flexible medication windows.
+  rep('f==="4x"?"4x (apat na beses)":"Custom"','f==="4x"?"4x (apat na beses)":"Flexible / Custom"');
+  rep('>+ Idagdag</button>','>+ Exact Time</button>');
+  src=src.replace('function fmt24to12(t24) {',`const NAKNAK_FLEX_WINDOWS={
+ morning:{label:"Umaga",range:"6–10 AM",start:360,end:600},
+ noon:{label:"Tanghali",range:"11 AM–2 PM",start:660,end:840},
+ afternoon:{label:"Hapon",range:"3–5 PM",start:900,end:1020},
+ evening:{label:"Gabi",range:"6–9 PM",start:1080,end:1260},
+ bedtime:{label:"Bago matulog",range:"9–11 PM",start:1260,end:1380}
+};
+function nakFlexWindow(slot){return typeof slot==="string"&&slot.startsWith("window:")?NAKNAK_FLEX_WINDOWS[slot.slice(7)]||null:null;}
+function fmt24to12(t24) {
+ const fw=nakFlexWindow(t24); if(fw)return fw.label+" ("+fw.range+")";`);
+  rep('function parseTimeMins(t24) { const [h,m] = (t24||"08:00").split(":").map(Number); return h*60+m; }','function parseTimeMins(t24) { const fw=nakFlexWindow(t24); if(fw)return fw.start; const [h,m]=(t24||"08:00").split(":").map(Number); return h*60+m; }');
+  rep('const h = parseInt(earliest.split(":")[0]);','const h = Math.floor(parseTimeMins(earliest)/60);');
+  rep('const slotMins = parseTimeMins(slot);','const slotMins = parseTimeMins(slot);\n     const fw = nakFlexWindow(slot);\n     const windowEnd = fw ? fw.end : slotMins + 60;');
+  rep('const diff = cur - slotMins; // positive = overdue\n     if (diff >= 0 && diff <= 2 && !notifiedRef.current[key]) {','const diff = cur - slotMins;\n     const reminderDue = fw ? (cur >= fw.start && cur <= fw.end) : (diff >= 0 && diff <= 2);\n     if (reminderDue && !notifiedRef.current[key]) {');
+  rep("if (diff > 60 && !notifiedRef.current[key+'-missed']) {","if (cur > windowEnd && !notifiedRef.current[key+'-missed']) {");
+  rep('const FREQ_OPTS = ["1x","2x","3x","4x","custom"];','const FREQ_OPTS = ["1x","2x","3x","4x","custom"];\n const FLEX_TIME_OPTS=[{id:"morning",label:"Umaga",sub:"6–10 AM"},{id:"noon",label:"Tanghali",sub:"11 AM–2 PM"},{id:"afternoon",label:"Hapon",sub:"3–5 PM"},{id:"evening",label:"Gabi",sub:"6–9 PM"},{id:"bedtime",label:"Bago matulog",sub:"9–11 PM"}];');
+  rep('const slots = f==="custom" ? med.schedule : freqToSlots(f);','const slots = f==="custom" ? (med.freq==="custom"?med.schedule:[]) : freqToSlots(f);');
+  rep('const addSlot=()=>{ if(customTime&&!med.schedule.includes(customTime)) { setMed(m=>({...m,schedule:[...m.schedule,customTime].sort()})); setCustomTime(""); } };','const addSlot=()=>{ if(customTime&&!med.schedule.includes(customTime)) { setMed(m=>({...m,schedule:[...m.schedule,customTime].sort((a,b)=>parseTimeMins(a)-parseTimeMins(b))})); setCustomTime(""); } };\n const addFlexSlot=(id)=>{const token="window:"+id;setMed(m=>{const next=m.schedule.includes(token)?m.schedule.filter(x=>x!==token):[...m.schedule,token];return {...m,schedule:next.sort((a,b)=>parseTimeMins(a)-parseTimeMins(b))};});};');
+
+  const customMarker='       )}\n      </div>\n      {/* Days of week */}';
+  const customExtra=`       )}
+       {med.freq==="custom"&&(
+        <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:10}}>
+         <div style={{fontSize:11,fontWeight:800,color:t.text3,textTransform:"uppercase",letterSpacing:0.7}}>O pumili ng flexible na oras</div>
+         <div style={{display:"flex",gap:7,flexWrap:"wrap"}}>
+          {FLEX_TIME_OPTS.map(w=>{const token="window:"+w.id;const active=med.schedule.includes(token);return <button key={w.id} onClick={()=>addFlexSlot(w.id)} style={{padding:"9px 11px",borderRadius:12,border:active?("1.5px solid "+t.green):("1.5px solid "+t.cardBorder),background:active?t.greenBg:t.bg2,color:active?t.green:t.text2,fontSize:11,fontWeight:800,cursor:"pointer"}}>{w.label}<span style={{display:"block",fontSize:9,opacity:.72,marginTop:2}}>{w.sub}</span></button>})}
+         </div>
+         <div style={{fontSize:10.5,color:t.text3,lineHeight:1.45,fontWeight:600}}>Piliin lamang ang timing na nakasulat sa reseta o ibinigay ng healthcare professional. Ang flexible window ay para sa reminder timing, hindi pagbabago ng dosage.</div>
+        </div>
+       )}
+      </div>
+      {/* Days of week */}`;
+  if(src.includes(customMarker))src=src.replace(customMarker,customExtra);
+
+  // Disability selections visibly alter the experience.
+  src=src.replace(/function getA11y\(profile\) \{[\s\S]*?\n\}/,`function getA11y(profile) {
+ const a=profile||{};
+ return {vision:!!a.vision,hearing:!!a.hearing,mobility:!!a.mobility,cognitive:!!a.cognitive,general:!!a.general,
+  btnH:a.mobility?90:(a.vision?78:64),fs:a.vision?22:16,bigBtn:!!(a.mobility||a.vision),highContrast:!!a.vision,visualAlerts:!!a.hearing,simplified:!!a.cognitive};
+}`);
+  rep('<TextSizeControl scale={textScale} setScale={setTextScale} t={t} i={i}/>','{(a11y.vision || (!a11y.mobility && !a11y.cognitive))&&<TextSizeControl scale={textScale} setScale={setTextScale} t={t} i={i}/>}');
+  rep('fontSize:10.5,fontWeight:700,textAlign:"center"','fontSize:a11y.bigBtn?14:11,fontWeight:800,textAlign:"center"');
+  rep('const a11y = getA11y(a11yProfile);','const a11y=getA11y(a11yProfile);\n useEffect(()=>{try{window.__naknakA11y=a11y;window.__naknakRole=role;document.body.dataset.nakRole=role||"";document.body.dataset.nakVision=a11y.vision?"1":"0";document.body.dataset.nakHearing=a11y.hearing?"1":"0";document.body.dataset.nakMobility=a11y.mobility?"1":"0";document.body.dataset.nakCognitive=a11y.cognitive?"1":"0";}catch(e){}},[a11yProfile,role]);');
+
+  // Visual + vibration alerts for hearing profiles and service-worker notification handoff.
+  src=src.replace(/function showLocalNotif\(title, body, tag = 'naknak', requireInteraction = false\) \{[\s\S]*?\n\}/,`function showLocalNotif(title,body,tag='naknak',requireInteraction=false){
+ const prof=(typeof window!=="undefined"&&window.__naknakA11y)||{};
+ if(prof.hearing){try{haptic([250,100,250,100,450]);}catch(e){}try{const old=document.getElementById('naknak-visual-alert');if(old)old.remove();const el=document.createElement('div');el.id='naknak-visual-alert';el.innerHTML='<div style="font-size:11px;font-weight:900;letter-spacing:1.4px;opacity:.8;margin-bottom:5px">NAKNAK ALERT</div><div></div><div></div>';el.children[1].textContent=title;el.children[2].textContent=body;Object.assign(el.children[1].style,{fontSize:'22px',fontWeight:'900',marginBottom:'5px'});Object.assign(el.children[2].style,{fontSize:'14px',fontWeight:'700',lineHeight:'1.4'});Object.assign(el.style,{position:'fixed',left:'12px',right:'12px',top:'52px',zIndex:'100000',background:'#111',color:'#fff',border:'4px solid #F0C040',borderRadius:'18px',padding:'18px',boxShadow:'0 10px 40px rgba(0,0,0,.45)',animation:'nakFlash .55s ease 0s 3'});document.body.appendChild(el);setTimeout(()=>el.remove(),9000);}catch(e){}}
+ if(!('Notification'in window)||Notification.permission!=='granted')return;
+ try{if(navigator.serviceWorker&&navigator.serviceWorker.controller){navigator.serviceWorker.controller.postMessage({type:'NAKNAK_NOTIFY',title,body,tag,requireInteraction});return;}const n=new Notification(title,{body,tag,requireInteraction,icon:''});if(!requireInteraction)setTimeout(()=>n.close(),9000);}catch(e){}
+}`);
+
+  // Caregiver notification engine for paired devices while NakNak is active.
+  rep('if(remote.alerts) st.alerts=remote.alerts;\n      STORE._pub();','const prevActive=new Set((st.alerts||[]).filter(a=>a.status==="active").map(a=>a.id));\n      if(remote.alerts) st.alerts=remote.alerts;\n      if(remote.alerts&&typeof window!=="undefined"&&window.__naknakRole==="caregiver"){const fresh=remote.alerts.find(a=>a.status==="active"&&!prevActive.has(a.id));if(fresh){showLocalNotif("SOS mula kay "+(fresh.seniorName||"kapamilya"),(fresh.location?"Lokasyon: "+fresh.location+". ":"")+"Buksan ang NakNak at pindutin ang I’m Responding.","remote-sos-"+fresh.id,true);}}\n      STORE._pub();');
+  rep('const SYNC_POLL_MS = 12000;','const SYNC_POLL_MS = 8000;');
+
+  // Current app shell: one responsive React surface, without the v14/v15 wrapper chain.
+  mustOnce('home text scaling','overflow:"hidden",zoom:textScale','overflow:"hidden",zoom:screen===SR.HOME?1:textScale');
+  mustOnce('direct emergency contact calling',
+   'onClick={()=>onEmergencyCall(c)}',
+   'onClick={()=>{haptic([300,100,300]);window.location.href="tel:"+c.num.replace(/[\\s\\-]/g,"");}}');
+  rep('onClick={()=>setCallTarget(c)}','onClick={()=>{haptic([300,100,300]);window.location.href="tel:"+c.num.replace(/[\\s\\-]/g,"");}}');
+  src=src.replace(/\s*\{callTarget&&<EmergencyCallOverlay[\s\S]*?\/>\}/g,'');
+  src=src.replace(/function EmergencyCallOverlay\([\s\S]*?(?=\nfunction NotifBanner)/,'');
+  mustOnce('app stage',
+   '<div style={{minHeight:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",padding:"16px 16px 32px",gap:14}}>',
+   '<div className="naknak-app-stage" style={{minHeight:"100%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-start",padding:"16px 16px 32px",gap:14}}>');
+  mustOnce('stage header',
+   '{/* Header label */}\n   <div style={{textAlign:"center",animation:"fadeUp 0.5s ease"}}>',
+   '{/* Header label */}\n   <div className="naknak-stage-header" style={{textAlign:"center",animation:"fadeUp 0.5s ease"}}>');
+  mustOnce('phone frame',
+   `<div style={{width:390,height:792,background:role&&onboardDone?t.bg:"#100906",borderRadius:46,overflow:"hidden",boxShadow:"0 50px 100px rgba(0,0,0,0.65),0 0 0 9px #111,0 0 0 11px #262626",display:"flex",flexDirection:"column",fontFamily:"'Nunito',sans-serif",transition:"background 0.4s ease",animation:"fadeUp 0.6s ease 0.1s both",position:"relative"}}>`,
+   `<div className="naknak-phone" style={{width:390,height:792,background:role&&onboardDone?t.bg:"#100906",borderRadius:46,overflow:"hidden",boxShadow:"0 50px 100px rgba(0,0,0,0.65),0 0 0 9px #111,0 0 0 11px #262626",display:"flex",flexDirection:"column",fontFamily:"'Nunito',sans-serif",transition:"background 0.4s ease",animation:"fadeUp 0.6s ease 0.1s both",position:"relative"}}>`);
+  mustOnce('developer controls',
+   '{/* External controls */}\n   <div style={{display:"flex",flexWrap:"wrap",gap:7,justifyContent:"center",maxWidth:430,animation:"fadeUp 0.5s ease 0.2s both"}}>',
+   '{/* External controls */}\n   <div className="naknak-dev-controls" style={{display:"flex",flexWrap:"wrap",gap:7,justifyContent:"center",maxWidth:430,animation:"fadeUp 0.5s ease 0.2s both"}}>');
+  mustOnce('stage footer',
+   '<div style={{color:"rgba(255,255,255,0.18)",fontSize:10.5,fontWeight:600,textAlign:"center"}}>',
+   '<div className="naknak-stage-footer" style={{color:"rgba(255,255,255,0.18)",fontSize:10.5,fontWeight:600,textAlign:"center"}}>');
+  mustOnce('caregiver beta boundary',
+   '    <NotifBanner t={t}/>\n    <MultiSeniorManager goTo={goTo} t={t} plan={plan}/>',
+   '    <NotifBanner t={t}/>\n    <div style={{padding:"11px 13px",borderRadius:14,background:t.warnBg,border:`1.5px solid ${t.warnBorder}`,color:t.warn,fontSize:11.5,fontWeight:800,lineHeight:1.4}}>Beta: Hindi pa aktibo ang remote SMS, automatic calling, guaranteed push, at fall detection. Ang Tawag at Mensahe buttons ay direktang nagbubukas ng phone.</div>\n    <MultiSeniorManager goTo={goTo} t={t} plan={plan}/>');
+
+  const currentHome=document.getElementById('naknak-current-senior-home').textContent.trim();
+  const homePattern=/function SeniorHome\([\s\S]*?(?=\n\nfunction SOSActiveSenior)/;
+  if(!homePattern.test(src))throw new Error('NakNak source mismatch: SeniorHome');
+  src=src.replace(homePattern,currentHome);
+
+  // Caregiver surfaces live in a dedicated React source module so the dashboard,
+  // medication view, pricing, and navigation can evolve without wrapper patches.
+  const caregiverUi=document.getElementById('naknak-current-caregiver-ui').textContent.trim();
+  const readCaregiverFunction=(name)=>{
+   const start=caregiverUi.indexOf('function '+name+'(');
+   if(start<0)throw new Error('NakNak caregiver source mismatch: '+name);
+   const next=caregiverUi.indexOf('\n\nfunction ',start+1);
+   const marker=caregiverUi.indexOf('\n\n/* naknak-caregiver-ui-end */',start+1);
+   const end=next>=0?next:marker;
+   if(end<0)throw new Error('NakNak caregiver source boundary mismatch: '+name);
+   return caregiverUi.slice(start,end).trim();
+  };
+  const replaceCaregiverFunction=(name,nextName)=>{
+   const startToken='function '+name+'(';
+   const nextToken='function '+nextName+'(';
+   const start=src.indexOf(startToken);
+   const next=src.indexOf(nextToken,start+startToken.length);
+   if(start<0||next<0)throw new Error('NakNak core mismatch: '+name);
+   src=src.slice(0,start)+readCaregiverFunction(name)+'\n\n'+src.slice(next);
+  };
+  replaceCaregiverFunction('CaregiverNav','CaregiverDash');
+  replaceCaregiverFunction('CaregiverDash','AlertDetailCare');
+  replaceCaregiverFunction('MedMonitorCare','AddMedCare');
+  replaceCaregiverFunction('PricingCare','CloudSyncCard');
+  replaceCaregiverFunction('MedicalIDEditCare','QRCodeCareReal');
+  replaceCaregiverFunction('CloudSyncCard','CareSettings');
+
+  const adaptive=`<style id="naknak-v13-adaptive">
+@keyframes nakFlash{0%,100%{filter:none;transform:scale(1)}50%{filter:brightness(1.8);transform:scale(1.01)}}
+#root button,#root a{min-height:44px}
+body[data-nak-role="senior_pwd"][data-nak-vision="1"] button,body[data-nak-role="senior_pwd"][data-nak-vision="1"] input,body[data-nak-role="senior_pwd"][data-nak-vision="1"] select{font-size:max(17px,1em)!important;border-width:2px!important}
+body[data-nak-role="senior_pwd"][data-nak-vision="1"] button{font-weight:900!important}
+body[data-nak-role="senior_pwd"][data-nak-vision="1"] [style*="font-size:10"],body[data-nak-role="senior_pwd"][data-nak-vision="1"] [style*="font-size:11"],body[data-nak-role="senior_pwd"][data-nak-vision="1"] [style*="fontSize:10"],body[data-nak-role="senior_pwd"][data-nak-vision="1"] [style*="fontSize:11"]{font-size:15px!important}
+body[data-nak-role="senior_pwd"][data-nak-mobility="1"] button{min-height:68px!important;touch-action:manipulation}
+body[data-nak-role="senior_pwd"][data-nak-mobility="1"] input,body[data-nak-role="senior_pwd"][data-nak-mobility="1"] select{min-height:60px!important}
+body[data-nak-role="senior_pwd"][data-nak-hearing="1"] .beta-banner{box-shadow:inset 0 -3px 0 #F0C040}
+body[data-nak-role="senior_pwd"][data-nak-cognitive="1"] button{font-weight:900!important}
+body[data-nak-role="senior_pwd"][data-nak-cognitive="1"] [role="button"]{outline-offset:3px}
+</style>`;
+  src=src.replace('</head>',adaptive+'\n</head>');
+  const currentCss=document.getElementById('naknak-current-css').textContent.trim();
+  src=src.replace('</head>',currentCss+'\n</head>');
+  const caregiverCss=document.getElementById('naknak-current-caregiver-css').textContent.trim();
+  src=src.replace('</head>',caregiverCss+'\n</head>');
+  document.open();document.write(src);document.close();
+ }catch(err){document.getElementById('boot').innerHTML='<div><strong>Hindi ma-load ang NakNak</strong><span>'+String(err.message||err)+'</span></div>';}
+})();
+</script>
+</body>
+</html>

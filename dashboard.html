@@ -2,6 +2,7 @@
 <html lang="tl">
 <head>
 <meta charset="UTF-8">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard — NakNak</title>
 <meta name="description" content="Ang NakNak caregiver dashboard. I-manage ang gamot, contacts, safe zone, at SOS alerts ng iyong senior — naka-sync sa totoong oras sa app.">
@@ -2659,7 +2660,9 @@ function SettingsPanel({ theme, plan, session, onDisconnect, setPlan, household 
       });
       const data = await res.json();
       if(!res.ok || !data.checkout_url) throw new Error(data.error || "Hindi magawa ang checkout session");
-      window.open(data.checkout_url, "_blank");
+      // PayMongo returns a trusted HTTPS checkout URL from our Edge Function.
+      // Keep the new tab isolated so it cannot reach back through window.opener.
+      window.open(data.checkout_url, "_blank", "noopener,noreferrer");
       setCheckout({ planId, method:"paymongo" });
       setShowFallback(false);
     } catch(err) {

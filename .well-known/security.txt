@@ -1,0 +1,4 @@
+Contact: mailto:naknak@gmail.com
+Expires: 2027-09-01T16:00:00.000Z
+Preferred-Languages: en, tl
+Policy: https://github.com/justineinacay/Naknak/blob/main/SECURITY.md
