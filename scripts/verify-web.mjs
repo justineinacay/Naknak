@@ -18,6 +18,7 @@ const unsafeBlankAnchors = blankAnchors.filter((match) => !/\brel=["'][^"']*\bno
 
 const checks = [
   ['app.html opens the direct build', entry.includes('./naknak-app.html')],
+  ['static Pages mode preserves .well-known files', await read('.nojekyll').then(() => true)],
   ['v15 opens the direct build', v15.includes('./naknak-app.html')],
   ['service worker caches the direct build', serviceWorker.includes("'./naknak-app.html'")],
   ['compiled app contains SeniorHome', app.includes('function SeniorHome')],
