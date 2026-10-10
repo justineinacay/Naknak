@@ -1,0 +1,45 @@
+name: Validate NakNak
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install native dependencies
+        working-directory: native
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck native app
+        working-directory: native
+        run: pnpm typecheck
+
+      - name: Lint native app
+        working-directory: native
+        run: pnpm lint
+
+      - name: Expo Doctor
+        working-directory: native
+        run: pnpm dlx expo-doctor
+
+      - name: Export Expo web build
+        working-directory: native
+        run: pnpm exec expo export --platform web
+
+      - name: Verify web safety build
+        run: node scripts/verify-web.mjs

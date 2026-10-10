@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#c62c2f"><title>NakNak Support</title><link rel="icon" href="Assets/favicon.ico">
+<style>
+:root{--red:#c62c2f;--red-dark:#8f171d;--cream:#fff9f2;--paper:#fff;--ink:#251c19;--muted:#6e625d;--line:#eadfd8}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.6}.wrap{width:min(920px,calc(100% - 32px));margin:auto}header{border-bottom:1px solid var(--line);background:rgba(255,249,242,.95)}.nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;gap:10px;align-items:center;font-weight:900;font-size:22px;text-decoration:none;color:var(--ink)}.brand img{width:40px;height:40px;border-radius:12px}.back{color:var(--red-dark);font-weight:800;text-decoration:none}main{padding:56px 0 82px}h1{font-size:clamp(38px,6vw,62px);line-height:1.05;letter-spacing:-.04em;margin:0}.lead{color:var(--muted);font-size:19px;max-width:720px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:34px 0}.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px}.card h2{font-size:22px;margin:0 0 8px}.card p{color:var(--muted)}.button{display:inline-flex;min-height:48px;align-items:center;padding:0 17px;border-radius:14px;background:var(--red);color:#fff;text-decoration:none;font-weight:850}.button.secondary{background:#fff;color:var(--red-dark);border:1px solid var(--line)}details{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px 20px;margin:10px 0}summary{font-weight:850;cursor:pointer}details p{color:var(--muted)}footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted)}a{color:var(--red-dark)}@media(max-width:650px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><a class="brand" href="index.html"><img src="Assets/logo-badge.png" alt=""><span>NakNak</span></a><a class="back" href="index.html">← Back</a></div></header>
+<main class="wrap">
+<h1>How can we help?</h1>
+<p class="lead">NakNak is still in beta. This support page separates Senior/PWD phone help from Caregiver / Anak dashboard help so the right person gets the right instructions.</p>
+<div class="grid">
+<section class="card"><h2>Senior / PWD phone</h2><p>Preview the safety experience, including SOS, calling, contacts, check-ins, medication reminders, and Family Code pairing.</p><a class="button" href="app.html">Open web beta</a></section>
+<section class="card"><h2>Caregiver / Anak</h2><p>Use the Family Dashboard for household setup, pairing, device management, and the currently supported family status view.</p><a class="button secondary" href="dashboard.html">Open dashboard</a></section>
+</div>
+<h2>Common questions</h2>
+<details><summary>My Ayos Ako status says it was saved locally.</summary><p>The check-in is stored on the phone first. It is shown as delivered to the family dashboard only when the paired server connection confirms it.</p></details>
+<details><summary>Why didn't my caregiver receive a push notification?</summary><p>Remote caregiver push notifications are not implemented in the current native milestone. The supported connected status is limited to Ayos Ako and SOS-opened updates in the dashboard.</p></details>
+<details><summary>My medication reminder did not appear.</summary><p>Check that notifications are allowed for NakNak and that the reminder was scheduled successfully. Local reminders rely on the phone's notification system.</p></details>
+<details><summary>Can NakNak call automatically?</summary><p>No. The current app opens the phone dialer when the user chooses a contact or emergency number. The user and operating system remain in control of the call.</p></details>
+<details><summary>Can I rely on NakNak instead of emergency services?</summary><p>No. NakNak is a support tool. In an emergency, use the appropriate local emergency number and professional services.</p></details>
+<h2 style="margin-top:38px">Contact</h2>
+<p>For product support, privacy questions, or a bug report, email <a href="mailto:naknak@gmail.com">naknak@gmail.com</a>. For sensitive security reports, do not post credentials or household data publicly.</p>
+</main>
+<footer><div class="wrap">© 2026 NakNak · <a href="privacy.html">Privacy & Data</a></div></footer>
+</body></html>

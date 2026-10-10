@@ -1,6 +1,6 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Href, router } from 'expo-router';
-import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { BottomNav } from '@/components/bottom-nav';
@@ -9,10 +9,16 @@ import { ACCESSIBILITY_OPTIONS, COPY } from '@/constants/copy';
 import { colors, radius, shadows, spacing, typography } from '@/constants/theme';
 import { useNakNak } from '@/context/naknak-context';
 
+const PRIVACY_URL = 'https://justineinacay.github.io/Naknak/privacy.html';
+const SUPPORT_URL = 'https://justineinacay.github.io/Naknak/support.html';
+
 export default function ProfileScreen() {
   const { state, familyConnection, disconnectFamily, resetApp } = useNakNak();
   const copy = COPY[state.profile.language];
   const editLabel = state.profile.language === 'en' ? 'Edit accessibility settings' : state.profile.language === 'ceb' ? 'Usba ang accessibility settings' : 'Baguhin ang accessibility settings';
+  const privacyLabel = state.profile.language === 'en' ? 'Privacy & data' : state.profile.language === 'ceb' ? 'Privacy ug data' : 'Privacy at data';
+  const supportLabel = state.profile.language === 'en' ? 'NakNak support' : state.profile.language === 'ceb' ? 'NakNak support' : 'NakNak support';
+  const dataTitle = state.profile.language === 'en' ? 'Data & support' : state.profile.language === 'ceb' ? 'Data ug support' : 'Data at support';
   const remoteTitle = familyConnection.status === 'connected'
     ? state.profile.language === 'en' ? 'Connected to caregiver dashboard' : 'Connected sa caregiver dashboard'
     : state.profile.language === 'en' ? 'Needs a connection' : state.profile.language === 'ceb' ? 'Kinahanglan ug koneksyon' : 'Kailangan ng koneksyon';
@@ -98,6 +104,10 @@ export default function ProfileScreen() {
         ) : (
           <SecondaryButton label="Ikonekta gamit ang Family Code" onPress={() => router.push('/onboarding/pairing' as Href)} />
         )}
+
+        <SectionTitle>{dataTitle}</SectionTitle>
+        <SecondaryButton label={privacyLabel} onPress={() => Linking.openURL(PRIVACY_URL)} />
+        <SecondaryButton label={supportLabel} onPress={() => Linking.openURL(SUPPORT_URL)} />
 
         <SecondaryButton label={copy.restartOnboarding} onPress={restart} tone="danger" />
       </ScrollView>
