@@ -72,7 +72,7 @@ const checks = [
   ['native status sync is scoped to check-in and SOS', nativeFamilySync.includes("event: 'check_in_ok' | 'sos_opened'") && nativeSyncMigration.includes("p_event not in ('check_in_ok', 'sos_opened')")],
   ['native sync updates one assigned senior instead of replacing household state', nativeSyncMigration.includes('v_senior_id') && nativeSyncMigration.includes("array['seniors', v_senior_index::text]") && !nativeFamilySync.includes('device_push_state')],
   ['native home distinguishes server confirmation from local save', nativeHome.includes('confirmed in the caregiver dashboard') && nativeHome.includes('saved on this phone')],
-  ['native SOS does not imply guaranteed push delivery', nativeSos.includes('Hindi nito ginagarantiya na may push notification na natanggap.')],
+  ['native SOS does not imply guaranteed push delivery', nativeSos.includes('This does not mean a caregiver push notification was received.') && nativeSos.includes('Hindi nito ibig sabihin na nakatanggap na ng push notification ang caregiver.')],
   ['native phone can revoke its own secret', nativeContext.includes('disconnectNativeDevice') && revocationMigration.includes('native_device_disconnect')],
   ['caregiver can revoke a household device', dashboard.includes('revoke_household_device') && dashboard.includes('I-disconnect') && revocationMigration.includes('(select auth.uid())')],
   ['dashboard describes native status sync without implying push alerts', dashboard.includes('Confirmed Ayos Ako and SOS dashboard status') && dashboard.includes('Remote push, SMS, and automatic calling are not active.')],
@@ -80,7 +80,7 @@ const checks = [
   ['native reminder scheduling rolls back partial work', nativeNotifications.includes('await cancelMedicationReminders(notificationIds)')],
   ['website CTAs have real destinations', !/(?:Download the App|Get Started Free|Choose Essential|Choose Family)[\s\S]{0,80}href=["']#["']/.test(landing) && landing.includes('href="app.html"')],
   ['dashboard has no unconfigured domain or social links', !dashboard.includes('naknak.io') && dashboard.includes('mailto:naknak@gmail.com')],
-  ['website states unavailable safety capabilities honestly', landing.includes('Remote alerts and automatic location sharing are still in development') && landing.includes('Fall detection (coming soon)')],
+  ['website states unavailable safety capabilities honestly', landing.includes('Remote caregiver push notifications are not implemented yet.') && landing.includes('Automatic location sharing and fall detection are not active features.')],
   ['external blank links are isolated', unsafeBlankAnchors.length === 0],
   ['HTML referrer fallback is present', [app, dashboard, landing].every((html) => html.includes('name="referrer"') && html.includes('strict-origin-when-cross-origin'))],
 ];
