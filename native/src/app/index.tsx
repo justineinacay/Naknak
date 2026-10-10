@@ -85,12 +85,14 @@ export default function EntryScreen() {
 
       <View style={styles.top}>
         <View style={styles.brandRow}>
-          <Image
-            accessibilityIgnoresInvertColors
-            accessibilityLabel="NakNak"
-            source={require('../../assets/images/icon.png')}
-            style={styles.logo}
-          />
+          <View style={styles.logoShell}>
+            <Image
+              accessibilityIgnoresInvertColors
+              accessibilityLabel="NakNak"
+              source={require('../../assets/images/icon.png')}
+              style={styles.logo}
+            />
+          </View>
           <View style={styles.brandCopy}>
             <Text style={styles.brand}>NakNak</Text>
             <Text style={styles.eyebrow}>{copy.eyebrow}</Text>
@@ -200,7 +202,8 @@ const styles = StyleSheet.create({
   },
   top: { gap: spacing.lg },
   brandRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  logo: { width: 64, height: 64, borderRadius: 19, ...shadows.sos },
+  logoShell: { width: 64, height: 64, borderRadius: 19, ...shadows.sos },
+  logo: { width: 64, height: 64, borderRadius: 19 },
   brandCopy: { flex: 1, gap: 2 },
   brand: {
     color: colors.white,
