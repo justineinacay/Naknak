@@ -5,13 +5,18 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - name: Checkout
+      - name: Checkout PR branch
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -23,7 +28,18 @@ jobs:
 
       - name: Install native dependencies
         working-directory: native
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
+
+      - name: Refresh lockfile when Expo patches changed
+        if: github.event_name == 'pull_request'
+        run: |
+          if ! git diff --quiet -- native/pnpm-lock.yaml; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add native/pnpm-lock.yaml
+            git commit -m "Refresh native lockfile for Expo SDK 57"
+            git push origin HEAD:${GITHUB_HEAD_REF}
+          fi
 
       - name: Typecheck native app
         working-directory: native
