@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#c62c2f"><meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Privacy & Data — NakNak</title><link rel="icon" href="Assets/favicon.ico">
+<style>
+:root{--red:#c62c2f;--red-dark:#8f171d;--cream:#fff9f2;--paper:#fff;--ink:#251c19;--muted:#6e625d;--line:#eadfd8;--green:#167a49}
+*{box-sizing:border-box}body{margin:0;background:var(--cream);color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.65}.wrap{width:min(860px,calc(100% - 32px));margin:auto}header{border-bottom:1px solid var(--line);background:rgba(255,249,242,.95);position:sticky;top:0}.nav{height:72px;display:flex;align-items:center;justify-content:space-between}.brand{display:flex;gap:10px;align-items:center;font-weight:900;font-size:22px;text-decoration:none;color:var(--ink)}.brand img{width:40px;height:40px;border-radius:12px}.back{color:var(--red-dark);font-weight:800;text-decoration:none}main{padding:56px 0 80px}h1{font-size:clamp(38px,6vw,62px);letter-spacing:-.04em;line-height:1.05;margin:0}.lead{font-size:19px;color:var(--muted);margin:18px 0 32px}.card{background:var(--paper);border:1px solid var(--line);border-radius:22px;padding:26px;margin:18px 0}.card h2{margin:0 0 10px;font-size:24px}.card p,.card li{color:var(--muted)}.notice{background:#eaf7ef;border-color:#c9ead7}.notice strong{color:var(--green)}a{color:var(--red-dark)}footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted)}
+</style>
+</head>
+<body>
+<header><div class="wrap nav"><a class="brand" href="index.html"><img src="Assets/logo-badge.png" alt=""><span>NakNak</span></a><a class="back" href="index.html">← Back to website</a></div></header>
+<main class="wrap">
+<h1>Privacy & Data</h1>
+<p class="lead">This notice describes the current NakNak beta as implemented. It is written to make clear what stays on the phone, what can reach the caregiver dashboard, and which capabilities are not active yet.</p>
+
+<section class="card notice"><h2>Current privacy promise</h2><p><strong>NakNak should not present data as shared unless the app can genuinely confirm that sharing.</strong> The current native milestone does not automatically share location, send SMS, place automatic calls, or provide remote caregiver push notifications.</p></section>
+
+<section class="card"><h2>Data stored on the Senior/PWD phone</h2><p>The native app may store the name and accessibility preferences entered during onboarding, emergency contacts, medication schedules, local reminder identifiers, check-in history, SOS-opened events, and the last check-in time. This data is stored locally so core safety information can remain available without a continuous internet connection.</p></section>
+
+<section class="card"><h2>Family pairing and dashboard sync</h2><p>If the user chooses to pair the phone with a Family Code, NakNak stores an opaque device credential in secure device storage. The current native sync is deliberately narrow: it can report <strong>Ayos Ako</strong> and <strong>SOS opened</strong> status to the assigned Senior/PWD record in the authenticated Caregiver / Anak dashboard.</p><p>Medication schedules, emergency contacts, and automatic location are not part of that native sync milestone.</p></section>
+
+<section class="card"><h2>Caregiver account data</h2><p>The web Family Dashboard uses authenticated household access backed by Supabase. Household data is intended to be restricted by database Row Level Security. A paired Senior/PWD phone does not receive a caregiver login session; its device credential is used only through limited server functions.</p></section>
+
+<section class="card"><h2>Notifications</h2><p>Medication reminders are scheduled on the device when notification permission is granted. NakNak does not currently claim that caregiver push notifications are available.</p></section>
+
+<section class="card"><h2>Emergency calling</h2><p>When the user chooses to call a saved contact or an emergency number, NakNak opens the phone dialer. The operating system and mobile carrier control whether a call can be completed. NakNak does not silently place automatic calls in the current release.</p></section>
+
+<section class="card"><h2>Location, sensors, and fall detection</h2><p>The current native milestone does not automatically share the user's location with caregivers and does not implement fall detection. If these capabilities are added later, NakNak should request appropriate permission and update this notice before public release.</p></section>
+
+<section class="card"><h2>Payments</h2><p>The web project includes payment infrastructure for future plan upgrades. Paid-plan activation should be based on verified payment events rather than a browser-only claim. Store-distributed digital features may also be subject to Apple and Google billing rules before public launch.</p></section>
+
+<section class="card"><h2>Resetting local app data</h2><p>The Senior/PWD app includes a reset flow that clears local NakNak state and removes the local family device credential. If a device was disconnected while offline, a caregiver may still need to revoke the old paired device from the Family Dashboard.</p></section>
+
+<section class="card"><h2>Contact</h2><p>For privacy or security questions, contact <a href="mailto:naknak@gmail.com">naknak@gmail.com</a>. For security vulnerabilities, avoid posting sensitive details in a public issue.</p></section>
+
+<p style="color:var(--muted);font-size:14px">Last updated: October 11, 2026. This beta notice should be reviewed again before App Store or Google Play submission and whenever NakNak's data handling changes.</p>
+</main>
+<footer><div class="wrap">© 2026 NakNak · <a href="support.html">Support</a> · <a href="dashboard.html">Family Dashboard</a></div></footer>
+</body></html>
