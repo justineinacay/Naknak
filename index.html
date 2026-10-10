@@ -7,7 +7,7 @@
   <meta name="description" content="NakNak is a Filipino safety and support system for Senior Citizens, PWDs, and the family members who care for them.">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <title>NakNak — Safety and support, always within reach</title>
-  <link rel="icon" href="Assets/favicon.ico">
+  <link rel="icon" href="Assets/favicon.ico">\n  <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="Assets/apple-touch-icon.png">
   <style>
     :root{
@@ -260,7 +260,7 @@
 <script>
   const menu=document.getElementById('menu');const nav=document.getElementById('navlinks');
   menu.addEventListener('click',()=>{const open=nav.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));menu.textContent=open?'×':'☰'});
-  nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'}));
+  nav.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{nav.classList.remove('open');menu.setAttribute('aria-expanded','false');menu.textContent='☰'}));\n  if('serviceWorker' in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('./naknak-sw.js').catch(()=>undefined));}
 </script>
 </body>
 </html>
