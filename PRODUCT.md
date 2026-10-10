@@ -1,36 +1,92 @@
-# Product
+# NakNak Product
 
-## Register
+## Product model
 
-product
+NakNak is one family safety system with two intentionally separate user experiences.
+
+### 1. Senior/PWD native app
+
+The native mobile app is the primary safety surface for Senior Citizens and Persons with Disabilities. It is designed for use under stress, limited dexterity, visual or hearing needs, and quick-glance situations.
+
+Core principles:
+
+- Emergency actions always outrank secondary information.
+- The home experience remains simple and non-dashboard-like.
+- Direct calling is easier than navigating family-management settings.
+- Local data remains useful without a continuous internet connection.
+- Connected states are shown as delivered only when the server confirms them.
+- The interface adapts meaningfully to selected accessibility needs.
+
+### 2. Caregiver / Anak web dashboard
+
+The caregiver experience belongs on the web. It handles household setup, pairing, connected-device management, and the currently supported family status view. Keeping it separate prevents management complexity from crowding the Senior/PWD emergency app.
 
 ## Users
 
-NakNak serves Senior Citizens and Persons with Disabilities (PWDs), plus the Caregiver / Anak family members who support them. Senior/PWD users may have visual, hearing, mobility/physical, cognitive/memory, or general-assistance needs and may use the app under stress, with limited dexterity, or at a quick glance.
+NakNak serves:
 
-## Product Purpose
+- Senior Citizens
+- Persons with Disabilities (PWDs)
+- Caregiver / Anak family members supporting them
 
-NakNak keeps safety, check-ins, emergency contacts, medication reminders, and caregiver support close at hand. Success means a Senior/PWD user can immediately understand their status and reach the right emergency or reassurance action, while caregivers receive only capability claims the app can genuinely support.
+## Product purpose
 
-## Brand Personality
+NakNak keeps essential safety actions close at hand while giving family members a clearer support surface. Success means a Senior/PWD user can immediately understand what to do and a caregiver can distinguish between:
 
-Reassuring, dignified, and direct. The product should feel Filipino and family-centered without becoming childish, clinical, or patronizing.
+- an action saved only on the phone,
+- an action confirmed by NakNak's server,
+- and a capability that has not yet been implemented.
 
-## Anti-references
+## Brand personality
 
-- Emergency interfaces that hide critical controls or navigation below the viewport.
-- Dense dashboards that make a stressed Senior/PWD user scan secondary information before acting.
-- Fragile layers of wrapper patches whose behavior depends on runtime string replacement.
-- Copy or states that imply SMS, automatic calling, remote push, or fall detection is working when it is not.
+Reassuring, dignified, direct, Filipino, and family-centered. Never childish, alarmist, overly clinical, or patronizing.
 
-## Design Principles
+## Anti-patterns
 
-- Emergency actions and navigation always outrank secondary content.
-- Make the safest action the easiest action, including direct emergency calling without an extra NakNak confirmation.
-- Adapt the interface meaningfully to the user's selected accessibility needs.
-- Preserve dignity through plain language, large clear controls, and familiar interaction patterns.
-- Describe beta and connected capabilities honestly at the point where expectations matter.
+- Hiding emergency controls below dense content.
+- Presenting a caregiver dashboard inside the Senior/PWD emergency home.
+- Claiming that push, SMS, calling, location, or fall alerts happened when they did not.
+- Requiring unnecessary confirmations before opening the phone dialer.
+- Small touch targets or low-contrast secondary controls.
+- Marketing unfinished safety functionality as active.
+- Treating NakNak as a replacement for emergency services or professional care.
 
-## Accessibility & Inclusion
+## Accessibility & inclusion
 
-Support large readable text, strong contrast, visible focus states, reduced motion, touch targets of at least 44 by 44 CSS pixels, and safe-area-aware layouts. Visual needs should increase legibility and contrast; hearing needs should emphasize visible and haptic feedback; mobility needs should enlarge and separate touch targets; cognitive/memory needs should simplify and guide. The Senior/PWD emergency home must remain a single non-scrollable screen with name/status, NakNak SOS, Ayos Ako, Rescue Bridge, and bottom navigation simultaneously visible.
+Target:
+
+- touch targets of at least 44×44 CSS points/pixels,
+- strong contrast,
+- visible focus and selected states,
+- screen-reader labels for interactive controls,
+- reduced-motion respect,
+- safe-area-aware layouts,
+- large readable text,
+- clear haptic/visual feedback,
+- simplified guidance for cognitive/memory needs.
+
+## Current native capability boundary
+
+Implemented:
+
+- Senior/PWD onboarding
+- language and accessibility choices
+- direct dialer calling
+- emergency contacts
+- local medication schedules and reminders
+- offline local app data
+- Family Code pairing
+- secure device credential
+- server-confirmed Ayos Ako status
+- server-confirmed SOS-opened status
+- device disconnect/revocation path
+
+Not implemented:
+
+- remote caregiver push notification
+- automatic SMS
+- automatic calling
+- automatic location sharing
+- fall detection
+
+These boundaries must remain visible in marketing, support, privacy, and store-review materials until implementation changes.
