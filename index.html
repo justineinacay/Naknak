@@ -17,14 +17,14 @@
 <link rel="icon" type="image/png" sizes="512x512" href="Assets/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --red-deep:#8F0209;
-  --red:#D3030C;
-  --red-bright:#E9291C;
-  --red-soft:#FFE7E3;
-  --paper:#FFF7F4;
+  --red-deep:#7A1008;
+  --red:#C4301E;
+  --red-bright:#D94A37;
+  --red-soft:#F9E4DE;
+  --paper:#FFF8F2;
   --cream:#FFFFFF;
   --surface:#FFFFFF;
   --ink:#1A1512;
@@ -36,8 +36,8 @@
   --gold:#C97A12;
   --shadow:0 20px 50px -20px rgba(143,2,9,0.28);
   --nav-bg:rgba(255,255,255,0.9);
-  --font-display:'Sora',-apple-system,BlinkMacSystemFont,sans-serif;
-  --font-body:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-display:'Nunito',-apple-system,BlinkMacSystemFont,sans-serif;
+  --font-body:'Nunito',-apple-system,BlinkMacSystemFont,sans-serif;
   color-scheme:light;
 }
 html[data-theme="dark"]{
@@ -280,6 +280,9 @@ footer{background:#100D0B;color:rgba(255,255,255,0.7);padding:64px 0 28px;}
 .reveal{opacity:0;transform:translateY(16px);transition:opacity .6s ease,transform .6s ease;}
 .reveal.in{opacity:1;transform:none;}
 @media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none;}}
+
+/* 2026 brand refresh and responsive navigation */
+.mobile-menu-button{display:none;width:44px;height:44px;border:1px solid var(--line);border-radius:13px;align-items:center;justify-content:center;flex-direction:column;gap:5px;flex-shrink:0}.mobile-menu-button span{width:19px;height:2px;border-radius:2px;background:var(--ink)}.mobile-menu[hidden]{display:none!important}.mobile-menu{position:sticky;top:69px;z-index:199;background:var(--surface);border-bottom:1px solid var(--line);padding:14px 20px;box-shadow:0 16px 24px rgba(0,0,0,.09)}.mobile-menu a{display:block;padding:12px 14px;font-weight:800;border-radius:12px}.mobile-menu a:hover,.mobile-menu a:focus-visible{background:var(--paper)}.care-modes{background:var(--paper)}.care-mode-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}.care-mode-card{background:var(--surface);padding:36px;border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow)}.care-mode-icon{display:grid;place-items:center;width:54px;height:54px;border-radius:16px;background:var(--red-soft);color:var(--red);font-size:30px;margin-bottom:20px}.care-mode-card h3{font:900 24px var(--font-display);margin-bottom:10px}.care-mode-card p{line-height:1.6;color:var(--ink2);margin-bottom:18px}.care-mode-card ul{list-style:disc;padding-left:20px;line-height:2;margin-bottom:22px;color:var(--ink2)}.care-mode-note{text-align:center;color:var(--ink2);font-size:13px;line-height:1.6;max-width:720px;margin:28px auto 0}@media(max-width:900px){.mobile-menu-button{display:flex}.nav-inner{gap:10px}.nav-actions{gap:7px}}@media(max-width:640px){.care-mode-grid{grid-template-columns:1fr}.care-mode-card{padding:26px}.nav-inner{padding:12px 18px}.nav-actions>.btn-primary{padding:0 13px;font-size:12px;height:40px}.brand span{font-size:18px}}@media(max-width:390px){.nav-actions>.btn-primary{display:none}}
 </style>
 </head>
 <body>
@@ -298,7 +301,7 @@ footer{background:#100D0B;color:rgba(255,255,255,0.7);padding:64px 0 28px;}
       <a href="#pricing">Pricing</a>
       <a href="#faq">FAQ</a>
     </div>
-    <div class="nav-actions">
+    <div class="nav-actions"><button class="mobile-menu-button" id="mobileMenuButton" aria-controls="mobileMenu" aria-expanded="false" aria-label="Open navigation menu" type="button"><span></span><span></span><span></span></button>
       <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
         <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79z"/></svg>
         <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.5 1.5M18.3 18.3l1.5 1.5M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.5-1.5M18.3 5.7l1.5-1.5"/></svg>
@@ -308,6 +311,7 @@ footer{background:#100D0B;color:rgba(255,255,255,0.7);padding:64px 0 28px;}
     </div>
   </div>
 </nav>
+<div class="mobile-menu" id="mobileMenu" hidden><a href="#home">Home</a><a href="#about">About</a><a href="#features">Features</a><a href="#how">How It Works</a><a href="#care-modes">Care Modes</a><a href="#pricing">Pricing</a><a href="#faq">FAQ</a><a href="dashboard.html">Caregiver Sign In</a></div>
 
 <main>
 <!-- ── HERO ─────────────────────────────────────────────────────── -->
@@ -316,8 +320,8 @@ footer{background:#100D0B;color:rgba(255,255,255,0.7);padding:64px 0 28px;}
     <div class="hero-grid">
       <div>
         <div class="eyebrow"><span class="dot"></span> Public beta available</div>
-        <h1>Always close,<br><span class="hl">even from afar.</span></h1>
-        <p class="lede">NakNak is a safety-support beta for Filipino seniors, PWDs, caregivers, and families, with accessible emergency calling, check-ins, and medication tools.</p>
+        <h1>Care that<br><span class="hl">never sleeps.</span></h1>
+        <p class="lede">For Filipino families caring for seniors and PWDs, whether they live independently or together at home. Stay connected with simple check-ins, medication tools, and accessible emergency calling.</p>
         <div class="hero-ctas">
           <a href="app.html" class="btn btn-primary">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13m0 0l-4-4m4 4l4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
@@ -325,7 +329,7 @@ footer{background:#100D0B;color:rgba(255,255,255,0.7);padding:64px 0 28px;}
           </a>
           <a href="#how" class="play-link">
             <span class="ring"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
-            Watch how it works
+            See how it works
           </a>
         </div>
         <div class="trust-row">
@@ -487,6 +491,7 @@ footer{background:#100D0B;color:rgba(255,255,255,0.7);padding:64px 0 28px;}
   </div>
 </section>
 
+<section class="care-modes" id="care-modes"><div class="wrap"><div class="section-head center reveal"><div class="section-eyebrow">Two ways to care</div><h2>One family. Different needs.</h2><p>Choose the situation that fits your loved one. Both experiences share the same NakNak foundation.</p></div><div class="care-mode-grid"><article class="care-mode-card"><div class="care-mode-icon" aria-hidden="true">⌂</div><h3>Independent Care</h3><p>For seniors and PWDs living on their own or away from family.</p><ul><li>Easy daily check-ins</li><li>Emergency contacts and SOS</li><li>Simple medication reminders</li></ul><a href="app.html" class="btn btn-primary">Explore senior beta</a></article><article class="care-mode-card"><div class="care-mode-icon" aria-hidden="true">♡</div><h3>Home Care</h3><p>For families caring for loved ones in the same household.</p><ul><li>Caregiver dashboard beta</li><li>Household safety information</li><li>Shared care coordination (planned)</li></ul><a href="dashboard.html" class="btn btn-outline">Explore caregiver beta</a></article></div><p class="care-mode-note">Remote alerts, full synchronization, and advanced monitoring remain in development. NakNak does not replace emergency services or professional care.</p></div></section>
 <!-- ── TESTIMONIAL ──────────────────────────────────────────────── -->
 <section class="testi">
   <div class="wrap">
@@ -645,6 +650,7 @@ footer{background:#100D0B;color:rgba(255,255,255,0.7);padding:64px 0 28px;}
 </footer>
 
 <script>
+(function(){var btn=document.getElementById("mobileMenuButton"),menu=document.getElementById("mobileMenu");if(btn&&menu){function close(){menu.hidden=true;btn.setAttribute("aria-expanded","false");btn.setAttribute("aria-label","Open navigation menu")}btn.addEventListener("click",function(){var opening=menu.hidden;menu.hidden=!opening;btn.setAttribute("aria-expanded",String(opening));btn.setAttribute("aria-label",opening?"Close navigation menu":"Open navigation menu")});menu.querySelectorAll("a").forEach(function(a){a.addEventListener("click",close)});document.addEventListener("keydown",function(e){if(e.key==="Escape")close()})}})();
 (function(){
   var root = document.documentElement;
   var toggle = document.getElementById('themeToggle');
