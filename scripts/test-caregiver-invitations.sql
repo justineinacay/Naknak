@@ -133,7 +133,7 @@ insert into public.naknak_family_subscriptions(
 ('11111111-1111-4111-8111-111111111111','manual','ci-sub-1','monthly','active',now(),now()+interval '30 days'),
 ('22222222-2222-4222-8222-222222222222','manual','ci-sub-2','annual','active',now(),now()+interval '365 days');
 
-do $
+do $$
 begin
   if has_table_privilege('authenticated','public.naknak_family_subscriptions','INSERT') or
      has_table_privilege('authenticated','public.naknak_family_subscriptions','UPDATE') or
@@ -141,23 +141,23 @@ begin
      not has_table_privilege('authenticated','public.naknak_family_subscriptions','SELECT') then
     raise exception 'Subscription table exposes unsafe client privileges';
   end if;
-end $;
+end $$;
 
 set role authenticated;
 select set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false);
-do $
+do $$
 declare n integer;
 begin
   select count(*) into n from public.naknak_family_subscriptions;
   if n<>1 then raise exception 'Household A could see another household subscription'; end if;
-end $;
+end $$;
 select set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',false);
-do $
+do $$
 declare n integer;
 begin
   select count(*) into n from public.naknak_family_subscriptions;
   if n<>1 then raise exception 'Household B could see another household subscription'; end if;
-end $;
+end $$;
 
 reset role;
 select 'PASS: one-use owner-only invites; subscription SELECT-only access scoped by RLS' as result;
