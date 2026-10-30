@@ -318,7 +318,10 @@ body{background:#140B09;color:#F8EEEA}
 
     <section id="view-settings" class="section-view"><div class="header-flex"><div><div class="eyebrow">ACCOUNT &amp; PLANS</div><h1>Family settings</h1><p>Manage your signed-in session and review NakNak's current subscription offering.</p></div></div><div class="plan-card"><div><div class="eyebrow">NAKNAK FAMILY PLANS</div><strong>Free ₱0 <span style="color:var(--muted);font-size:17px">/ Family ₱199 monthly</span></strong><p class="muted">Family annual: ₱1,990. These are proposed prices; monthly billing, renewals, and cancellation handling have not been verified.</p>
       <p class="ops-copy" style="margin-top:7px">Server-reported household plan: <strong id="ops-current-plan">Unknown · Sign in to confirm</strong></p>
-      <p class="ops-copy">A one-time payment is not a recurring subscription. Do not pay until the complete billing lifecycle is ready.</p></div><a href="index.html#pricing" class="btn soft">Compare plans</a></div><div class="panel" style="margin-top:17px"><div class="panel-header"><h2>Account</h2></div><div class="details-grid"><div class="detail"><label>Signed-in email</label><strong id="settings-email">—</strong></div><div class="detail"><label>Connected household</label><strong id="settings-household">—</strong></div></div><div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap"><button id="signout" type="button" class="btn">Sign out</button><a href="https://justineinacay.github.io/Naknak/dashboard.html" class="btn">Advanced dashboard</a><a href="privacy.html" class="btn">Privacy information</a><a href="support.html" class="btn">Support</a></div></div></section>
+      <p class="ops-copy">A one-time payment is not a recurring subscription. Do not pay until the complete billing lifecycle is ready.</p>
+      <div class="ops-item"><strong>Verified recurring subscription</strong><span id="ops-billing-status">Not checked</span></div>
+      <div class="ops-item"><strong>Current period end</strong><span id="ops-billing-end">Not confirmed</span></div>
+      <p class="ops-status" id="ops-billing-message" aria-live="polite">The secure subscription read model has not been verified in production.</p></div><a href="index.html#pricing" class="btn soft">Compare plans</a></div><div class="panel" style="margin-top:17px"><div class="panel-header"><h2>Account</h2></div><div class="details-grid"><div class="detail"><label>Signed-in email</label><strong id="settings-email">—</strong></div><div class="detail"><label>Connected household</label><strong id="settings-household">—</strong></div></div><div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap"><button id="signout" type="button" class="btn">Sign out</button><a href="https://justineinacay.github.io/Naknak/dashboard.html" class="btn">Advanced dashboard</a><a href="privacy.html" class="btn">Privacy information</a><a href="support.html" class="btn">Support</a></div></div></section>
     <div class="footer-note">NakNak is a household support tool. A failed or delayed sync does not establish anyone's safety. For urgent emergencies, contact appropriate local emergency services directly. <a href="privacy.html">Privacy</a> · <a href="https://justineinacay.github.io/Naknak/dashboard.html">Advanced management</a> · <a href="index.html">Website</a> · <a href="https://justineinacay.github.io/Naknak/app.html">App</a></div>
   </main></div>
 </div>
@@ -355,6 +358,7 @@ body{background:#140B09;color:#F8EEEA}
     closeMenu();
     if(view==='helpdesk')opsLoadSupport();
     if(view==='access')opsLoadInvites();
+    if(view==='settings')opsLoadBilling();
     window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
     try{history.replaceState({},'',location.pathname+location.search+'#'+view)}
     catch(_){/* Local file preview can have an opaque origin. */}
@@ -617,6 +621,45 @@ body{background:#140B09;color:#F8EEEA}
   }
 
   /* P1: explicit server-authorized caregiver invitations. */
+
+  /* P1: no browser-driven payment activation. Only read server-verified subscription periods. */
+  async function opsLoadBilling(){
+    if(!state.client||!state.session||!state.household){
+      opsText('ops-billing-status','Not signed in');
+      opsText('ops-billing-end','Not confirmed');
+      opsText('ops-billing-message','This is a local preview. No paid subscription can be verified here.');
+      return;
+    }
+    const householdId=state.household.id;
+    opsText('ops-billing-status','Checking server…');
+    try{
+      const {data,error}=await state.client.from('naknak_family_subscriptions')
+        .select('provider,status,billing_cycle,period_end,cancel_at_period_end,updated_at')
+        .eq('household_id',householdId).maybeSingle();
+      if(error)throw error;
+      if(state.household?.id!==householdId)return;
+      if(!data){
+        opsText('ops-billing-status','No active recurring plan confirmed');
+        opsText('ops-billing-end','—');
+        opsText('ops-billing-message','Free access remains available. Do not infer a recurring plan from an older one-time payment record.');
+        return;
+      }
+      const end=data.period_end?new Date(data.period_end):null;
+      const dateValid=end&&Number.isFinite(end.getTime());
+      const active=data.status==='active'&&dateValid&&end.getTime()>Date.now();
+      opsText('ops-billing-status',active?'Active '+String(data.billing_cycle||'')+' subscription':String(data.status||'unknown')+' · Not active');
+      opsText('ops-billing-end',dateValid?dtime(data.period_end):'Not confirmed');
+      opsText('ops-billing-message',active
+        ?'Current server period is valid until '+dtime(data.period_end)+(data.cancel_at_period_end?' and is set to end at that date.':'.')
+        :'No current paid entitlement is verified. This dashboard does not charge or upgrade an account.');
+      if(active)opsText('ops-current-plan','Family · verified subscription period');
+    }catch(_){
+      opsText('ops-billing-status','Subscription service not configured or unavailable');
+      opsText('ops-billing-end','Not confirmed');
+      opsText('ops-billing-message','The billing read model is not accessible. No subscription activation can be confirmed on this page.');
+    }
+  }
+
   function opsRenderAccess(){
     opsText('ops-access-email',state.session?.user?.email||'Local preview');
     opsText('ops-access-membership',state.session?'Signed-in household member':'Not signed in');
@@ -739,7 +782,7 @@ body{background:#140B09;color:#F8EEEA}
     opsRenderAccess();
     opsRenderWarnings();
     const rawPlan=String(state.value?.plan||'free').toLowerCase();
-    opsText('ops-current-plan',state.session?(rawPlan==='family'?'Family (server record)':rawPlan==='essential'?'Legacy Essential (server record)':'Free (server record)'):'Not verified · Local preview');
+    opsText('ops-current-plan',state.session?(rawPlan==='family'?'Legacy Family flag · subscription requires verification':rawPlan==='essential'?'Legacy Essential record · not a new plan':'Free (household record)'):'Not verified · Local preview');
     opsRenderCare();
     opsRenderPrep();
   }
