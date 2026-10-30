@@ -669,10 +669,10 @@ function nid(){ return Math.random().toString(36).slice(2,10); }
 const PLANS = {
   free:      { id:"free",      name:"Libre",       maxContacts:1, vitals:false, safeZone:false, medications:false, fall:false, multiMember:false,
     price:"₱0", priceSub:"Habambuhay na libre", features:["SOS button","Araw-araw na check-in","1 emergency contact","Offline Vault access"] },
-  essential: { id:"essential", name:"Kailangan",    maxContacts:2, vitals:true,  safeZone:false, medications:true,  fall:false, multiMember:false,
-    price:"₱100", priceSub:"Isang beses lang, hindi na babalikan", features:["Lahat ng nasa Libre","Medication tracking","2 emergency contacts","Vitals logging + charts","Smart escalation alerts"] },
+  essential: { id:"essential", name:"Legacy Essential", maxContacts:2, vitals:true,  safeZone:false, medications:true,  fall:false, multiMember:false,
+    price:"Legacy", priceSub:"For previously enrolled households only", features:["Historical entitlement only","Local medicine and contact tools","No guaranteed caregiver alert delivery"] },
   family:    { id:"family",    name:"Pamilya",  maxContacts:3, vitals:true,  safeZone:true,  medications:true,  fall:false,  multiMember:true,
-    price:"₱199", priceSub:"/buwan", features:["Lahat ng nasa Essential","Fall detection (coming soon)","Safe Zone GPS beta","3 emergency contacts","Hanggang 4 na senior","Connected sync beta"] },
+    price:"₱199", priceSub:"/month proposed", features:["Shared family space (beta)","Ayos Ako and SOS-opened records only","Medication reminders remain on phone","Annual proposal: ₱1,990/year","Remote push, location and fall detection not active"] },
 };
 const canUse = (plan, feat) => PLANS[plan]?.[feat] ?? true;
 
@@ -2661,6 +2661,7 @@ function QrPanel({ senior }) {
 
 /* ── SETTINGS: theme, plan, account ─────────────────────────────────────── */
 function SettingsPanel({ theme, plan, session, onDisconnect, household }) {
+  const RECURRING_BILLING_AVAILABLE = false; // Never charge via one-time checkout for recurring plans.
   const PLAN_LABEL = { free:"Libre", essential:"Kailangan", family:"Pamilya" };
   const PLAN_COLOR = { free:"var(--ink3)", essential:"var(--gold)", family:"var(--green)" };
   const [checkout, setCheckout] = useState(null); // { planId, method:'paymongo'|'gcash' } or null
@@ -2668,6 +2669,7 @@ function SettingsPanel({ theme, plan, session, onDisconnect, household }) {
   const [creatingCheckout, setCreatingCheckout] = useState(false);
 
   const startCheckout = async (planId) => {
+    if(!RECURRING_BILLING_AVAILABLE){ setCheckoutError("The Family subscription is not accepting payments until renewal, cancellation and entitlement processing are verified."); return; }
     if(!PAYMONGO_CHECKOUT_FN_URL) return;
     setCreatingCheckout(true); setCheckoutError("");
     try {
@@ -2727,9 +2729,9 @@ function SettingsPanel({ theme, plan, session, onDisconnect, household }) {
       </div>
 
       <div className="panel">
-        <div className="panel-head"><div><h2><Icon name="credit_card" size={17}/>Mga Plano at Bayad</h2><p>I-upgrade o i-downgrade ang plan ng household</p></div></div>
+        <div className="panel-head"><div><h2><Icon name="credit_card" size={17}/>Mga Plano at Bayad</h2><p>Free access is available. Family ₱199/month and ₱1,990/year are proposed, not purchasable yet.</p></div></div>
         <div className="settings-price-grid">
-          {Object.values(PLANS).map(p=>{
+          {Object.values(PLANS).filter(p=>p.id!=="essential").map(p=>{
             const isCurrent = p.id===plan;
             const isFree = p.id==="free";
             return (
@@ -2745,7 +2747,7 @@ function SettingsPanel({ theme, plan, session, onDisconnect, household }) {
                   ))}
                 </ul>
                 {isCurrent ? (
-                  <div style={{textAlign:"center",fontSize:12,fontWeight:700,color:"var(--ink3)",padding:"10px 0"}}>Ito ang aktibong plano mo</div>
+                  <div style={{textAlign:"center",fontSize:12,fontWeight:700,color:"var(--ink3)",padding:"10px 0"}}>Plan recorded in this household (not proof of current paid subscription)</div>
                 ) : isFree ? (
                   <a className="btn-cancel" style={{width:"100%",display:"block",textAlign:"center"}} href="mailto:naknak@gmail.com?subject=NakNak%20plan%20downgrade">Humiling ng downgrade</a>
                 ) : checkout?.planId===p.id && checkout?.method==="paymongo" ? (
@@ -2758,8 +2760,9 @@ function SettingsPanel({ theme, plan, session, onDisconnect, household }) {
                 ) : (
                   <div style={{display:"flex",flexDirection:"column",gap:8}}>
                     {checkoutError && <div style={{fontSize:11,fontWeight:600,color:"var(--red)",marginBottom:2}}>{checkoutError}</div>}
-                    {PAYMONGO_CHECKOUT_FN_URL && <button className="btn-save" style={{width:"100%"}} disabled={creatingCheckout} onClick={()=>startCheckout(p.id)}>{creatingCheckout?"…":"Bayaran Ngayon"}</button>}
-                    <a className={PAYMONGO_CHECKOUT_FN_URL?"btn-cancel":"btn-save"} style={{width:"100%",display:"block",textAlign:"center"}} href={`mailto:naknak@gmail.com?subject=NakNak%20manual%20GCash%20-%20${encodeURIComponent(p.name)}`}>Manual GCash support</a>
+                    {RECURRING_BILLING_AVAILABLE && PAYMONGO_CHECKOUT_FN_URL && <button className="btn-save" style={{width:"100%"}} disabled={creatingCheckout} onClick={()=>startCheckout(p.id)}>{creatingCheckout?"…":"Bayaran Ngayon"}</button>}
+                    {!RECURRING_BILLING_AVAILABLE && <p style={{fontSize:12,fontWeight:700}}>Paid subscriptions are not active. No payment is collected here.</p>}
+                    <a className="btn-cancel" style={{width:"100%",display:"block",textAlign:"center"}} href="https://justineinacay.github.io/Naknak/family-dashboard.html#settings">View plan details</a>
                   </div>
                 )}
               </div>
@@ -2767,7 +2770,7 @@ function SettingsPanel({ theme, plan, session, onDisconnect, household }) {
           })}
         </div>
         <p style={{fontSize:11,color:"var(--ink3)",fontWeight:600,marginTop:16,lineHeight:1.6}}>
-          <Icon name="info" size={11} color="var(--ink3)"/> PayMongo upgrades activate only after its signed payment webhook confirms the payment. Manual GCash payments require support verification.
+          <Icon name="info" size={11} color="var(--ink3)"/> No new paid checkout is active. Existing one-time transactions require reconciliation; recurring payments, refunds, renewals, cancellation and subscription expiration are not verified.
         </p>
       </div>
     </>
