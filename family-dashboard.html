@@ -512,15 +512,164 @@ body{background:#140B09;color:#F8EEEA}
     const ev=eventRows().slice(0,8);
     $('ops-care-events').innerHTML=ev.length?ev.map(e=>'<div class="ops-item"><div><strong>'+safe(e.title||e.type||'Activity')+'</strong><p class="ops-copy">'+safe(e.memberName)+' · '+safe(dtime(e.time))+'</p></div><span class="ops-pill neutral">Recorded</span></div>').join(''):empty('No activity in the connected record','Use Ayos Ako from the paired phone and verify delivery.','clock');
   }
+
+  /* P0: record freshness is not proof of physical safety. */
+  function opsRenderWarnings(){
+    const issues=[];
+    if(!state.session){
+      issues.push('LOCAL PREVIEW · This page has no verified family data.');
+    }else if(state.dataError){
+      issues.push('Cannot confirm a current server read. Displayed records may be outdated; contact family directly to check their wellbeing.');
+    }else if(!state.lastFetchedAt){
+      issues.push('No successful server read has been confirmed yet.');
+    }else{
+      const readAge=Date.now()-new Date(state.lastFetchedAt).getTime();
+      if(!Number.isFinite(readAge)||readAge>60000){
+        issues.push('This page has not successfully refreshed in over one minute. Retry before relying on recent records.');
+      }
+      if(!state.lastRemoteAt){
+        issues.push('No household record has been received yet. Pair a phone and send a test Ayos Ako.');
+      }else{
+        const recordAge=Date.now()-new Date(state.lastRemoteAt).getTime();
+        if(Number.isFinite(recordAge)&&recordAge>24*60*60*1000){
+          issues.push('No changes to the connected household record in the last 24 hours. This is a record timestamp, not a health assessment.');
+        }
+      }
+    }
+    const sos=members().filter(m=>m.status==='sos');
+    if(sos.length){
+      issues.push('SOS-opened record found for '+sos.map(m=>m.nickname||m.name||'a member').slice(0,3).join(', ')+'. No emergency dispatch or caregiver push is confirmed; call the person or emergency services directly when necessary.');
+    }
+    for(const id of ['ops-overview-warning','ops-care-warning']){
+      const el=$(id);if(!el)continue;
+      el.hidden=issues.length===0;
+      el.textContent=issues.join(' ');
+      el.classList.toggle('danger',Boolean(state.dataError||sos.length));
+    }
+  }
+
+  /* P1: explicit server-authorized caregiver invitations. */
+  function opsRenderAccess(){
+    opsText('ops-access-email',state.session?.user?.email||'Local preview');
+    opsText('ops-access-membership',state.session?'Signed-in household member':'Not signed in');
+    opsText('ops-access-role',state.membershipRole||'—');
+    const switcher=$('ops-household-switch');
+    if(switcher){
+      const rows=state.households||[];
+      switcher.innerHTML=rows.length?rows.map((m,i)=>
+        '<option value="'+safe(m.household_id)+'">'+safe(
+          'Family Space '+(m.household_id||'').slice(0,8)+(m.role==='owner'?' · Owner':' · Caregiver')
+        )+'</option>').join(''):'<option value="">No connected households</option>';
+      switcher.value=state.household?.id||'';
+      switcher.disabled=rows.length<=1;
+    }
+    const canInvite=Boolean(state.session&&state.household&&state.membershipRole==='owner');
+    if(!canInvite){
+      $('ops-create-invite').disabled=true;
+      opsText('ops-invite-mode',state.session?'Only the household owner can issue invitations.':'Sign in required for invitations.');
+      $('ops-invite-list').innerHTML='<p class="ops-copy">Only a signed-in owner can manage caregiver invitations.</p>';
+    }
+  }
+
+  async function opsLoadInvites(){
+    opsRenderAccess();
+    if(!state.client||!state.session||!state.household||state.membershipRole!=='owner')return;
+    $('ops-create-invite').disabled=true;
+    opsText('ops-invite-mode','Checking invitation permissions…');
+    $('ops-invite-list').textContent='Checking recent invitations…';
+    const householdId=state.household.id;
+    try{
+      const {data,error}=await state.client.rpc('naknak_invite_list',{p_household_id:householdId});
+      if(error)throw error;
+      if(householdId!==state.household?.id)return;
+      $('ops-create-invite').disabled=false;
+      opsText('ops-invite-mode','Owner verified · one-use invitations enabled');
+      const rows=Array.isArray(data)?data:[];
+      $('ops-invite-list').innerHTML=rows.length?rows.map(v=>
+        '<div class="ops-item"><div><strong>'+safe(v.status||'Unknown')+'</strong><p class="ops-copy">Created '+safe(dtime(v.created_at))+' · Expires '+safe(dtime(v.expires_at))+'</p></div>'+
+        (v.status==='pending'?'<button type="button" class="btn small" data-revoke-invite="'+safe(v.invite_id)+'">Revoke</button>':'<span class="ops-pill neutral">'+safe(v.status)+'</span>')+
+        '</div>').join(''):'<p class="ops-copy">No invitation records yet.</p>';
+    }catch(_){
+      $('ops-create-invite').disabled=true;
+      opsText('ops-invite-mode','Invitations not configured or access not verified');
+      $('ops-invite-list').innerHTML='<div class="ops-note">The secure invitation migration must be applied and tested before this workflow is available. No invitation was issued.</div>';
+    }
+  }
+
+  async function opsCreateInvite(){
+    if(!state.client||!state.session||!state.household||state.membershipRole!=='owner'){
+      opsText('ops-invite-create-message','Only a signed-in household owner can issue invitations.');return;
+    }
+    const btn=$('ops-create-invite');btn.disabled=true;
+    opsText('ops-invite-create-message','Creating a one-time invitation…');
+    $('ops-issued-invite').hidden=true;$('ops-invite-token-value').textContent='';
+    try{
+      const {data,error}=await state.client.rpc('naknak_invite_create',{p_household_id:state.household.id});
+      if(error)throw error;
+      const row=Array.isArray(data)?data[0]:data;
+      if(!row?.invite_token||!(/^[a-f0-9]{48}$/.test(row.invite_token)))throw Error('No valid invitation token was received.');
+      $('ops-invite-token-value').textContent=row.invite_token;
+      opsText('ops-invite-expiry','Expires '+dtime(row.expires_at)+'. Share privately once; do not include this token in public links or screenshots.');
+      $('ops-issued-invite').hidden=false;
+      opsText('ops-invite-create-message','Invitation confirmed by server. Copy the one-time token privately.');
+      await opsLoadInvites();
+    }catch(_){
+      opsText('ops-invite-create-message','Invitation was not confirmed. No token is available; verify the secured database migration.');
+      $('ops-issued-invite').hidden=true;
+      await opsLoadInvites();
+    }finally{btn.disabled=state.membershipRole!=='owner';}
+  }
+
+  async function opsAcceptInvite(event,fieldId,messageId){
+    event.preventDefault();
+    const input=$(fieldId),output=$(messageId),token=(input?.value||'').trim().toLowerCase();
+    if(!/^[a-f0-9]{48}$/.test(token)){
+      output.textContent='Enter a valid 48-character caregiver invitation token.';return;
+    }
+    if(!state.client||!state.session){
+      output.textContent='Sign in on the HTTPS Family Dashboard before accepting invitations.';return;
+    }
+    const submit=event.target.querySelector('button[type="submit"]');
+    if(submit)submit.disabled=true;
+    output.textContent='Checking invitation with NakNak server…';
+    try{
+      const {data,error}=await state.client.rpc('naknak_invite_accept',{p_token:token});
+      if(error)throw error;
+      const row=Array.isArray(data)?data[0]:data;
+      if(!row?.household_id)throw Error('No household membership was confirmed.');
+      input.value='';
+      output.textContent='Invitation accepted. Loading your new Family Space…';
+      await resolve(row.household_id);
+      navigate('access');
+      opsText('ops-join-result','New household access verified. You can switch households from Family Access.');
+    }catch(err){
+      output.textContent='Could not join: '+String(err.message||'Invalid or expired invitation')+
+        '. No membership was added on this page.';
+    }finally{if(submit)submit.disabled=false;}
+  }
+
+  async function opsRevokeInvite(id){
+    if(!state.client||!state.session||state.membershipRole!=='owner')return;
+    if(!/^[a-f0-9-]{36}$/i.test(id))return;
+    if(!window.confirm('Revoke this pending invitation? This cannot be undone.'))return;
+    try{
+      const {data,error}=await state.client.rpc('naknak_invite_revoke',{p_invite_id:id});
+      if(error||data!==true)throw Error('Not revoked');
+      opsText('ops-invite-create-message','Invitation revoked by the server.');
+    }catch(_){opsText('ops-invite-create-message','Could not verify revocation. Refresh and try again.');}
+    await opsLoadInvites();
+  }
+
   function opsRender(){
     if(!state.household)return;
     if(ops.householdId!==state.household.id){ops.ticketsLoaded=false;opsLoadPrep();}
     opsText('ops-network',navigator.onLine?'Browser reports online':'Browser reports offline');
     opsText('ops-auth',state.session?'Account signed in':'Local preview / not signed in');
-    opsText('ops-record',state.dataError?'Read failed':state.value?'Household record loaded':'No record loaded');
+    opsText('ops-record',state.dataError?'Cannot verify current record':state.value?'Household record loaded':'No record loaded');
     opsText('ops-last',state.lastRemoteAt?dtime(state.lastRemoteAt):'Not confirmed');
-    opsText('ops-access-email',state.session?.user?.email||'Local preview');
-    opsText('ops-access-membership',state.session?'Membership checked at sign-in':'No live session');
+    opsText('ops-last-fetch',state.lastFetchedAt?dtime(state.lastFetchedAt):'Not confirmed');
+    opsRenderAccess();
+    opsRenderWarnings();
     opsRenderCare();
     opsRenderPrep();
   }
