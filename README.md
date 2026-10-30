@@ -14,6 +14,7 @@ A paired native phone can currently send server-confirmed **Ayos Ako** and **SOS
 
 - Website: `index.html`
 - Caregiver / Anak dashboard: `dashboard.html`
+- Family-first Dashboard: `family-dashboard.html` — connected household records, setup, connection checks, daily care, prep (shared after migration), support (after migration)
 - Web safety beta: `app.html`
 - Privacy & data notice: `privacy.html`
 - Support: `support.html`
@@ -105,3 +106,8 @@ node scripts/verify-web.mjs
 ## License
 
 © 2026 NakNak. All rights reserved.
+
+
+## P0–P2 review phase
+
+The new household operations rollout is documented in [P0-P2-IMPLEMENTATION.md](P0-P2-IMPLEMENTATION.md). These dashboard modules should not be treated as production-complete until their required migration, access policy tests, device tests, and provider integrations pass. The secure native sync currently covers confirmed Ayos Ako and SOS-opened events only.
