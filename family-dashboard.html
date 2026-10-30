@@ -275,7 +275,7 @@ body{background:#140B09;color:#F8EEEA}
   const show = section => { ['loading','auth','shell'].forEach(id=>$(id).classList.toggle('hidden',id!==section)); };
   const signout = async () => {clearInterval(state.timer);if(state.channel&&state.client){await state.client.removeChannel(state.channel)}state.channel=null;state.value=null;state.household=null;state.rev=0;state.lastRemoteAt=null;await state.client.auth.signOut();state.session=null;show('auth');$('sign-in').classList.remove('hidden');$('household-create').classList.add('hidden');};
   const closeMenu = () => {$('sidebar').classList.remove('open');$('shade').classList.remove('show');$('hamb').setAttribute('aria-expanded','false')};
-  function navigate(view){if(!$(`view-${view}`))view='overview';state.currentView=view;const navButton=document.querySelector(`[data-view="${view}"]`);const lbl=$('current-section-label');if(lbl)lbl.textContent=navButton?navButton.textContent.trim():'Overview';document.querySelectorAll('.section-view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));document.querySelectorAll('[data-view]').forEach(b=>{let active=b.dataset.view===view;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});closeMenu();window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});try{history.replaceState({},'',location.pathname+location.search+'#'+view);}catch(_){/* Embedded design previews can have an opaque origin. */}}
+  function navigate(view){if(!$(`view-${view}`))view='overview';state.currentView=view;const navButton=document.querySelector(`[data-view="${view}"]`);const lbl=$('current-section-label');if(lbl)lbl.textContent=navButton?navButton.textContent.trim():'Overview';document.querySelectorAll('.section-view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));document.querySelectorAll('[data-view]').forEach(b=>{let active=b.dataset.view===view;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});closeMenu();if(view==='helpdesk')opsLoadSupport();window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});try{history.replaceState({},'',location.pathname+location.search+'#'+view);}catch(_){/* Embedded design previews can have an opaque origin. */}}
   async function resolve(){const {data:memberships,error:memError}=await state.client.from('naknak_household_members').select('household_id').eq('auth_uid',state.session.user.id).limit(1).maybeSingle();if(memError)throw memError;if(!memberships){$('sign-in').classList.add('hidden');$('household-create').classList.remove('hidden');show('auth');return;}const {data:household,error:hhError}=await state.client.from('naknak_households').select('id,pair_code').eq('id',memberships.household_id).maybeSingle();if(hhError)throw hhError;if(!household)throw Error('Household not found or you do not have permission to view it.');state.household=household;state.rev=0;state.value=null;state.selected=null;show('shell');$('settings-email').textContent=state.session.user.email||'—';$('settings-household').textContent=household.id||'—';$('pair-code').textContent=household.pair_code||'Unavailable';$('top-household').textContent='Connected Family Space';status('Connecting');const requested=decodeURIComponent((location.hash||'#overview').slice(1));navigate(requested);await refresh();listen();}
   async function refresh(){if(!state.household||state.refreshing)return;state.refreshing=true;status('Checking updates');try{const {data,error}=await state.client.from('naknak_state').select('state,rev,updated_at').eq('household_id',state.household.id).maybeSingle();if(error)throw error;if(data){state.value=data.state||{};state.rev=Number(data.rev)||0;state.dataError='';state.lastRemoteAt=data.updated_at||null;status('Updated '+shortDate(data.updated_at),'ok')}else{state.value={seniors:[]};state.rev=0;state.lastRemoteAt=null;status('No app data yet','caution')}}catch(err){state.dataError=err.message||'Connection failed';status('Sync unavailable','caution');$('top-household').textContent='Could not refresh household data'}finally{state.refreshing=false;render();}}
   function listen(){if(state.channel)state.client.removeChannel(state.channel);state.channel=state.client.channel('naknak-view-'+state.household.id).on('postgres_changes',{event:'*',schema:'public',table:'naknak_state',filter:'household_id=eq.'+state.household.id},payload=>{const record=payload.new;if(record && Number(record.rev||0)>=state.rev){state.value=record.state||{};state.rev=Number(record.rev||0);state.lastRemoteAt=record.updated_at||null;status('Synced update','ok');render()}}).subscribe();clearInterval(state.timer);state.timer=setInterval(()=>{if(!document.hidden)refresh()},20000)}
@@ -291,6 +291,161 @@ body{background:#140B09;color:#F8EEEA}
     return all.slice(0,4).map(x=>`<div class="list-row"><div><strong>${safe(x.name||'Medication')}</strong><p>${safe(x.memberName)} · ${safe(x.dose||'Dose not recorded')} · ${safe(typeof x.schedule==='string'?x.schedule:'Schedule not shared')}</p></div><span class="tag neutral">Recorded</span></div>`).join('');
   }
   function miniDetailHTML(label,value){return `<div class="list-row"><div><strong>${safe(label)}</strong><p>${safe(value||'Not in connected record')}</p></div></div>`}
+
+  /* NakNak P0–P2 household operations: no simulated SOS, push, billing, or health records. */
+  const OPS_ITEMS=[
+    ['water','Water and drinking containers'],['food','Ready-to-eat food'],['flashlight','Flashlight and spare batteries'],
+    ['medication','Personal medication supplies'],['firstaid','First aid kit'],['documents','Copies of important documents'],
+    ['power','Power bank and charging cables'],['contacts','Written emergency contacts']
+  ];
+  const ops={householdId:null,prepBackend:false,prepLoaded:false,prepBusy:false,checks:new Set(),ticketsLoaded:false,diagRunning:false};
+  const opsText=(id,value)=>{const e=$(id);if(e)e.textContent=String(value??'');};
+  const opsDraftKey=()=> 'naknak_prep_draft_v1_'+String(state.household?.id||'preview')+'_'+String(state.session?.user?.id||'local');
+  function opsLocalLoad(){try{const arr=JSON.parse(localStorage.getItem(opsDraftKey())||'[]');return new Set(Array.isArray(arr)?arr.filter(k=>OPS_ITEMS.some(([id])=>id===k)):[])}catch(_){return new Set()}}
+  function opsLocalSave(){try{localStorage.setItem(opsDraftKey(),JSON.stringify([...ops.checks]))}catch(_){opsText('ops-prep-message','Browser storage was unavailable. Your draft may not persist.');}}
+  function opsRenderPrep(){
+    const count=OPS_ITEMS.filter(([id])=>ops.checks.has(id)).length;
+    opsText('ops-prep-count',count+' of '+OPS_ITEMS.length+' checked');
+    if($('ops-prep-progress'))$('ops-prep-progress').style.width=(count/OPS_ITEMS.length*100)+'%';
+    opsText('ops-prep-mode',ops.prepLoaded?(ops.prepBackend?'Household-shared checklist':'Draft on this browser only'):'Checking checklist storage…');
+    const wrap=$('ops-prep-items');if(!wrap)return;
+    wrap.innerHTML=OPS_ITEMS.map(([key,label])=>'<label class="ops-check"><input type="checkbox" data-prep="'+safe(key)+'" '+(ops.checks.has(key)?'checked ':'')+(ops.prepBusy?'disabled ':'')+'/><span>'+safe(label)+'</span></label>').join('');
+  }
+  async function opsLoadPrep(){
+    const hh=state.household;
+    if(!hh)return;
+    ops.householdId=hh.id;ops.prepLoaded=false;ops.prepBackend=false;ops.checks=opsLocalLoad();opsRenderPrep();
+    if(!state.client||!state.session){ops.prepLoaded=true;opsText('ops-prep-message','Local preview only. These checks never leave this browser.');opsRenderPrep();return;}
+    const householdId=hh.id;
+    try{
+      const {data,error}=await state.client.from('naknak_household_prep').select('item_key,completed').eq('household_id',householdId);
+      if(error)throw error;
+      if(state.household?.id!==householdId)return;
+      ops.prepBackend=true;ops.checks=new Set((data||[]).filter(x=>x.completed && OPS_ITEMS.some(([id])=>id===x.item_key)).map(x=>x.item_key));
+      opsText('ops-prep-message','Loaded household-shared checklist. Changes are saved only after server confirmation.');
+    }catch(_){
+      ops.prepBackend=false;ops.checks=opsLocalLoad();
+      opsText('ops-prep-message','Shared checklist is not configured or accessible. Edits will stay on this browser only; they are not synced to family members.');
+    }finally{if(state.household?.id===householdId){ops.prepLoaded=true;opsRenderPrep();}}
+  }
+  async function opsTogglePrep(key,checked){
+    if(!OPS_ITEMS.some(([id])=>id===key)||ops.prepBusy)return;
+    const previous=new Set(ops.checks);
+    ops.checks[checked?'add':'delete'](key);
+    if(!ops.prepBackend||!state.client||!state.session){
+      opsLocalSave();opsRenderPrep();
+      opsText('ops-prep-message','Saved to this browser only; not shared with connected devices.');
+      return;
+    }
+    ops.prepBusy=true;opsRenderPrep();
+    try{
+      const {error}=await state.client.from('naknak_household_prep').upsert({
+        household_id:state.household.id,item_key:key,completed:checked,
+        updated_by:state.session.user.id,updated_at:new Date().toISOString()
+      },{onConflict:'household_id,item_key'});
+      if(error)throw error;
+      opsText('ops-prep-message','Change saved to the household checklist on the server.');
+    }catch(_){
+      ops.checks=previous;
+      opsText('ops-prep-message','Could not save this change to the server. The previous confirmed value was restored.');
+    }finally{ops.prepBusy=false;opsRenderPrep();}
+  }
+  function opsRenderCare(){
+    const mm=members();
+    $('ops-care-members').innerHTML=mm.length?mm.map(m=>'<div class="ops-item"><div><strong>'+safe(m.nickname||m.name||'Member')+'</strong><p class="ops-copy">Last recorded check-in: '+safe(dtime(m.lastCheckin))+'</p></div><span class="ops-pill neutral">Record only</span></div>').join(''):empty('No connected profiles yet','Create a Family Space and pair a phone to see check-ins.');
+    const meds=mm.flatMap(m=>(Array.isArray(m.medications)?m.medications:[]).map(x=>({name:x.name||'Medication',dose:x.dose||'',owner:m.nickname||m.name||'Member'}))).slice(0,12);
+    $('ops-care-meds').innerHTML=meds.length?meds.map(m=>'<div class="ops-item"><div><strong>'+safe(m.name)+'</strong><p class="ops-copy">'+safe([m.dose,m.owner].filter(Boolean).join(' · '))+'</p></div><span class="ops-pill neutral">Schedule record</span></div>').join(''):empty('No medicines shared','Native medicine reminders may still be stored only on the phone.','pill');
+    const ev=eventRows().slice(0,8);
+    $('ops-care-events').innerHTML=ev.length?ev.map(e=>'<div class="ops-item"><div><strong>'+safe(e.title||e.type||'Activity')+'</strong><p class="ops-copy">'+safe(e.memberName)+' · '+safe(dtime(e.time))+'</p></div><span class="ops-pill neutral">Recorded</span></div>').join(''):empty('No activity in the connected record','Use Ayos Ako from the paired phone and verify delivery.','clock');
+  }
+  function opsRender(){
+    if(!state.household)return;
+    if(ops.householdId!==state.household.id){ops.ticketsLoaded=false;opsLoadPrep();}
+    opsText('ops-network',navigator.onLine?'Browser reports online':'Browser reports offline');
+    opsText('ops-auth',state.session?'Account signed in':'Local preview / not signed in');
+    opsText('ops-record',state.dataError?'Read failed':state.value?'Household record loaded':'No record loaded');
+    opsText('ops-last',state.lastRemoteAt?dtime(state.lastRemoteAt):'Not confirmed');
+    opsText('ops-access-email',state.session?.user?.email||'Local preview');
+    opsText('ops-access-membership',state.session?'Membership checked at sign-in':'No live session');
+    opsRenderCare();
+    opsRenderPrep();
+  }
+  async function opsRunConnection(){
+    if(ops.diagRunning)return;
+    if(!state.client||!state.session||!state.household){
+      opsText('ops-check-result','A hosted, signed-in dashboard is required for a real connection test.');
+      return;
+    }
+    ops.diagRunning=true;const btn=$('ops-run-check');btn.disabled=true;
+    opsText('ops-check-result','Checking server access and permitted household records…');
+    try{
+      const {data:userData,error:userError}=await state.client.auth.getUser();
+      if(userError||!userData?.user)throw Error('Authentication could not be confirmed.');
+      opsText('ops-auth','Server verified session');
+      const {data:membership,error:membershipError}=await state.client.from('naknak_household_members')
+        .select('household_id,role').eq('auth_uid',userData.user.id).eq('household_id',state.household.id).maybeSingle();
+      if(membershipError||!membership)throw Error('Household membership could not be confirmed.');
+      opsText('ops-access-role',membership.role||'Caregiver');
+      opsText('ops-access-membership','Server verified member');
+      const {data:row,error:readError}=await state.client.from('naknak_state')
+        .select('updated_at,rev').eq('household_id',state.household.id).maybeSingle();
+      if(readError)throw Error('Household state was not accessible.');
+      opsText('ops-record',row?'Accessible':'No household state found');
+      opsText('ops-last',row?.updated_at?dtime(row.updated_at):'No confirmed update');
+      const {data:devices,error:deviceError}=await state.client.from('naknak_devices')
+        .select('id,device_label,paired_at,last_seen_at,senior_id').eq('household_id',state.household.id).limit(12);
+      if(deviceError){
+        opsText('ops-devices','Device details are not available to this account. Pairing and last-seen times cannot be verified here.');
+        $('ops-device-list').innerHTML='';
+      }else{
+        opsText('ops-devices',(devices||[]).length+' device record(s) accessible. Last seen is not live presence.');
+        $('ops-device-list').innerHTML=(devices||[]).length?(devices||[]).map(d=>'<div class="ops-item"><div><strong>'+safe(d.device_label||'NakNak Phone')+'</strong><p class="ops-copy">Last seen by server: '+safe(dtime(d.last_seen_at))+'</p></div><span class="ops-pill neutral">Historical</span></div>').join(''):'<p class="ops-copy">No paired devices are visible in this account.</p>';
+      }
+      opsText('ops-check-result','Server access checked. For real safety verification, test Ayos Ako on a separate paired phone.');
+    }catch(err){
+      opsText('ops-check-result','Connection check incomplete: '+String(err.message||'Unknown error')+' Do not assume family safety.');
+    }finally{btn.disabled=false;ops.diagRunning=false;}
+  }
+  async function opsLoadSupport(){
+    if(!state.client||!state.session||!state.household){
+      $('ops-support-history').innerHTML='<p class="ops-copy">Local design preview. Support requests cannot be submitted or loaded.</p>';return;
+    }
+    $('ops-support-history').textContent='Checking requests…';
+    try{
+      const {data,error}=await state.client.from('naknak_support_requests').select('id,subject,status,created_at')
+        .eq('requester_id',state.session.user.id).eq('household_id',state.household.id)
+        .order('created_at',{ascending:false}).limit(20);
+      if(error)throw error;
+      $('ops-support-history').innerHTML=(data||[]).length?data.map(x=>'<div class="ops-item"><div><strong>'+safe(x.subject)+'</strong><p class="ops-copy">'+safe(dtime(x.created_at))+'</p></div><span class="ops-pill neutral">'+safe(x.status)+'</span></div>').join(''):'<p class="ops-copy">No support requests submitted in this household.</p>';
+    }catch(_){$('ops-support-history').innerHTML='<div class="ops-note">Ticket storage is not yet configured. You can contact NakNak support by email instead.</div>';}
+  }
+  async function opsSubmitSupport(event){
+    event.preventDefault();
+    const subject=$('ops-support-subject').value.trim(),message=$('ops-support-message').value.trim();
+    const result=$('ops-support-result');result.textContent='';
+    if(subject.length<5||subject.length>120||message.length<10||message.length>2000){
+      result.textContent='Enter a subject (5–120 characters) and message (10–2000 characters).';return;
+    }
+    if(!state.client||!state.session||!state.household){
+      result.textContent='Sign in on the hosted Family Dashboard before submitting a support request.';return;
+    }
+    const button=$('ops-support-form').querySelector('button[type="submit"]');button.disabled=true;
+    try{
+      const {error}=await state.client.from('naknak_support_requests').insert({
+        household_id:state.household.id,requester_id:state.session.user.id,subject,message,status:'open'
+      });
+      if(error)throw error;
+      result.textContent='Support request saved to the server. This is not an emergency response service.';
+      $('ops-support-form').reset();await opsLoadSupport();
+    }catch(_){
+      result.textContent='Ticket storage unavailable. No request was submitted.';
+      let anchor=$('ops-support-email');
+      if(!anchor){anchor=document.createElement('a');anchor.id='ops-support-email';anchor.className='btn';anchor.textContent='Prepare an email instead';result.after(anchor);}
+      anchor.href='mailto:naknak@gmail.com?subject='+encodeURIComponent('NakNak support: '+subject)+'&body='+encodeURIComponent(message.slice(0,1500));
+      anchor.hidden=false;
+    }finally{button.disabled=false;}
+  }
+
   function render(){
     if(!state.household)return;
     const mm=members(),chosen=activeMember();if(chosen)state.selected=chosen.id;
@@ -317,6 +472,7 @@ body{background:#140B09;color:#F8EEEA}
     $('medical-contacts').innerHTML=chosen?(cm.length?cm.slice(0,5).map(c=>miniDetailHTML(c.name||'Contact',`${c.relation||c.relationship||'Emergency contact'} · ${c.phone||c.number||'Phone not shared'}`)).join(''):empty('No contacts shared yet','Add emergency contacts in the app and allow them to sync.','phone')):empty('Select a member','There is no linked member data.');
     const mx=chosen?.medications&&Array.isArray(chosen.medications)?chosen.medications:[];
     $('medical-medications').innerHTML=chosen?(mx.length?mx.slice(0,5).map(x=>miniDetailHTML(x.name||'Medication',`${x.dose||'Dose not shared'} · ${typeof x.schedule==='string'?x.schedule:'Schedule not shared'}`)).join(''):empty('No medicines shared','Local medicine reminders may still exist on a phone.','pill')):empty('Select a member','There is no linked member data.');
+    opsRender();
     if(state.dataError)status('Sync error · Try again','caution');
   }
   function renderDetails(m){const missing=()=>empty('No member selected','Connect a phone and select a member first.');if(!m){for(const id of ['member-details','meds-body','contacts-body','medical-body','prep-body'])$(id).innerHTML=missing();return}const name=m.nickname||m.name||'Family member';const st=memberState(m);$('member-details').innerHTML=`<div class="details-grid"><div class="detail"><label>Name</label><strong>${safe(m.name||'—')}</strong></div><div class="detail"><label>Last check-in</label><strong>${safe(dtime(m.lastCheckin))}</strong></div><div class="detail"><label>Record status</label><strong>${safe(st.label)}</strong></div><div class="detail"><label>Medications in record</label><strong>${Array.isArray(m.medications)?m.medications.length:0}</strong></div></div><p class="note" style="margin-top:15px">Status is based on synced app records, not a live medical or location assessment.</p>`;
@@ -327,6 +483,11 @@ body{background:#140B09;color:#F8EEEA}
   }
   function initEvents(){document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.view)));document.addEventListener('click',e=>{let g=e.target.closest('[data-go]');if(g){navigate(g.dataset.go)}let m=e.target.closest('[data-member]');if(m){state.selected=m.dataset.member;render();}});for(const id of ['top-member-select','medical-member-select']){$(id).addEventListener('change',e=>{const selected=members().find(m=>String(m.id)===String(e.target.value));if(selected){state.selected=selected.id;render();}})};$('hamb').addEventListener('click',()=>{let open=$('sidebar').classList.toggle('open');$('shade').classList.toggle('show',open);$('hamb').setAttribute('aria-expanded',String(open))});$('shade').addEventListener('click',closeMenu);document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});$('refresh').addEventListener('click',refresh);$('activity-refresh').addEventListener('click',refresh);$('signout').addEventListener('click',signout);$('create-signout').addEventListener('click',signout);
   $('copy-code').addEventListener('click',async()=>{try{if(!navigator.clipboard)throw Error('Clipboard unavailable');await navigator.clipboard.writeText(state.household?.pair_code||'');$('copy-feedback').textContent='Pairing code copied. Keep it private.';}catch(e){$('copy-feedback').textContent='Copy is not available here. Select and enter the code manually.';}});
+  $('ops-run-check').addEventListener('click',opsRunConnection);
+  $('ops-prep-items').addEventListener('change',e=>{const box=e.target.closest('input[data-prep]');if(box)opsTogglePrep(box.dataset.prep,box.checked);});
+  $('ops-support-form').addEventListener('submit',opsSubmitSupport);
+  window.addEventListener('online',()=>opsText('ops-network','Browser reports online'));
+  window.addEventListener('offline',()=>opsText('ops-network','Browser reports offline'));
   $('sign-in-form').addEventListener('submit',async e=>{e.preventDefault();visibleError('auth-error','');$('auth-sent').textContent='';const email=$('email').value.trim();if(!email||!$('email').checkValidity()){visibleError('auth-error','Please enter a valid email address.');return}let b=$('send-link');b.disabled=true;try{const redirect=new URL('family-dashboard.html',location.href).href;const {error}=await state.client.auth.signInWithOtp({email,options:{emailRedirectTo:redirect}});if(error)throw error;$('auth-sent').textContent='Check your inbox for a secure sign-in link. You can safely close this tab.';}catch(err){visibleError('auth-error',err.message||'Unable to send email. Try again.')}finally{b.disabled=false}});
   $('create-form').addEventListener('submit',async e=>{e.preventDefault();visibleError('create-error','');let name=$('first-name').value.trim().slice(0,60);if(!name){visibleError('create-error','Enter a name or nickname to get started.');return}const b=$('create-btn');b.disabled=true;try{const {data,error}=await state.client.rpc('create_household',{p_senior_name:name});if(error)throw error;const row=Array.isArray(data)?data[0]:data;if(!row?.household_id)throw Error('Household was not created. Please try again.');await resolve()}catch(err){visibleError('create-error',err.message||'Could not create Family Space.')}finally{b.disabled=false}});
   }
