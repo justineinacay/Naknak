@@ -142,3 +142,40 @@ jobs:
       - name: Verify web safety build
         if: steps.scope.outputs.web_safety == 'true'
         run: node scripts/verify-web.mjs
+
+
+  invitation-db-test:
+    name: Caregiver invitation authorization tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: naknak_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d naknak_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client
+          fi
+      - name: Test one-use and cross-household authorization
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: naknak_ci
+        run: psql -v ON_ERROR_STOP=1 -f scripts/test-caregiver-invitations.sql
