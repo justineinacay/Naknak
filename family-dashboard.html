@@ -757,7 +757,7 @@ body{background:#140B09;color:#F8EEEA}
       opsText('ops-invite-create-message','Invitation was not confirmed. No token is available; verify the secured database migration.');
       $('ops-issued-invite').hidden=true;
       await opsLoadInvites();
-    }finally{btn.disabled=state.membershipRole!=='owner';}
+    }finally{/* opsLoadInvites controls the button state after server validation. */}
   }
 
   async function opsAcceptInvite(event,fieldId,messageId){
