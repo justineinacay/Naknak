@@ -78,9 +78,9 @@ const checks = [
   ['dashboard describes native status sync without implying push alerts', dashboard.includes('Confirmed Ayos Ako and SOS dashboard status') && dashboard.includes('Remote push, SMS, and automatic calling are not active.')],
   ['native reset cancels saved medication reminders', nativeContext.includes('cancelMedicationReminders(notificationIds)')],
   ['native reminder scheduling rolls back partial work', nativeNotifications.includes('await cancelMedicationReminders(notificationIds)')],
-  ['website CTAs have real destinations', !/(?:Download the App|Get Started Free|Choose Essential|Choose Family)[\s\S]{0,80}href=["']#["']/.test(landing) && landing.includes('href="app.html"')],
+  ['website CTAs have real destinations', !/(?:Download the App|Get Started Free|Choose Essential|Choose Family)[\s\S]{0,80}href=["']#["']/.test(landing) && /href=["'](?:https:\/\/justineinacay\.github\.io\/Naknak\/)?(?:app|naknak-app)\.html["']/.test(landing) && landing.includes('href="family-dashboard.html"')],
   ['dashboard has no unconfigured domain or social links', !dashboard.includes('naknak.io') && dashboard.includes('mailto:naknak@gmail.com')],
-  ['website states unavailable safety capabilities honestly', landing.includes('Remote caregiver push notifications are not implemented yet.') && landing.includes('Automatic location sharing and fall detection are not active features.')],
+  ['website states unavailable safety capabilities honestly', landing.includes('Remote caregiver push notifications, automatic location sharing, and fall detection are not active current capabilities.') && landing.includes('do not automatically call emergency services') && landing.includes('Paid subscriptions and the full Family feature set are not active.')],
   ['external blank links are isolated', unsafeBlankAnchors.length === 0],
   ['HTML referrer fallback is present', [app, dashboard, landing].every((html) => html.includes('name="referrer"') && html.includes('strict-origin-when-cross-origin'))],
 ];

@@ -67,6 +67,53 @@ body{background:#140B09;color:#F8EEEA}
 .local-preview-notice{margin:0 0 24px;padding:15px 19px;border:1px solid #e4a38b;border-left:5px solid var(--red);background:#fff2e9;border-radius:14px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;color:#57261f}
 .local-preview-notice[hidden]{display:none!important}.local-preview-notice strong{font-weight:900}.local-preview-notice span{flex:1;min-width:220px;font-size:13px}.local-preview-notice a{color:var(--red-d);font-weight:900;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:650px){.local-preview-notice{display:block}.local-preview-notice span{display:block;margin:7px 0 10px}}
+
+/* NakNak household operations • P0–P2, 2026 */
+.ops-intro{max-width:750px;line-height:1.65;color:var(--muted);margin:0 0 20px}
+.ops-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0}
+.ops-card{border:1px solid rgba(122,16,8,.12);background:var(--surface,#fff);border-radius:20px;padding:22px;min-width:0}
+.ops-card h2{font-size:18px;margin:0 0 8px}.ops-card p{font-size:13px;line-height:1.6;color:var(--muted);margin:3px 0 12px}
+.ops-pill{font-size:11px;font-weight:850;display:inline-flex;align-items:center;gap:6px;border-radius:30px;padding:6px 10px;background:#fff1ea;color:#823022}
+.ops-pill.ok{background:#e6f7ea;color:#12633d}.ops-pill.warn{background:#fff0d5;color:#8c4a04}
+.ops-pill.neutral{background:#efeae5;color:#4f463c}
+.ops-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid rgba(122,16,8,.09)}
+.ops-item:last-child{border-bottom:0}.ops-item strong{font-size:14px}.ops-item span{font-size:12px;color:var(--muted)}
+.ops-actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.ops-copy{color:var(--muted);line-height:1.6;font-size:13px}
+.ops-status{font-size:13px;min-height:24px;margin:8px 0;font-weight:750}
+.ops-status[role="alert"]{color:#992118}
+.ops-check-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.ops-check{display:flex;align-items:center;gap:11px;border:1px solid rgba(122,16,8,.14);background:rgba(255,255,255,.7);border-radius:13px;padding:14px;cursor:pointer;min-height:56px;font-weight:700;font-size:13px}
+.ops-check input{width:19px;height:19px;accent-color:#C4301E;flex:0 0 auto}
+.ops-check:has(input:checked){border-color:#b0dab7;background:#f1fbf0}
+.ops-check input:disabled{cursor:wait}
+.ops-note{padding:13px 16px;background:#fff4eb;border-radius:14px;color:#643423;line-height:1.55;font-size:13px;margin:14px 0}
+.ops-note strong{font-weight:850}
+.ops-field{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:750;margin:13px 0}
+.ops-field input,.ops-field textarea{width:100%;border:1px solid #dac8bb;background:#fff;color:#33231f;border-radius:12px;padding:13px;min-height:47px;font:inherit}
+.ops-field textarea{min-height:120px;resize:vertical}
+.ops-progress{height:9px;background:#eaded6;border-radius:20px;overflow:hidden;margin:15px 0}
+.ops-progress > div{height:100%;width:0;background:#C4301E;transition:width .3s}
+.ops-timeline{border-left:2px solid #ebd1c8;margin:16px 0 0 12px;padding-left:20px}
+.ops-timeline>div{margin:0 0 16px;position:relative}
+.ops-timeline>div:before{content:"";position:absolute;width:10px;height:10px;left:-26px;top:3px;background:#C4301E;border-radius:50%}
+.ops-timeline strong{display:block;font-size:13px}.ops-timeline p{font-size:12px;margin:4px 0;color:var(--muted)}
+@media(max-width:760px){.ops-grid{grid-template-columns:1fr}.ops-check-list{grid-template-columns:1fr}.ops-card{padding:17px}}
+@media(prefers-reduced-motion:reduce){.ops-progress>div{transition:none}}
+
+
+/* P0 reliability and P1 one-time caregiver invitations */
+.ops-sync-warning{margin:14px 0 20px;padding:14px 17px;border:1px solid #d8a072;background:#fff2e4;border-radius:14px;color:#6f340d;font-size:13px;line-height:1.5;font-weight:800}
+.ops-sync-warning[hidden]{display:none}
+.ops-sync-warning.danger{border-color:#d18880;background:#fff0ef;color:#811d19}
+.ops-invite-token{background:#fff;border:1px dashed #c17a5c;padding:14px 12px;overflow-wrap:anywhere;border-radius:12px;font-size:13px;letter-spacing:.04em;font-weight:800;color:#792d19}
+.ops-form-line{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.ops-form-line .ops-field{flex:1 1 200px;min-width:0}
+.ops-form-line button{min-height:46px}
+.ops-access-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:16px}
+.ops-join-help{font-size:12px;color:var(--muted);line-height:1.55}
+@media(max-width:760px){.ops-access-layout{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -106,7 +153,19 @@ body{background:#140B09;color:#F8EEEA}
     </div>
     <div id="household-create" class="hidden"><div class="eyebrow">GET STARTED</div><h2>Create your Family Space.</h2><p class="lede">Choose a first member name, then connect the NakNak app using your pairing code.</p>
       <form id="create-form"><div class="form-field"><label for="first-name">First member's name or nickname</label><input id="first-name" maxlength="60" placeholder="e.g. Nanay, Tatay, Alex" required></div><button id="create-btn" class="btn primary" type="submit">Create Family Space <svg><use href="#ic-arrow"/></svg></button></form>
-      <p id="create-error" class="form-error" role="alert"></p><button class="btn small" id="create-signout" type="button" style="margin-top:20px">Sign out</button>
+      
+      <div class="ops-card" style="margin-top:20px">
+        <h2>Already invited to a Family Space?</h2>
+        <p class="ops-copy">Sign in first, then enter the one-time caregiver invitation token supplied by the household owner. This is different from a phone pairing code.</p>
+        <form id="ops-auth-join-form" autocomplete="off">
+          <label class="ops-field">Caregiver invitation token
+            <input id="ops-auth-invite-token" type="text" maxlength="48" minlength="48" pattern="[a-fA-F0-9]{48}" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="48-character invitation token" required>
+          </label>
+          <button class="btn" type="submit">Join Family Space</button>
+        </form>
+        <p class="ops-status" id="ops-auth-join-message" role="status" aria-live="polite"></p>
+      </div>
+<p id="create-error" class="form-error" role="alert"></p><button class="btn small" id="create-signout" type="button" style="margin-top:20px">Sign out</button>
     </div>
     <a class="auth-back" href="index.html">Back to NakNak website</a>
   </div></div>
@@ -121,6 +180,11 @@ body{background:#140B09;color:#F8EEEA}
   <button data-view="medical" type="button"><svg><use href="#ic-id"/></svg> Medical ID</button>
   <button data-view="preparedness" type="button"><svg><use href="#ic-folder"/></svg> Vault &amp; Prep</button>
   <button data-view="pairing" type="button"><svg><use href="#ic-link"/></svg> Pair a device</button>
+  <button data-view="connection" type="button"><svg><use href="#ic-link"/></svg> Connection Center</button>
+  <button data-view="carehub" type="button"><svg><use href="#ic-heart"/></svg> Daily Care Hub</button>
+  <button data-view="access" type="button"><svg><use href="#ic-users"/></svg> Family Access</button>
+  <button data-view="sharedprep" type="button"><svg><use href="#ic-check"/></svg> Shared Prep</button>
+  <button data-view="helpdesk" type="button"><svg><use href="#ic-shield"/></svg> Support &amp; Launch</button>
   <button data-view="settings" type="button"><svg><use href="#ic-settings"/></svg> Settings &amp; plan</button>
   </nav></div>
   <div class="sidebar-bottom"><strong>Safety information, not emergency dispatch.</strong><p style="font-size:12px;margin:10px 0;color:#cbaa9f">SOS-opened status does not confirm a call, SMS, or responder dispatch.</p><a href="https://justineinacay.github.io/Naknak/app.html">Open NakNak app ↗</a><a href="https://justineinacay.github.io/Naknak/dashboard.html">Advanced management ↗</a><a href="index.html">Back to website ↗</a></div>
@@ -129,7 +193,7 @@ body{background:#140B09;color:#F8EEEA}
   <div class="main"><header class="topbar"><div class="topbar-left"><button class="hamb" id="hamb" type="button" aria-label="Open dashboard menu" aria-expanded="false"><svg><use href="#ic-menu"/></svg></button><div><div class="topbar-title">Family Dashboard <span class="topbar-crumb">/ <span id="current-section-label">Overview</span></span></div><div class="topbar-sub" id="top-household">Your private household</div></div></div><div class="topbar-actions"><label class="mini-select-wrap" for="top-member-select">Member <select id="top-member-select" aria-label="Choose active member"><option value="">No members yet</option></select></label><span class="tag neutral" id="sync-label"><span class="dot"></span> Loading</span><button id="refresh" class="btn small" type="button"><svg><use href="#ic-refresh"/></svg> Refresh</button><a class="btn primary small" href="https://justineinacay.github.io/Naknak/app.html">Open App <svg><use href="#ic-arrow"/></svg></a></div></header>
   <main class="main-content">
 <div id="local-preview-notice" class="local-preview-notice" hidden role="status"><strong>Local design preview — no household data</strong><span>Sign-in, pairing, and live synchronization require publishing these pages over HTTPS. This preview does not show real family information or send alerts.</span><a href="https://justineinacay.github.io/Naknak/">Existing NakNak site ↗</a></div>
-    <section id="view-overview" class="section-view active">
+    <section id="view-overview" class="section-view active"><div id="ops-overview-warning" class="ops-sync-warning" role="status" aria-live="polite" hidden></div>
   <div class="family-hero">
     <div class="family-hero-content">
       <div class="hero-overline"><span class="pulse-dot"></span> NAKNAK FAMILY SPACE <span class="hero-overline-end">CARE THAT NEVER SLEEPS</span></div>
@@ -178,7 +242,91 @@ body{background:#140B09;color:#F8EEEA}
 </section>
 <section id="view-preparedness" class="section-view"><div class="header-flex"><div><div class="eyebrow">VAULT &amp; PREP</div><h1>Household preparedness</h1><p>These app areas may store sensitive files and checklists locally. This dashboard never assumes on-device documents are already shared.</p></div><a href="https://justineinacay.github.io/Naknak/app.html" class="btn primary">Open NakNak app <svg><use href="#ic-arrow"/></svg></a></div><div class="feature-grid grid"><div class="feature-card"><div class="feature-title"><svg><use href="#ic-folder"/></svg> Document vault</div><span class="tag neutral">Device-first</span><p>Files such as IDs and documents may exist on the member's device without being uploaded. For safety, the website does not attempt to access them or expose private file URLs.</p></div><div class="feature-card"><div class="feature-title"><svg><use href="#ic-check"/></svg> Go-bag preparation</div><span class="tag neutral">Sync varies</span><p>Use Prep in the app for your supplies checklist. Device-only progress may not be available here.</p></div><div class="feature-card"><div class="feature-title"><svg><use href="#ic-shield"/></svg> Emergency readiness</div><span class="tag neutral">Always review</span><p>Confirm contacts and emergency supplies regularly. NakNak supports preparedness but does not replace local emergency services.</p></div></div><div style="margin-top:20px" class="panel"><div class="panel-header"><h2>Synced preparation summary</h2></div><div id="prep-body"></div></div></section>
     <section id="view-pairing" class="section-view"><div class="header-flex"><div><div class="eyebrow">DEVICE CONNECTION</div><h1>Connect your NakNak phone.</h1><p>Your Family Space pairs with the mobile/web app using a code. Pairing and synchronization require an internet connection.</p></div><a class="btn primary" href="https://justineinacay.github.io/Naknak/app.html">Open NakNak app <svg><use href="#ic-arrow"/></svg></a></div><div class="pair-box"><div><div class="eyebrow" style="color:#ffd2c5">FAMILY PAIRING CODE</div><div id="pair-code" class="pair-code">—</div><p>Enter this code in the app's Family Code / Connect screen. Keep it private and avoid sharing screenshots containing it.</p></div><button type="button" class="btn outline" id="copy-code"><svg><use href="#ic-copy"/></svg> Copy code</button></div><div style="margin-top:20px" class="panel"><div class="panel-header"><h2>Connect in three steps</h2></div><div class="list-row"><strong>01 &nbsp; Open the NakNak app</strong><span class="muted">Use your existing phone or web beta</span></div><div class="list-row"><strong>02 &nbsp; Find Family Code pairing</strong><span class="muted">Enter the code shown above</span></div><div class="list-row"><strong>03 &nbsp; Return to Family Dashboard</strong><span class="muted">Use Refresh to confirm synced household activity</span></div><p class="note" style="margin-top:16px">A pairing code is sensitive and may be single-use or time-limited. If it no longer works, use the existing account support and pairing process; don't post it publicly.</p><p id="copy-feedback" class="form-help" aria-live="polite"></p></div></section>
-    <section id="view-settings" class="section-view"><div class="header-flex"><div><div class="eyebrow">ACCOUNT &amp; PLANS</div><h1>Family settings</h1><p>Manage your signed-in session and review NakNak's current subscription offering.</p></div></div><div class="plan-card"><div><div class="eyebrow">NAKNAK FAMILY PLANS</div><strong>Free ₱0 <span style="color:var(--muted);font-size:17px">/ Family ₱199 monthly</span></strong><p class="muted">Family annual: ₱1,990. Paid plan activation and billing are not active on this dashboard.</p></div><a href="index.html#pricing" class="btn soft">Compare plans</a></div><div class="panel" style="margin-top:17px"><div class="panel-header"><h2>Account</h2></div><div class="details-grid"><div class="detail"><label>Signed-in email</label><strong id="settings-email">—</strong></div><div class="detail"><label>Connected household</label><strong id="settings-household">—</strong></div></div><div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap"><button id="signout" type="button" class="btn">Sign out</button><a href="https://justineinacay.github.io/Naknak/dashboard.html" class="btn">Advanced dashboard</a><a href="privacy.html" class="btn">Privacy information</a><a href="support.html" class="btn">Support</a></div></div></section>
+
+    <!-- P0: supported connection checks, never a proof of physical safety -->
+    <section id="view-connection" class="section-view">
+      <div class="header-flex"><div><div class="eyebrow">P0 • CONNECTIVITY &amp; RELIABILITY</div><h1>Connection Center</h1><p>Know what actually reached the NakNak server. Device silence is never proof that a person is safe.</p></div><button class="btn primary" type="button" id="ops-run-check">Run connection check</button></div>
+      <div class="ops-grid">
+        <div class="ops-card"><h2>Connectivity</h2><div class="ops-item"><strong>Browser network</strong><span id="ops-network">Checking…</span></div><div class="ops-item"><strong>Signed-in session</strong><span id="ops-auth">Checking…</span></div><div class="ops-item"><strong>Household record</strong><span id="ops-record">Checking…</span></div><div class="ops-item"><strong>Last successful server read</strong><span id="ops-last-fetch">Not confirmed</span></div><div class="ops-item"><strong>Last household record change</strong><span id="ops-last">—</span></div></div>
+        <div class="ops-card"><h2>Connected phone records</h2><p id="ops-devices">Checking authorized device records is available on the hosted dashboard.</p><div id="ops-device-list"></div><div class="ops-note">A recent server timestamp confirms only a recorded request. It does not confirm that a caregiver received an alert, that the phone has battery power, or that someone is physically safe.</div></div>
+      </div><p id="ops-check-result" class="ops-status" aria-live="polite">Use Run connection check to verify accessible server records.</p>
+      <div class="ops-grid"><div class="ops-card"><h2>Connect your household in four steps</h2><div class="ops-timeline"><div><strong>1. Create your Family Space</strong><p>Sign in with your email and confirm the household profile.</p></div><div><strong>2. Connect a NakNak phone</strong><p>Use the private Family Code in the app’s pairing screen.</p></div><div><strong>3. Send a test Ayos Ako</strong><p>From the paired phone, send a check-in and wait for server confirmation.</p></div><div><strong>4. Confirm the event here</strong><p>Refresh Check-ins &amp; SOS and match the member and timestamp.</p></div></div><button class="btn" data-go="pairing" type="button">View pairing code</button>
+        <div class="ops-note" style="margin-top:16px"><strong>Confirm with a real phone:</strong> Start a verification window, send Ayos Ako from the paired NakNak app, and refresh the server record. This does not test push notification delivery.</div>
+        <label class="ops-field" style="max-width:370px">Choose the member you are testing
+          <select id="ops-test-member" aria-label="Member to verify" style="width:100%;min-height:46px;padding:10px;border-radius:12px;border:1px solid #decabf">
+            <option value="">No linked members yet</option>
+          </select>
+        </label>
+        <div class="ops-actions">
+          <button class="btn primary" id="ops-test-start" type="button">Start Ayos Ako test</button>
+          <button class="btn" id="ops-test-verify" type="button" disabled>Verify check-in on server</button>
+        </div>
+        <p class="ops-status" id="ops-test-result" role="status" aria-live="polite">No device test started.</p>
+      </div>
+      <div class="ops-card"><h2>Safety capability boundaries</h2><div class="ops-item"><strong>Ayos Ako &amp; SOS-opened records</strong><span>Supported, confirm on server</span></div><div class="ops-item"><strong>Remote caregiver push / SMS</strong><span>Not active</span></div><div class="ops-item"><strong>Automatic emergency calling</strong><span>Not active</span></div><div class="ops-item"><strong>Location sharing / fall detection</strong><span>Not active</span></div><div class="ops-note">For an emergency, use an appropriate emergency service or call a contact directly. This page is not an emergency dispatch service.</div></div></div>
+    </section>
+    <!-- P1: read-only records until a verified broader device sync is released -->
+    <section id="view-carehub" class="section-view"><div id="ops-care-warning" class="ops-sync-warning" role="status" aria-live="polite" hidden></div>
+      <div class="header-flex"><div><div class="eyebrow">P1 • EVERYDAY CARE</div><h1>Daily Care Hub</h1><p>See check-ins, recorded medicines, and household activity together without suggesting that a missing record means a missed dose.</p></div><button class="btn" data-go="activity" type="button">Full activity</button></div>
+      <div class="ops-grid"><div class="ops-card"><h2>Family check-ins</h2><div id="ops-care-members"></div></div><div class="ops-card"><h2>Medication information</h2><p>Only schedules present in the connected record appear; native reminders remain on the phone.</p><div id="ops-care-meds"></div></div></div>
+      <div class="ops-card"><h2>Seven-day activity summary</h2><p>Count of events actually recorded in the connected household over the past seven days.</p><div id="ops-weekly-summary"></div></div><div class="ops-card" style="margin-top:16px"><h2>Recent recorded activity</h2><div id="ops-care-events"></div></div><div class="ops-note">No automatic medication adherence scoring, emergency escalation, or remote notifications are implied by this view.</div>
+    </section>
+    <!-- P1: existing authenticated household roles are visible; invitations need backend tests -->
+    <section id="view-access" class="section-view">
+      <div class="header-flex"><div><div class="eyebrow">P1 • ACCESS &amp; PRIVACY</div><h1>Family Access</h1><p>Household membership is controlled by your signed-in account and database security policies.</p></div></div>
+      <div class="ops-access-layout">
+        <div class="ops-card"><h2>Your access</h2>
+          <div class="ops-item"><strong>Email account</strong><span id="ops-access-email">—</span></div>
+          <div class="ops-item"><strong>Household membership</strong><span id="ops-access-membership">Checking…</span></div>
+          <div class="ops-item"><strong>Role</strong><span id="ops-access-role">—</span></div>
+          <label class="ops-field">Current Family Space
+            <select id="ops-household-switch" aria-label="Switch Family Space" style="width:100%;min-height:46px;padding:8px;border:1px solid #decabf;border-radius:12px"></select>
+          </label><p class="ops-join-help">You can access only households to which your signed-in account belongs. Switching does not merge household records.</p>
+        </div>
+        <div class="ops-card"><h2>Invite a caregiver</h2>
+          <span class="ops-pill warn" id="ops-invite-mode">Checking owner permissions…</span>
+          <p>Only a household owner can issue a one-time caregiver invitation. Tokens expire after 24 hours and can be used once. Share privately with the invited caregiver, not publicly.</p>
+          <button class="btn primary" id="ops-create-invite" type="button" disabled>Create one-time invitation</button>
+          <p id="ops-invite-create-message" class="ops-status" role="status" aria-live="polite"></p>
+          <div id="ops-issued-invite" hidden>
+            <div class="ops-invite-token" id="ops-invite-token-value"></div>
+            <div class="ops-actions"><button type="button" class="btn" id="ops-copy-invite">Copy token</button></div>
+            <p class="ops-copy" id="ops-invite-expiry"></p>
+          </div>
+          <h3 style="font-size:14px;margin:18px 0 8px">Recent invitations</h3>
+          <div id="ops-invite-list"><p class="ops-copy">Available to household owners after server validation.</p></div>
+        </div>
+      </div>
+      <div class="ops-card"><h2>Join another Family Space</h2>
+        <p>Have an invitation from a household owner? Enter its token while signed in. Never use a phone pairing code here.</p>
+        <form id="ops-join-form" class="ops-form-line" autocomplete="off">
+          <label class="ops-field">One-time invitation token
+            <input id="ops-join-token" type="text" maxlength="48" minlength="48" pattern="[a-fA-F0-9]{48}" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="48-character invitation token" required>
+          </label>
+          <button class="btn" type="submit">Join household</button>
+        </form>
+        <p class="ops-status" id="ops-join-result" role="status" aria-live="polite"></p>
+        <div class="ops-note">Household owner controls who can issue invitations. Role changes and invitations are separate from NakNak's emergency phone pairing.</div>
+      </div>
+    </section>
+    <!-- P2: household-shared checklist only after RLS migration succeeds; draft fallback explicit -->
+    <section id="view-sharedprep" class="section-view">
+      <div class="header-flex"><div><div class="eyebrow">P2 • HOUSEHOLD READINESS</div><h1>Preparedness checklist</h1><p>Review a practical go-bag checklist. Shared progress is available only after the secured database table has been configured.</p></div></div>
+      <div class="ops-card"><div class="ops-item"><strong id="ops-prep-mode">Checking checklist storage…</strong><span id="ops-prep-count">0 of 8 checked</span></div><div class="ops-progress"><div id="ops-prep-progress"></div></div><div id="ops-prep-items" class="ops-check-list"></div><p id="ops-prep-message" class="ops-status" aria-live="polite"></p><div class="ops-note">This is a planning list, not proof that supplies are physically present. Vault and medical IDs are not transferred or displayed here.</div></div>
+    </section>
+    <!-- P2: request tickets use RLS when available, otherwise a transparent email fallback -->
+    <section id="view-helpdesk" class="section-view">
+      <div class="header-flex"><div><div class="eyebrow">P2 • SUPPORT &amp; RELEASE</div><h1>NakNak Support Center</h1><p>Report account and technical concerns. This is not an emergency help channel.</p></div><a class="btn" href="support.html">Support information</a></div>
+      <div class="ops-grid"><div class="ops-card"><h2>Contact support</h2><form id="ops-support-form"><label class="ops-field">Subject<input id="ops-support-subject" maxlength="120" minlength="5" required placeholder="Example: Family Code will not pair"></label><label class="ops-field">How can we help?<textarea id="ops-support-message" maxlength="2000" minlength="10" required placeholder="Explain the problem without sending sensitive medical records or device secrets."></textarea></label><button class="btn primary" type="submit">Submit support request</button><p id="ops-support-result" class="ops-status" aria-live="polite"></p></form></div><div class="ops-card"><h2>My support requests</h2><div id="ops-support-history"><p class="ops-copy">Load the hosted dashboard to view requests.</p></div></div></div>
+      <div class="ops-card"><h2>Release requirements</h2><p>Store publication and subscriptions remain gated by real integration tests and provider approval.</p><div class="ops-item"><strong>Device pairing &amp; SOS-opened two-device test</strong><span>Needs physical test</span></div><div class="ops-item"><strong>Medication reminders on iOS/Android</strong><span>Needs physical test</span></div><div class="ops-item"><strong>Billing &amp; webhook activation</strong><span>Not verified</span></div><div class="ops-item"><strong>Privacy, store assets, and approval</strong><span>Before public release</span></div><a class="btn" href="index.html#pricing">View planned Family pricing</a></div>
+    </section>
+
+    <section id="view-settings" class="section-view"><div class="header-flex"><div><div class="eyebrow">ACCOUNT &amp; PLANS</div><h1>Family settings</h1><p>Manage your signed-in session and review NakNak's current subscription offering.</p></div></div><div class="plan-card"><div><div class="eyebrow">NAKNAK FAMILY PLANS</div><strong>Free ₱0 <span style="color:var(--muted);font-size:17px">/ Family ₱199 monthly</span></strong><p class="muted">Family annual: ₱1,990. These are proposed prices; monthly billing, renewals, and cancellation handling have not been verified.</p>
+      <p class="ops-copy" style="margin-top:7px">Server-reported household plan: <strong id="ops-current-plan">Unknown · Sign in to confirm</strong></p>
+      <p class="ops-copy">A one-time payment is not a recurring subscription. Do not pay until the complete billing lifecycle is ready.</p>
+      <div class="ops-item"><strong>Verified recurring subscription</strong><span id="ops-billing-status">Not checked</span></div>
+      <div class="ops-item"><strong>Current period end</strong><span id="ops-billing-end">Not confirmed</span></div>
+      <p class="ops-status" id="ops-billing-message" aria-live="polite">The secure subscription read model has not been verified in production.</p></div><a href="index.html#pricing" class="btn soft">Compare plans</a></div><div class="panel" style="margin-top:17px"><div class="panel-header"><h2>Account</h2></div><div class="details-grid"><div class="detail"><label>Signed-in email</label><strong id="settings-email">—</strong></div><div class="detail"><label>Connected household</label><strong id="settings-household">—</strong></div></div><div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap"><button id="signout" type="button" class="btn">Sign out</button><a href="https://justineinacay.github.io/Naknak/dashboard.html" class="btn">Advanced dashboard</a><a href="privacy.html" class="btn">Privacy information</a><a href="support.html" class="btn">Support</a></div></div></section>
     <div class="footer-note">NakNak is a household support tool. A failed or delayed sync does not establish anyone's safety. For urgent emergencies, contact appropriate local emergency services directly. <a href="privacy.html">Privacy</a> · <a href="https://justineinacay.github.io/Naknak/dashboard.html">Advanced management</a> · <a href="index.html">Website</a> · <a href="https://justineinacay.github.io/Naknak/app.html">App</a></div>
   </main></div>
 </div>
@@ -187,7 +335,7 @@ body{background:#140B09;color:#F8EEEA}
   const SUPA_URL = 'https://louqshzgqutxydfqgnyz.supabase.co';
   const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvdXFzaHpncXV0eHlkZnFnbnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMTUsImV4cCI6MjA5ODYwNDMxNX0.tvgCedmaK9OxRqeW1piNNRr4KXT0XFFF5EuJ3692vgU';
   const $ = id => document.getElementById(id);
-  const state = { client:null, session:null, household:null, value:null, rev:0, selected:null, currentView:'overview', channel:null, timer:null, booting:true, dataError:'', refreshing:false, lastRemoteAt:null };
+  const state = { client:null, session:null, household:null, value:null, rev:0, selected:null, currentView:'overview', channel:null, timer:null, booting:true, dataError:'', refreshing:false, lastRemoteAt:null, lastFetchedAt:null, realtimeStatus:'unknown', households:[], membershipRole:null, billingDisplay:null };
   const safe = val => String(val ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const icon = n => `<svg aria-hidden="true"><use href="#ic-${n}"></use></svg>`;
   const dtime = date => {if(!date)return 'Not recorded';const d=new Date(date);if(!Number.isFinite(d.getTime()))return 'Not recorded';return d.toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'});};
@@ -199,12 +347,111 @@ body{background:#140B09;color:#F8EEEA}
   const visibleError=(id,message)=>{$(id).textContent=message||'';};
   const status=(text,color='neutral')=>{$('sync-label').className='tag '+color;$('sync-label').innerHTML=`<span class="dot"></span> ${safe(text)}`;};
   const show = section => { ['loading','auth','shell'].forEach(id=>$(id).classList.toggle('hidden',id!==section)); };
-  const signout = async () => {clearInterval(state.timer);if(state.channel&&state.client){await state.client.removeChannel(state.channel)}state.channel=null;state.value=null;state.household=null;state.rev=0;state.lastRemoteAt=null;await state.client.auth.signOut();state.session=null;show('auth');$('sign-in').classList.remove('hidden');$('household-create').classList.add('hidden');};
+  const signout = async () => {try{sessionStorage.removeItem('naknak_active_household')}catch(_){}const invite=$('ops-invite-token-value');if(invite)invite.textContent='';const issued=$('ops-issued-invite');if(issued)issued.hidden=true;clearInterval(state.timer);if(state.channel&&state.client){await state.client.removeChannel(state.channel)}state.channel=null;state.value=null;state.household=null;state.rev=0;state.lastRemoteAt=null;await state.client.auth.signOut();state.session=null;show('auth');$('sign-in').classList.remove('hidden');$('household-create').classList.add('hidden');};
   const closeMenu = () => {$('sidebar').classList.remove('open');$('shade').classList.remove('show');$('hamb').setAttribute('aria-expanded','false')};
-  function navigate(view){if(!$(`view-${view}`))view='overview';state.currentView=view;const navButton=document.querySelector(`[data-view="${view}"]`);const lbl=$('current-section-label');if(lbl)lbl.textContent=navButton?navButton.textContent.trim():'Overview';document.querySelectorAll('.section-view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));document.querySelectorAll('[data-view]').forEach(b=>{let active=b.dataset.view===view;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});closeMenu();window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});try{history.replaceState({},'',location.pathname+location.search+'#'+view);}catch(_){/* Embedded design previews can have an opaque origin. */}}
-  async function resolve(){const {data:memberships,error:memError}=await state.client.from('naknak_household_members').select('household_id').eq('auth_uid',state.session.user.id).limit(1).maybeSingle();if(memError)throw memError;if(!memberships){$('sign-in').classList.add('hidden');$('household-create').classList.remove('hidden');show('auth');return;}const {data:household,error:hhError}=await state.client.from('naknak_households').select('id,pair_code').eq('id',memberships.household_id).maybeSingle();if(hhError)throw hhError;if(!household)throw Error('Household not found or you do not have permission to view it.');state.household=household;state.rev=0;state.value=null;state.selected=null;show('shell');$('settings-email').textContent=state.session.user.email||'—';$('settings-household').textContent=household.id||'—';$('pair-code').textContent=household.pair_code||'Unavailable';$('top-household').textContent='Connected Family Space';status('Connecting');const requested=decodeURIComponent((location.hash||'#overview').slice(1));navigate(requested);await refresh();listen();}
-  async function refresh(){if(!state.household||state.refreshing)return;state.refreshing=true;status('Checking updates');try{const {data,error}=await state.client.from('naknak_state').select('state,rev,updated_at').eq('household_id',state.household.id).maybeSingle();if(error)throw error;if(data){state.value=data.state||{};state.rev=Number(data.rev)||0;state.dataError='';state.lastRemoteAt=data.updated_at||null;status('Updated '+shortDate(data.updated_at),'ok')}else{state.value={seniors:[]};state.rev=0;state.lastRemoteAt=null;status('No app data yet','caution')}}catch(err){state.dataError=err.message||'Connection failed';status('Sync unavailable','caution');$('top-household').textContent='Could not refresh household data'}finally{state.refreshing=false;render();}}
-  function listen(){if(state.channel)state.client.removeChannel(state.channel);state.channel=state.client.channel('naknak-view-'+state.household.id).on('postgres_changes',{event:'*',schema:'public',table:'naknak_state',filter:'household_id=eq.'+state.household.id},payload=>{const record=payload.new;if(record && Number(record.rev||0)>=state.rev){state.value=record.state||{};state.rev=Number(record.rev||0);state.lastRemoteAt=record.updated_at||null;status('Synced update','ok');render()}}).subscribe();clearInterval(state.timer);state.timer=setInterval(()=>{if(!document.hidden)refresh()},20000)}
+  function navigate(view){
+    if(!$('view-'+view))view='overview';
+    state.currentView=view;
+    const navButton=document.querySelector('[data-view="'+view+'"]'),label=$('current-section-label');
+    if(label)label.textContent=navButton?navButton.textContent.trim():'Overview';
+    document.querySelectorAll('.section-view').forEach(el=>el.classList.toggle('active',el.id==='view-'+view));
+    document.querySelectorAll('[data-view]').forEach(btn=>{
+      const active=btn.dataset.view===view;
+      btn.classList.toggle('active',active);
+      if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');
+    });
+    closeMenu();
+    if(view==='helpdesk')opsLoadSupport();
+    if(view==='access')opsLoadInvites();
+    if(view==='settings')opsLoadBilling();
+    window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+    try{history.replaceState({},'',location.pathname+location.search+'#'+view)}
+    catch(_){/* Local file preview can have an opaque origin. */}
+  }
+  async function resolve(preferredHouseholdId=null){
+    if(!state.client||!state.session)throw Error('A signed-in account is required.');
+    const {data:membershipRows,error:memError}=await state.client.from('naknak_household_members')
+      .select('household_id,role,joined_at').eq('auth_uid',state.session.user.id).order('joined_at',{ascending:false});
+    if(memError)throw memError;
+    const rows=Array.isArray(membershipRows)?membershipRows:[];
+    state.households=rows;
+    if(!rows.length){
+      state.household=null;state.membershipRole=null;state.value=null;
+      $('sign-in').classList.add('hidden');$('household-create').classList.remove('hidden');show('auth');return;
+    }
+    let stored=null;
+    try{stored=sessionStorage.getItem('naknak_active_household')}catch(_){}
+    const membership=rows.find(m=>m.household_id===preferredHouseholdId)
+      ||rows.find(m=>m.household_id===stored)||rows[0];
+    const {data:household,error:hhError}=await state.client.from('naknak_households')
+      .select('id,pair_code').eq('id',membership.household_id).maybeSingle();
+    if(hhError)throw hhError;
+    if(!household)throw Error('Household not found or you do not have permission to view it.');
+    if(state.channel&&state.client){await state.client.removeChannel(state.channel);state.channel=null;}
+    clearInterval(state.timer);state.timer=null;
+    state.household=household;state.membershipRole=membership.role||'caregiver';
+    state.rev=0;state.value=null;state.selected=null;state.dataError='';state.lastRemoteAt=null;state.lastFetchedAt=null;state.billingDisplay=null;
+    opsCheckinTest.householdId=null;opsCheckinTest.memberId=null;opsCheckinTest.baseline=new Set();$('ops-test-verify').disabled=true;opsText('ops-test-result','No device test started.');
+    try{sessionStorage.setItem('naknak_active_household',household.id)}catch(_){}
+    const issued=$('ops-issued-invite');if(issued)issued.hidden=true;
+    const secret=$('ops-invite-token-value');if(secret)secret.textContent='';
+    show('shell');
+    $('settings-email').textContent=state.session.user.email||'—';
+    $('settings-household').textContent=household.id||'—';
+    $('pair-code').textContent=household.pair_code||'Unavailable';
+    $('top-household').textContent='Signed-in Family Space';
+    status('Checking connection');
+    let requested='overview';
+    try{requested=decodeURIComponent((location.hash||'#overview').slice(1))}catch(_){}
+    navigate(requested);
+    await refresh();
+    listen();
+  }
+  async function refresh(){
+    if(!state.household||state.refreshing||!state.client)return;
+    state.refreshing=true;status('Checking updates');
+    try{
+      const {data,error}=await state.client.from('naknak_state')
+        .select('state,rev,updated_at').eq('household_id',state.household.id).maybeSingle();
+      if(error)throw error;
+      state.lastFetchedAt=new Date().toISOString();
+      state.dataError='';
+      if(data){
+        state.value=data.state||{};state.rev=Number(data.rev)||0;
+        state.lastRemoteAt=data.updated_at||null;
+        status('Server read confirmed '+shortDate(state.lastFetchedAt),'ok');
+      }else{
+        state.value={seniors:[]};state.rev=0;state.lastRemoteAt=null;
+        status('No app data yet','caution');
+      }
+    }catch(err){
+      state.dataError=err.message||'Connection failed';
+      status('Sync unavailable','caution');
+      $('top-household').textContent='Could not refresh household data';
+      // Do not clear the last record: show an explicit out-of-date warning instead.
+    }finally{state.refreshing=false;render();}
+  }
+  function listen(){
+    if(state.channel)state.client.removeChannel(state.channel);
+    const channel=state.client.channel('naknak-view-'+state.household.id)
+      .on('postgres_changes',{event:'*',schema:'public',table:'naknak_state',filter:'household_id=eq.'+state.household.id},payload=>{
+        const record=payload.new;
+        if(record&&Number(record.rev||0)>state.rev){
+          state.value=record.state||{};state.rev=Number(record.rev||0);
+          state.lastRemoteAt=record.updated_at||null;state.lastFetchedAt=new Date().toISOString();state.dataError='';
+          status('Server update received','ok');render();
+        }
+      }).subscribe(statusName=>{
+        state.realtimeStatus=statusName;
+        if(statusName==='CHANNEL_ERROR'||statusName==='TIMED_OUT'||statusName==='CLOSED'){
+          // Polling can still succeed; never claim continuous real-time access.
+          opsText('ops-check-result','Realtime channel unavailable. Periodic server refresh may still work.');
+        }
+      });
+    state.channel=channel;
+    clearInterval(state.timer);
+    state.timer=setInterval(()=>{if(!document.hidden)refresh()},20000);
+  }
   function memberState(m){if(!m)return {label:'No information',type:'neutral'};if(m.status==='sos')return {label:'SOS opened',type:'red'};if(m.lastCheckin)return {label:'Check-in recorded',type:'ok'};return {label:'Awaiting check-in',type:'neutral'}}
   function cardMember(m,selected){const n=m.nickname||m.name||'Family member';const st=memberState(m);return `<button type="button" class="member ${selected?'selected':''}" data-member="${safe(m.id||'')}" aria-label="Select ${safe(n)}"><span class="avatar">${safe(String(n).slice(0,1).toUpperCase())}</span><span class="who"><strong>${safe(n)}</strong><span>${safe(m.name&&m.nickname&&m.name!==m.nickname?m.name:dtime(m.lastCheckin))}</span></span><span class="tag ${st.type}">${safe(st.label)}</span></button>`}
   function activityHTML(max){const ev=eventRows().slice(0,max);if(!ev.length)return empty('No recorded activity yet','Pair a phone and sync your first Ayos Ako check-in to see real updates.','clock');return `<div class="activity-list">${ev.map(e=>{let sos=e.type==='sos'||/sos/i.test(e.title||'');let check=e.type==='checkin'||/check.in/i.test(e.title||'');return `<div class="activity"><span class="bubble">${icon(sos?'alert':check?'check':'clock')}</span><div><strong>${safe(e.title||'Activity recorded')}</strong><p>${safe(e.memberName)}${e.detail?' · '+safe(e.detail):''}</p>${sos?'<span class="tag caution">Record only · No automatic dispatch</span>':''}</div><time>${safe(dtime(e.time))}</time></div>`}).join('')}</div>`}
@@ -217,6 +464,443 @@ body{background:#140B09;color:#F8EEEA}
     return all.slice(0,4).map(x=>`<div class="list-row"><div><strong>${safe(x.name||'Medication')}</strong><p>${safe(x.memberName)} · ${safe(x.dose||'Dose not recorded')} · ${safe(typeof x.schedule==='string'?x.schedule:'Schedule not shared')}</p></div><span class="tag neutral">Recorded</span></div>`).join('');
   }
   function miniDetailHTML(label,value){return `<div class="list-row"><div><strong>${safe(label)}</strong><p>${safe(value||'Not in connected record')}</p></div></div>`}
+
+  /* NakNak P0–P2 household operations: no simulated SOS, push, billing, or health records. */
+  const OPS_ITEMS=[
+    ['water','Water and drinking containers'],['food','Ready-to-eat food'],['flashlight','Flashlight and spare batteries'],
+    ['medication','Personal medication supplies'],['firstaid','First aid kit'],['documents','Copies of important documents'],
+    ['power','Power bank and charging cables'],['contacts','Written emergency contacts']
+  ];
+  const ops={householdId:null,prepBackend:false,prepLoaded:false,prepBusy:false,checks:new Set(),ticketsLoaded:false,diagRunning:false};
+  const opsText=(id,value)=>{const e=$(id);if(e)e.textContent=String(value??'');};
+  const opsDraftKey=()=> 'naknak_prep_draft_v1_'+String(state.household?.id||'preview')+'_'+String(state.session?.user?.id||'local');
+  function opsLocalLoad(){try{const arr=JSON.parse(localStorage.getItem(opsDraftKey())||'[]');return new Set(Array.isArray(arr)?arr.filter(k=>OPS_ITEMS.some(([id])=>id===k)):[])}catch(_){return new Set()}}
+  function opsLocalSave(){try{localStorage.setItem(opsDraftKey(),JSON.stringify([...ops.checks]))}catch(_){opsText('ops-prep-message','Browser storage was unavailable. Your draft may not persist.');}}
+  function opsRenderPrep(){
+    const count=OPS_ITEMS.filter(([id])=>ops.checks.has(id)).length;
+    opsText('ops-prep-count',count+' of '+OPS_ITEMS.length+' checked');
+    if($('ops-prep-progress'))$('ops-prep-progress').style.width=(count/OPS_ITEMS.length*100)+'%';
+    opsText('ops-prep-mode',ops.prepLoaded?(ops.prepBackend?'Household-shared checklist':'Draft on this browser only'):'Checking checklist storage…');
+    const wrap=$('ops-prep-items');if(!wrap)return;
+    wrap.innerHTML=OPS_ITEMS.map(([key,label])=>'<label class="ops-check"><input type="checkbox" data-prep="'+safe(key)+'" '+(ops.checks.has(key)?'checked ':'')+(ops.prepBusy?'disabled ':'')+'/><span>'+safe(label)+'</span></label>').join('');
+  }
+  async function opsLoadPrep(){
+    const hh=state.household;
+    if(!hh)return;
+    ops.householdId=hh.id;ops.prepLoaded=false;ops.prepBackend=false;ops.checks=opsLocalLoad();opsRenderPrep();
+    if(!state.client||!state.session){ops.prepLoaded=true;opsText('ops-prep-message','Local preview only. These checks never leave this browser.');opsRenderPrep();return;}
+    const householdId=hh.id;
+    try{
+      const {data,error}=await state.client.from('naknak_household_prep').select('item_key,completed').eq('household_id',householdId);
+      if(error)throw error;
+      if(state.household?.id!==householdId)return;
+      ops.prepBackend=true;ops.checks=new Set((data||[]).filter(x=>x.completed && OPS_ITEMS.some(([id])=>id===x.item_key)).map(x=>x.item_key));
+      opsText('ops-prep-message','Loaded household-shared checklist. Changes are saved only after server confirmation.');
+    }catch(_){
+      ops.prepBackend=false;ops.checks=opsLocalLoad();
+      opsText('ops-prep-message','Shared checklist is not configured or accessible. Edits will stay on this browser only; they are not synced to family members.');
+    }finally{if(state.household?.id===householdId){ops.prepLoaded=true;opsRenderPrep();}}
+  }
+  async function opsTogglePrep(key,checked){
+    if(!OPS_ITEMS.some(([id])=>id===key)||ops.prepBusy)return;
+    const previous=new Set(ops.checks);
+    ops.checks[checked?'add':'delete'](key);
+    if(!ops.prepBackend||!state.client||!state.session){
+      opsLocalSave();opsRenderPrep();
+      opsText('ops-prep-message','Saved to this browser only; not shared with connected devices.');
+      return;
+    }
+    ops.prepBusy=true;opsRenderPrep();
+    try{
+      const {error}=await state.client.from('naknak_household_prep').upsert({
+        household_id:state.household.id,item_key:key,completed:checked,
+        updated_by:state.session.user.id,updated_at:new Date().toISOString()
+      },{onConflict:'household_id,item_key'});
+      if(error)throw error;
+      opsText('ops-prep-message','Change saved to the household checklist on the server.');
+    }catch(_){
+      ops.checks=previous;
+      opsText('ops-prep-message','Could not save this change to the server. The previous confirmed value was restored.');
+    }finally{ops.prepBusy=false;opsRenderPrep();}
+  }
+  function opsRenderCare(){
+    const mm=members();
+    $('ops-care-members').innerHTML=mm.length?mm.map(m=>'<div class="ops-item"><div><strong>'+safe(m.nickname||m.name||'Member')+'</strong><p class="ops-copy">Last recorded check-in: '+safe(dtime(m.lastCheckin))+'</p></div><span class="ops-pill neutral">Record only</span></div>').join(''):empty('No connected profiles yet','Create a Family Space and pair a phone to see check-ins.');
+    const meds=mm.flatMap(m=>(Array.isArray(m.medications)?m.medications:[]).map(x=>({name:x.name||'Medication',dose:x.dose||'',owner:m.nickname||m.name||'Member'}))).slice(0,12);
+    $('ops-care-meds').innerHTML=meds.length?meds.map(m=>'<div class="ops-item"><div><strong>'+safe(m.name)+'</strong><p class="ops-copy">'+safe([m.dose,m.owner].filter(Boolean).join(' · '))+'</p></div><span class="ops-pill neutral">Schedule record</span></div>').join(''):empty('No medicines shared','Native medicine reminders may still be stored only on the phone.','pill');
+    const lastSevenDays=Date.now()-7*86400000;
+    const weekly=eventRows().filter(e=>{
+      const t=new Date(e.time||0).getTime();
+      return Number.isFinite(t)&&t>=lastSevenDays&&t<=Date.now()+60000;
+    });
+    const weeklyCheckins=weekly.filter(e=>e.type==='checkin'&&!/profile|na-create/i.test(String(e.title||'')));
+    const weeklySos=weekly.filter(e=>e.type==='sos'||/SOS.*opened|SOS mula/i.test(String(e.title||'')));
+    const activeMembers=new Set(weeklyCheckins.map(e=>String(e.memberId||''))).size;
+    $('ops-weekly-summary').innerHTML=
+      '<div class="ops-item"><strong>Recorded Ayos Ako check-ins</strong><span>'+weeklyCheckins.length+'</span></div>'+
+      '<div class="ops-item"><strong>Members with a recorded check-in</strong><span>'+activeMembers+'</span></div>'+
+      '<div class="ops-item"><strong>SOS-opened records</strong><span>'+weeklySos.length+'</span></div>'+
+      '<p class="ops-copy">These counts come from the latest fetched household record. They do not measure wellbeing, medication adherence, or whether an emergency notification was delivered.</p>';
+    const ev=eventRows().slice(0,8);
+    $('ops-care-events').innerHTML=ev.length?ev.map(e=>'<div class="ops-item"><div><strong>'+safe(e.title||e.type||'Activity')+'</strong><p class="ops-copy">'+safe(e.memberName)+' · '+safe(dtime(e.time))+'</p></div><span class="ops-pill neutral">Recorded</span></div>').join(''):empty('No activity in the connected record','Use Ayos Ako from the paired phone and verify delivery.','clock');
+  }
+
+  /* P0: record freshness is not proof of physical safety. */
+  const opsCheckinTest={householdId:null,memberId:null,baseline:new Set(),startedAt:null,busy:false};
+  const opsCheckinKeys=(record)=>{
+    const profiles=Array.isArray(record?.seniors)?record.seniors:[];
+    const result=new Set();
+    for(const member of profiles){
+      const events=Array.isArray(member?.eventLog)?member.eventLog:[];
+      for(const e of events){
+        if(!e||e.type!=='checkin'||/profile|na-create/i.test(String(e.title||'')))continue;
+        const key=String(member.id||'')+'|'+String(e.id||e.time||'')+'|'+String(e.title||'');
+        result.add(key);
+      }
+    }
+    return result;
+  };
+  async function opsReadCheckinState(){
+    if(!state.session||!state.client||!state.household)throw Error('Sign in to a hosted Family Space.');
+    const {data,error}=await state.client.from('naknak_state')
+      .select('state,updated_at').eq('household_id',state.household.id).maybeSingle();
+    if(error||!data)throw Error('Cannot verify household state on the server.');
+    return data;
+  }
+  async function opsStartCheckinTest(){
+    if(opsCheckinTest.busy)return;
+    const memberId=$('ops-test-member')?.value;
+    if(!memberId||!members().some(m=>String(m.id)===memberId)){
+      opsText('ops-test-result','Select the connected family member whose phone you will test.');return;
+    }
+    opsCheckinTest.busy=true;$('ops-test-start').disabled=true;
+    opsText('ops-test-result','Reading baseline from the NakNak server…');
+    try{
+      const record=await opsReadCheckinState();
+      opsCheckinTest.baseline=opsCheckinKeys(record.state);
+      opsCheckinTest.householdId=state.household.id;
+      opsCheckinTest.memberId=memberId;
+      opsCheckinTest.startedAt=new Date().toISOString();
+      $('ops-test-verify').disabled=false;
+      opsText('ops-test-result','Baseline saved in this browser. Now press Ayos Ako on the paired phone, wait for its server confirmation, then select Verify check-in on server.');
+    }catch(err){
+      $('ops-test-verify').disabled=true;opsCheckinTest.householdId=null;
+      opsText('ops-test-result','Could not start: '+String(err.message||'Server read failed'));
+    }finally{opsCheckinTest.busy=false;$('ops-test-start').disabled=false;}
+  }
+  async function opsVerifyCheckinTest(){
+    if(opsCheckinTest.busy||opsCheckinTest.householdId!==state.household?.id){
+      opsText('ops-test-result','Start a new test for this Family Space.');return;
+    }
+    opsCheckinTest.busy=true;$('ops-test-verify').disabled=true;
+    opsText('ops-test-result','Checking the server for a new Ayos Ako event…');
+    try{
+      const row=await opsReadCheckinState();
+      const latest=opsCheckinKeys(row.state);
+      const newKeys=[...latest].filter(key=>key.startsWith(opsCheckinTest.memberId+'|')&&!opsCheckinTest.baseline.has(key));
+      if(newKeys.length){
+        opsText('ops-test-result','A NEW check-in record was confirmed on the NakNak server ('+dtime(row.updated_at)+'). This does not confirm remote push, SMS, or emergency dispatch.');
+        opsCheckinTest.baseline=latest;
+      }else{
+        opsText('ops-test-result','No new Ayos Ako record confirmed. Verify the paired app reported server success, then retry. This does not indicate the member is unsafe.');
+      }
+    }catch(err){
+      opsText('ops-test-result','Unable to check: '+String(err.message||'Server unavailable')+'. No delivery can be confirmed.');
+    }finally{opsCheckinTest.busy=false;$('ops-test-verify').disabled=false;}
+  }
+
+  function opsRenderWarnings(){
+    const issues=[];
+    if(!state.session){
+      issues.push('LOCAL PREVIEW · This page has no verified family data.');
+    }else if(state.dataError){
+      issues.push('Cannot confirm a current server read. Displayed records may be outdated; contact family directly to check their wellbeing.');
+    }else if(!state.lastFetchedAt){
+      issues.push('No successful server read has been confirmed yet.');
+    }else{
+      const readAge=Date.now()-new Date(state.lastFetchedAt).getTime();
+      if(!Number.isFinite(readAge)||readAge>60000){
+        issues.push('This page has not successfully refreshed in over one minute. Retry before relying on recent records.');
+      }
+      if(!state.lastRemoteAt){
+        issues.push('No household record has been received yet. Pair a phone and send a test Ayos Ako.');
+      }else{
+        const recordAge=Date.now()-new Date(state.lastRemoteAt).getTime();
+        if(Number.isFinite(recordAge)&&recordAge>24*60*60*1000){
+          issues.push('No changes to the connected household record in the last 24 hours. This is a record timestamp, not a health assessment.');
+        }
+      }
+    }
+    const sos=members().filter(m=>m.status==='sos');
+    if(sos.length){
+      issues.push('SOS-opened record found for '+sos.map(m=>m.nickname||m.name||'a member').slice(0,3).join(', ')+'. No emergency dispatch or caregiver push is confirmed; call the person or emergency services directly when necessary.');
+    }
+    for(const id of ['ops-overview-warning','ops-care-warning']){
+      const el=$(id);if(!el)continue;
+      el.hidden=issues.length===0;
+      el.textContent=issues.join(' ');
+      el.classList.toggle('danger',Boolean(state.dataError||sos.length));
+    }
+  }
+
+  /* P1: explicit server-authorized caregiver invitations. */
+
+  /* P1: no browser-driven payment activation. Only read server-verified subscription periods. */
+  async function opsLoadBilling(){
+    if(!state.client||!state.session||!state.household){
+      opsText('ops-billing-status','Not signed in');
+      opsText('ops-billing-end','Not confirmed');
+      opsText('ops-billing-message','This is a local preview. No paid subscription can be verified here.');
+      return;
+    }
+    const householdId=state.household.id;
+    opsText('ops-billing-status','Checking server…');
+    try{
+      const {data,error}=await state.client.from('naknak_family_subscriptions')
+        .select('provider,status,billing_cycle,period_end,cancel_at_period_end,updated_at')
+        .eq('household_id',householdId).maybeSingle();
+      if(error)throw error;
+      if(state.household?.id!==householdId)return;
+      if(!data){
+        state.billingDisplay='No active recurring subscription verified';
+        opsText('ops-current-plan',state.billingDisplay);
+        opsText('ops-billing-status','No active recurring plan confirmed');
+        opsText('ops-billing-end','—');
+        opsText('ops-billing-message','Free access remains available. Do not infer a recurring plan from an older one-time payment record.');
+        return;
+      }
+      const end=data.period_end?new Date(data.period_end):null;
+      const dateValid=end&&Number.isFinite(end.getTime());
+      const active=data.status==='active'&&dateValid&&end.getTime()>Date.now();
+      state.billingDisplay=active?'Family · verified '+String(data.billing_cycle||'')+' period':'No current paid entitlement verified';
+      opsText('ops-current-plan',state.billingDisplay);
+      opsText('ops-billing-status',active?'Active '+String(data.billing_cycle||'')+' subscription':String(data.status||'unknown')+' · Not active');
+      opsText('ops-billing-end',dateValid?dtime(data.period_end):'Not confirmed');
+      opsText('ops-billing-message',active
+        ?'Current server period is valid until '+dtime(data.period_end)+(data.cancel_at_period_end?' and is set to end at that date.':'.')
+        :'No current paid entitlement is verified. This dashboard does not charge or upgrade an account.');
+
+    }catch(_){
+      state.billingDisplay='Unable to verify paid subscription';
+      opsText('ops-current-plan',state.billingDisplay);
+      opsText('ops-billing-status','Subscription service not configured or unavailable');
+      opsText('ops-billing-end','Not confirmed');
+      opsText('ops-billing-message','The billing read model is not accessible. No subscription activation can be confirmed on this page.');
+    }
+  }
+
+  function opsRenderAccess(){
+    opsText('ops-access-email',state.session?.user?.email||'Local preview');
+    opsText('ops-access-membership',state.session?'Signed-in household member':'Not signed in');
+    opsText('ops-access-role',state.membershipRole||'—');
+    const switcher=$('ops-household-switch');
+    if(switcher){
+      const rows=state.households||[];
+      switcher.innerHTML=rows.length?rows.map((m,i)=>
+        '<option value="'+safe(m.household_id)+'">'+safe(
+          'Family Space '+(m.household_id||'').slice(0,8)+(m.role==='owner'?' · Owner':' · Caregiver')
+        )+'</option>').join(''):'<option value="">No connected households</option>';
+      switcher.value=state.household?.id||'';
+      switcher.disabled=rows.length<=1;
+    }
+    const canInvite=Boolean(state.session&&state.household&&state.membershipRole==='owner');
+    if(!canInvite){
+      $('ops-create-invite').disabled=true;
+      opsText('ops-invite-mode',state.session?'Only the household owner can issue invitations.':'Sign in required for invitations.');
+      $('ops-invite-list').innerHTML='<p class="ops-copy">Only a signed-in owner can manage caregiver invitations.</p>';
+    }
+  }
+
+  async function opsLoadInvites(){
+    opsRenderAccess();
+    if(!state.client||!state.session||!state.household||state.membershipRole!=='owner')return;
+    $('ops-create-invite').disabled=true;
+    opsText('ops-invite-mode','Checking invitation permissions…');
+    $('ops-invite-list').textContent='Checking recent invitations…';
+    const householdId=state.household.id;
+    try{
+      const {data,error}=await state.client.rpc('naknak_invite_list',{p_household_id:householdId});
+      if(error)throw error;
+      if(householdId!==state.household?.id)return;
+      $('ops-create-invite').disabled=false;
+      opsText('ops-invite-mode','Owner verified · one-use invitations enabled');
+      const rows=Array.isArray(data)?data:[];
+      $('ops-invite-list').innerHTML=rows.length?rows.map(v=>
+        '<div class="ops-item"><div><strong>'+safe(v.status||'Unknown')+'</strong><p class="ops-copy">Created '+safe(dtime(v.created_at))+' · Expires '+safe(dtime(v.expires_at))+'</p></div>'+
+        (v.status==='pending'?'<button type="button" class="btn small" data-revoke-invite="'+safe(v.invite_id)+'">Revoke</button>':'<span class="ops-pill neutral">'+safe(v.status)+'</span>')+
+        '</div>').join(''):'<p class="ops-copy">No invitation records yet.</p>';
+    }catch(_){
+      $('ops-create-invite').disabled=true;
+      opsText('ops-invite-mode','Invitations not configured or access not verified');
+      $('ops-invite-list').innerHTML='<div class="ops-note">The secure invitation migration must be applied and tested before this workflow is available. No invitation was issued.</div>';
+    }
+  }
+
+  async function opsCreateInvite(){
+    if(!state.client||!state.session||!state.household||state.membershipRole!=='owner'){
+      opsText('ops-invite-create-message','Only a signed-in household owner can issue invitations.');return;
+    }
+    const btn=$('ops-create-invite');btn.disabled=true;
+    opsText('ops-invite-create-message','Creating a one-time invitation…');
+    $('ops-issued-invite').hidden=true;$('ops-invite-token-value').textContent='';
+    try{
+      const {data,error}=await state.client.rpc('naknak_invite_create',{p_household_id:state.household.id});
+      if(error)throw error;
+      const row=Array.isArray(data)?data[0]:data;
+      if(!row?.invite_token||!(/^[a-f0-9]{48}$/.test(row.invite_token)))throw Error('No valid invitation token was received.');
+      $('ops-invite-token-value').textContent=row.invite_token;
+      opsText('ops-invite-expiry','Expires '+dtime(row.expires_at)+'. Share privately once; do not include this token in public links or screenshots.');
+      $('ops-issued-invite').hidden=false;
+      opsText('ops-invite-create-message','Invitation confirmed by server. Copy the one-time token privately.');
+      await opsLoadInvites();
+    }catch(_){
+      opsText('ops-invite-create-message','Invitation was not confirmed. No token is available; verify the secured database migration.');
+      $('ops-issued-invite').hidden=true;
+      await opsLoadInvites();
+    }finally{/* opsLoadInvites controls the button state after server validation. */}
+  }
+
+  async function opsAcceptInvite(event,fieldId,messageId){
+    event.preventDefault();
+    const input=$(fieldId),output=$(messageId),token=(input?.value||'').trim().toLowerCase();
+    if(!/^[a-f0-9]{48}$/.test(token)){
+      output.textContent='Enter a valid 48-character caregiver invitation token.';return;
+    }
+    if(!state.client||!state.session){
+      output.textContent='Sign in on the HTTPS Family Dashboard before accepting invitations.';return;
+    }
+    const submit=event.target.querySelector('button[type="submit"]');
+    if(submit)submit.disabled=true;
+    output.textContent='Checking invitation with NakNak server…';
+    try{
+      const {data,error}=await state.client.rpc('naknak_invite_accept',{p_token:token});
+      if(error)throw error;
+      const row=Array.isArray(data)?data[0]:data;
+      if(!row?.household_id)throw Error('No household membership was confirmed.');
+      input.value='';
+      output.textContent='Invitation accepted. Loading your new Family Space…';
+      await resolve(row.household_id);
+      navigate('access');
+      opsText('ops-join-result','New household access verified. You can switch households from Family Access.');
+    }catch(err){
+      output.textContent='Could not join: '+String(err.message||'Invalid or expired invitation')+
+        '. No membership was added on this page.';
+    }finally{if(submit)submit.disabled=false;}
+  }
+
+  async function opsRevokeInvite(id){
+    if(!state.client||!state.session||state.membershipRole!=='owner')return;
+    if(!/^[a-f0-9-]{36}$/i.test(id))return;
+    if(!window.confirm('Revoke this pending invitation? This cannot be undone.'))return;
+    try{
+      const {data,error}=await state.client.rpc('naknak_invite_revoke',{p_invite_id:id});
+      if(error||data!==true)throw Error('Not revoked');
+      opsText('ops-invite-create-message','Invitation revoked by the server.');
+    }catch(_){opsText('ops-invite-create-message','Could not verify revocation. Refresh and try again.');}
+    await opsLoadInvites();
+  }
+
+  function opsRender(){
+    if(!state.household)return;
+    if(ops.householdId!==state.household.id){ops.ticketsLoaded=false;opsLoadPrep();}
+    opsText('ops-network',navigator.onLine?'Browser reports online':'Browser reports offline');
+    opsText('ops-auth',state.session?'Account signed in':'Local preview / not signed in');
+    opsText('ops-record',state.dataError?'Cannot verify current record':state.value?'Household record loaded':'No record loaded');
+    opsText('ops-last',state.lastRemoteAt?dtime(state.lastRemoteAt):'Not confirmed');
+    opsText('ops-last-fetch',state.lastFetchedAt?dtime(state.lastFetchedAt):'Not confirmed');
+    opsRenderAccess();
+    opsRenderWarnings();
+    const rawPlan=String(state.value?.plan||'free').toLowerCase();
+    opsText('ops-current-plan',state.billingDisplay||(state.session?(rawPlan==='family'?'Legacy Family flag · subscription requires verification':rawPlan==='essential'?'Legacy Essential record · not a new plan':'Free (household record)'):'Not verified · Local preview'));
+    const memberSelector=$('ops-test-member');
+    if(memberSelector){
+      const current=memberSelector.value;
+      const choices=members();
+      memberSelector.innerHTML=choices.length?choices.map(m=>
+        '<option value="'+safe(m.id||'')+'">'+safe(m.nickname||m.name||'Member')+'</option>'
+      ).join(''):'<option value="">No linked members yet</option>';
+      if(choices.some(m=>String(m.id)===current))memberSelector.value=current;
+      memberSelector.disabled=choices.length===0;
+    }
+    opsRenderCare();
+    opsRenderPrep();
+  }
+  async function opsRunConnection(){
+    if(ops.diagRunning)return;
+    if(!state.client||!state.session||!state.household){
+      opsText('ops-check-result','A hosted, signed-in dashboard is required for a real connection test.');
+      return;
+    }
+    ops.diagRunning=true;const btn=$('ops-run-check');btn.disabled=true;
+    opsText('ops-check-result','Checking server access and permitted household records…');
+    try{
+      const {data:userData,error:userError}=await state.client.auth.getUser();
+      if(userError||!userData?.user)throw Error('Authentication could not be confirmed.');
+      opsText('ops-auth','Server verified session');
+      const {data:membership,error:membershipError}=await state.client.from('naknak_household_members')
+        .select('household_id,role').eq('auth_uid',userData.user.id).eq('household_id',state.household.id).maybeSingle();
+      if(membershipError||!membership)throw Error('Household membership could not be confirmed.');
+      opsText('ops-access-role',membership.role||'Caregiver');
+      opsText('ops-access-membership','Server verified member');
+      const {data:row,error:readError}=await state.client.from('naknak_state')
+        .select('updated_at,rev').eq('household_id',state.household.id).maybeSingle();
+      if(readError)throw Error('Household state was not accessible.');
+      opsText('ops-record',row?'Accessible':'No household state found');
+      opsText('ops-last',row?.updated_at?dtime(row.updated_at):'No confirmed update');
+      const {data:devices,error:deviceError}=await state.client.from('naknak_devices')
+        .select('id,device_label,paired_at,last_seen_at,senior_id').eq('household_id',state.household.id).limit(12);
+      if(deviceError){
+        opsText('ops-devices','Device details are not available to this account. Pairing and last-seen times cannot be verified here.');
+        $('ops-device-list').innerHTML='';
+      }else{
+        opsText('ops-devices',(devices||[]).length+' device record(s) accessible. Last seen is not live presence.');
+        $('ops-device-list').innerHTML=(devices||[]).length?(devices||[]).map(d=>'<div class="ops-item"><div><strong>'+safe(d.device_label||'NakNak Phone')+'</strong><p class="ops-copy">Last seen by server: '+safe(dtime(d.last_seen_at))+'</p></div><span class="ops-pill neutral">Historical</span></div>').join(''):'<p class="ops-copy">No paired devices are visible in this account.</p>';
+      }
+      opsText('ops-check-result','Server access checked. For real safety verification, test Ayos Ako on a separate paired phone.');
+    }catch(err){
+      opsText('ops-check-result','Connection check incomplete: '+String(err.message||'Unknown error')+' Do not assume family safety.');
+    }finally{btn.disabled=false;ops.diagRunning=false;}
+  }
+  async function opsLoadSupport(){
+    if(!state.client||!state.session||!state.household){
+      $('ops-support-history').innerHTML='<p class="ops-copy">Local design preview. Support requests cannot be submitted or loaded.</p>';return;
+    }
+    $('ops-support-history').textContent='Checking requests…';
+    try{
+      const {data,error}=await state.client.from('naknak_support_requests').select('id,subject,status,created_at')
+        .eq('requester_id',state.session.user.id).eq('household_id',state.household.id)
+        .order('created_at',{ascending:false}).limit(20);
+      if(error)throw error;
+      $('ops-support-history').innerHTML=(data||[]).length?data.map(x=>'<div class="ops-item"><div><strong>'+safe(x.subject)+'</strong><p class="ops-copy">'+safe(dtime(x.created_at))+'</p></div><span class="ops-pill neutral">'+safe(x.status)+'</span></div>').join(''):'<p class="ops-copy">No support requests submitted in this household.</p>';
+    }catch(_){$('ops-support-history').innerHTML='<div class="ops-note">Ticket storage is not yet configured. You can contact NakNak support by email instead.</div>';}
+  }
+  async function opsSubmitSupport(event){
+    event.preventDefault();
+    const subject=$('ops-support-subject').value.trim(),message=$('ops-support-message').value.trim();
+    const result=$('ops-support-result');result.textContent='';
+    if(subject.length<5||subject.length>120||message.length<10||message.length>2000){
+      result.textContent='Enter a subject (5–120 characters) and message (10–2000 characters).';return;
+    }
+    if(!state.client||!state.session||!state.household){
+      result.textContent='Sign in on the hosted Family Dashboard before submitting a support request.';return;
+    }
+    const button=$('ops-support-form').querySelector('button[type="submit"]');button.disabled=true;
+    try{
+      const {error}=await state.client.from('naknak_support_requests').insert({
+        household_id:state.household.id,requester_id:state.session.user.id,subject,message,status:'open'
+      });
+      if(error)throw error;
+      result.textContent='Support request saved to the server. This is not an emergency response service.';
+      $('ops-support-form').reset();await opsLoadSupport();
+    }catch(_){
+      result.textContent='Ticket storage unavailable. No request was submitted.';
+      let anchor=$('ops-support-email');
+      if(!anchor){anchor=document.createElement('a');anchor.id='ops-support-email';anchor.className='btn';anchor.textContent='Prepare an email instead';result.after(anchor);}
+      anchor.href='mailto:naknak@gmail.com?subject='+encodeURIComponent('NakNak support: '+subject)+'&body='+encodeURIComponent(message.slice(0,1500));
+      anchor.hidden=false;
+    }finally{button.disabled=false;}
+  }
+
   function render(){
     if(!state.household)return;
     const mm=members(),chosen=activeMember();if(chosen)state.selected=chosen.id;
@@ -243,6 +927,7 @@ body{background:#140B09;color:#F8EEEA}
     $('medical-contacts').innerHTML=chosen?(cm.length?cm.slice(0,5).map(c=>miniDetailHTML(c.name||'Contact',`${c.relation||c.relationship||'Emergency contact'} · ${c.phone||c.number||'Phone not shared'}`)).join(''):empty('No contacts shared yet','Add emergency contacts in the app and allow them to sync.','phone')):empty('Select a member','There is no linked member data.');
     const mx=chosen?.medications&&Array.isArray(chosen.medications)?chosen.medications:[];
     $('medical-medications').innerHTML=chosen?(mx.length?mx.slice(0,5).map(x=>miniDetailHTML(x.name||'Medication',`${x.dose||'Dose not shared'} · ${typeof x.schedule==='string'?x.schedule:'Schedule not shared'}`)).join(''):empty('No medicines shared','Local medicine reminders may still exist on a phone.','pill')):empty('Select a member','There is no linked member data.');
+    opsRender();
     if(state.dataError)status('Sync error · Try again','caution');
   }
   function renderDetails(m){const missing=()=>empty('No member selected','Connect a phone and select a member first.');if(!m){for(const id of ['member-details','meds-body','contacts-body','medical-body','prep-body'])$(id).innerHTML=missing();return}const name=m.nickname||m.name||'Family member';const st=memberState(m);$('member-details').innerHTML=`<div class="details-grid"><div class="detail"><label>Name</label><strong>${safe(m.name||'—')}</strong></div><div class="detail"><label>Last check-in</label><strong>${safe(dtime(m.lastCheckin))}</strong></div><div class="detail"><label>Record status</label><strong>${safe(st.label)}</strong></div><div class="detail"><label>Medications in record</label><strong>${Array.isArray(m.medications)?m.medications.length:0}</strong></div></div><p class="note" style="margin-top:15px">Status is based on synced app records, not a live medical or location assessment.</p>`;
@@ -253,6 +938,40 @@ body{background:#140B09;color:#F8EEEA}
   }
   function initEvents(){document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.view)));document.addEventListener('click',e=>{let g=e.target.closest('[data-go]');if(g){navigate(g.dataset.go)}let m=e.target.closest('[data-member]');if(m){state.selected=m.dataset.member;render();}});for(const id of ['top-member-select','medical-member-select']){$(id).addEventListener('change',e=>{const selected=members().find(m=>String(m.id)===String(e.target.value));if(selected){state.selected=selected.id;render();}})};$('hamb').addEventListener('click',()=>{let open=$('sidebar').classList.toggle('open');$('shade').classList.toggle('show',open);$('hamb').setAttribute('aria-expanded',String(open))});$('shade').addEventListener('click',closeMenu);document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});$('refresh').addEventListener('click',refresh);$('activity-refresh').addEventListener('click',refresh);$('signout').addEventListener('click',signout);$('create-signout').addEventListener('click',signout);
   $('copy-code').addEventListener('click',async()=>{try{if(!navigator.clipboard)throw Error('Clipboard unavailable');await navigator.clipboard.writeText(state.household?.pair_code||'');$('copy-feedback').textContent='Pairing code copied. Keep it private.';}catch(e){$('copy-feedback').textContent='Copy is not available here. Select and enter the code manually.';}});
+  $('ops-create-invite').addEventListener('click',opsCreateInvite);
+  $('ops-copy-invite').addEventListener('click',async()=>{
+    const token=$('ops-invite-token-value').textContent;
+    if(!/^[a-f0-9]{48}$/.test(token)){opsText('ops-invite-create-message','No active token to copy.');return;}
+    try{await navigator.clipboard.writeText(token);opsText('ops-invite-create-message','Token copied. Share privately with the intended caregiver.');}
+    catch(_){opsText('ops-invite-create-message','Clipboard unavailable. Manually select the token to share it securely.');}
+  });
+  $('ops-join-form').addEventListener('submit',event=>opsAcceptInvite(event,'ops-join-token','ops-join-result'));
+  $('ops-auth-join-form').addEventListener('submit',event=>opsAcceptInvite(event,'ops-auth-invite-token','ops-auth-join-message'));
+  $('ops-household-switch').addEventListener('change',event=>{
+    const householdId=event.target.value;
+    if(!state.households.some(m=>m.household_id===householdId))return;
+    resolve(householdId).catch(()=>opsText('ops-join-result','Could not open that household. Your current data remains unchanged.'));
+  });
+  $('ops-invite-list').addEventListener('click',event=>{
+    const btn=event.target.closest('[data-revoke-invite]');
+    if(btn)opsRevokeInvite(btn.dataset.revokeInvite);
+  });
+  window.addEventListener('hashchange',()=>{
+    if(!state.household)return;
+    let view='overview';try{view=decodeURIComponent((location.hash||'#overview').slice(1))}catch(_){}
+    if(view!==state.currentView)navigate(view);
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden && state.household && state.client && state.session)refresh();
+    else if(state.household)opsRenderWarnings();
+  });
+  $('ops-test-start').addEventListener('click',opsStartCheckinTest);
+  $('ops-test-verify').addEventListener('click',opsVerifyCheckinTest);
+  $('ops-run-check').addEventListener('click',opsRunConnection);
+  $('ops-prep-items').addEventListener('change',e=>{const box=e.target.closest('input[data-prep]');if(box)opsTogglePrep(box.dataset.prep,box.checked);});
+  $('ops-support-form').addEventListener('submit',opsSubmitSupport);
+  window.addEventListener('online',()=>opsText('ops-network','Browser reports online'));
+  window.addEventListener('offline',()=>opsText('ops-network','Browser reports offline'));
   $('sign-in-form').addEventListener('submit',async e=>{e.preventDefault();visibleError('auth-error','');$('auth-sent').textContent='';const email=$('email').value.trim();if(!email||!$('email').checkValidity()){visibleError('auth-error','Please enter a valid email address.');return}let b=$('send-link');b.disabled=true;try{const redirect=new URL('family-dashboard.html',location.href).href;const {error}=await state.client.auth.signInWithOtp({email,options:{emailRedirectTo:redirect}});if(error)throw error;$('auth-sent').textContent='Check your inbox for a secure sign-in link. You can safely close this tab.';}catch(err){visibleError('auth-error',err.message||'Unable to send email. Try again.')}finally{b.disabled=false}});
   $('create-form').addEventListener('submit',async e=>{e.preventDefault();visibleError('create-error','');let name=$('first-name').value.trim().slice(0,60);if(!name){visibleError('create-error','Enter a name or nickname to get started.');return}const b=$('create-btn');b.disabled=true;try{const {data,error}=await state.client.rpc('create_household',{p_senior_name:name});if(error)throw error;const row=Array.isArray(data)?data[0]:data;if(!row?.household_id)throw Error('Household was not created. Please try again.');await resolve()}catch(err){visibleError('create-error',err.message||'Could not create Family Space.')}finally{b.disabled=false}});
   }
@@ -268,7 +987,7 @@ body{background:#140B09;color:#F8EEEA}
     for(const id of ['refresh','activity-refresh','signout','copy-code']){
       if($(id)){$(id).disabled=true;$(id).title='Available only on the hosted, signed-in dashboard';}
     }
-    navigate('overview');render();status('Design preview','neutral');return;
+    let previewView='overview';try{previewView=decodeURIComponent((location.hash||'#overview').slice(1))}catch(_){}navigate(previewView);render();status('Design preview','neutral');return;
   }if(typeof supabase==='undefined'){
     await new Promise(resolveSDK=>{
       const js=document.createElement('script');js.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';js.async=true;

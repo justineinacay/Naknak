@@ -62,8 +62,8 @@ jobs:
           NODE
 
       # A website-only pull request should not fail due to unrelated native SDK drift.
-      # Whenever native code, sync/backend code, or web-app build inputs change,
-      # retain the full native TypeScript, lint, Expo Doctor, export, and safety checks.
+      # Native Expo checks run when native app/build inputs change.
+      # Backend migrations still run web safety checks without unrelated Expo drift.
       - name: Detect changes requiring native validation
         id: scope
         shell: bash
@@ -73,14 +73,42 @@ jobs:
         run: |
           if [[ "$GITHUB_EVENT_NAME" != "pull_request" ]]; then
             echo "native=true" >> "$GITHUB_OUTPUT"
+            echo "web_safety=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
           changed_files="$(git diff --name-only "$PR_BASE_SHA" "$PR_HEAD_SHA")"
-          if printf '%s\n' "$changed_files" | grep -Eq '^(native/|web-src/|scripts/(build-web|verify-web)\.mjs$|app(-v15)?\.html$|naknak-app\.html$|dashboard\.html$|functions/|supabase/|manifest\.webmanifest$|naknak-sw\.js$)'; then
+          if printf '%s\n' "$changed_files" | grep -Eq '^(native/|web-src/|scripts/build-web\.mjs$|app(-v15)?\.html$|naknak-app\.html$|manifest\.webmanifest$|naknak-sw\.js$)'; then
             echo "native=true" >> "$GITHUB_OUTPUT"
           else
             echo "native=false" >> "$GITHUB_OUTPUT"
           fi
+          if printf '%s\n' "$changed_files" | grep -Eq '^(native/|web-src/|scripts/(build-web|verify-web)\.mjs$|app(-v15)?\.html$|naknak-app\.html$|dashboard\.html$|functions/|supabase/|manifest\.webmanifest$|naknak-sw\.js$)'; then
+            echo "web_safety=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "web_safety=false" >> "$GITHUB_OUTPUT"
+          fi
+
+
+      - name: Verify new household operations boundaries
+        run: |
+          node --input-type=module <<'NODE'
+          import {readFileSync} from 'node:fs';
+          const sql=readFileSync('supabase/migrations/20261031090000_household_prep_and_support.sql','utf8');
+          const html=readFileSync('family-dashboard.html','utf8');
+          const tests=[
+            ['prep RLS enabled',sql.includes('naknak_household_prep enable row level security')],
+            ['support RLS enabled',sql.includes('naknak_support_requests enable row level security')],
+            ['anon revoked for both tables',(sql.match(/revoke all on table public\.naknak_\w+ from anon,authenticated/g)||[]).length===2],
+            ['policies use authenticated household membership',sql.includes('auth_uid = (select auth.uid())')],
+            ['support requests cannot be updated by browser',!sql.includes('grant update on table public.naknak_support_requests')],
+            ['connection checks do not assert emergency delivery',html.includes('It does not confirm that a caregiver received an alert')],
+            ['prep falls back to explicit browser-only draft',html.includes('Saved to this browser only')],
+            ['support errors do not claim request saved',html.includes('No request was submitted')],
+            ['new household sections are present',['connection','carehub','access','sharedprep','helpdesk'].every(id=>html.includes('id="view-'+id+'"'))],
+          ];
+          for(const [name,ok] of tests)console.log((ok?'PASS ':'FAIL ')+name);
+          if(tests.some(([,ok])=>!ok))process.exitCode=1;
+          NODE
 
       - name: Enable Corepack
         if: steps.scope.outputs.native == 'true'
@@ -112,5 +140,42 @@ jobs:
         run: pnpm exec expo export --platform web
 
       - name: Verify web safety build
-        if: steps.scope.outputs.native == 'true'
+        if: steps.scope.outputs.web_safety == 'true'
         run: node scripts/verify-web.mjs
+
+
+  invitation-db-test:
+    name: Caregiver invitation authorization tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: naknak_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d naknak_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install PostgreSQL client
+        run: |
+          if ! command -v psql >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y postgresql-client
+          fi
+      - name: Test one-use and cross-household authorization
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGUSER: postgres
+          PGPASSWORD: postgres
+          PGDATABASE: naknak_ci
+        run: psql -v ON_ERROR_STOP=1 -f scripts/test-caregiver-invitations.sql

@@ -38,7 +38,10 @@ In Supabase Auth, set the Site URL and allowed redirect URL to the exact product
 
 ```text
 https://justineinacay.github.io/Naknak/dashboard.html
+https://justineinacay.github.io/Naknak/family-dashboard.html
 ```
+
+The new Family Dashboard uses `signInWithOtp` with `family-dashboard.html` as its exact redirect target. If only the advanced dashboard URL is allowlisted, magic-link sign-in to the new Family Dashboard will fail. Verify both URLs in Supabase Auth → URL Configuration before publishing.
 
 If a custom domain is introduced, add its exact dashboard URL before changing the public links.
 
@@ -73,3 +76,22 @@ GitHub Pages does not allow repository code to set all production response heade
 - Create an Apple Developer account, App Store Connect record, privacy details, screenshots, TestFlight build, and review submission.
 
 Do not claim SMS, automatic calling, guaranteed push, automatic location sharing, fall detection, or App Store availability before those capabilities are implemented and verified.
+
+
+## P0–P2 family operations (review before deployment)
+
+The `family-dashboard.html` now includes Connection Center, Daily Care Hub, Family Access, Shared Prep, and Support Center. `index.html` links to `family-dashboard.html#connection`.
+
+The SQL migration `supabase/migrations/20261031090000_household_prep_and_support.sql` has **not been applied to production**. A connected Supabase inspection failed with a read-only database credential error. Have an authorized project administrator review and test its RLS before applying it. Until then, prep uses clearly labeled browser-only drafts; support requests offer email fallback. Review `P0-P2-IMPLEMENTATION.md` for release gates.
+
+Payment, new multi-caregiver invitations, remote push/SMS, native full medication sync, and store releases remain separate unverified development work.
+
+
+## P0–P1 installation and regression checks
+
+1. Review `P0-P1-IMPLEMENTATION.md` and the invitation/subscription migrations before touching production SQL.
+2. Run the temporary PostgreSQL CI job `Caregiver invitation authorization tests`; it checks one-use tokens, owner scope, and subscription read-only RLS.
+3. Repair the NakNak Supabase database credential issue (28P01). An ACTIVE_HEALTHY project status does not prove SQL access.
+4. Add `family-dashboard.html` to Supabase Auth's allowed redirect URLs and test magic-link sign-in.
+5. Verify the Connection Center's selected-member Ayos Ako test using two real devices.
+6. Before activating billing, implement full subscription lifecycle, including verified recurring charges, period expiry, renewals, cancellations, refunds, historical session reconciliation, and entitlement tests. The legacy one-time checkout is blocked in this review branch and must not be redeployed as a recurring product.
