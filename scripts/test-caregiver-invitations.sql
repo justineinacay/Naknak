@@ -23,6 +23,11 @@ create table public.naknak_household_members(
   joined_at timestamptz not null default now(),
   primary key(household_id,auth_uid)
 );
+-- Mirror the production membership SELECT grant/RLS used by household-scoped policies.
+alter table public.naknak_household_members enable row level security;
+grant select on table public.naknak_household_members to authenticated;
+create policy "member can read own membership" on public.naknak_household_members
+  for select to authenticated using (auth_uid = (select auth.uid()));
 insert into auth.users(id) values
 ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),
 ('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'),
