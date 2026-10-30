@@ -318,7 +318,7 @@ body{background:#140B09;color:#F8EEEA}
   const SUPA_URL = 'https://louqshzgqutxydfqgnyz.supabase.co';
   const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvdXFzaHpncXV0eHlkZnFnbnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMTUsImV4cCI6MjA5ODYwNDMxNX0.tvgCedmaK9OxRqeW1piNNRr4KXT0XFFF5EuJ3692vgU';
   const $ = id => document.getElementById(id);
-  const state = { client:null, session:null, household:null, value:null, rev:0, selected:null, currentView:'overview', channel:null, timer:null, booting:true, dataError:'', refreshing:false, lastRemoteAt:null };
+  const state = { client:null, session:null, household:null, value:null, rev:0, selected:null, currentView:'overview', channel:null, timer:null, booting:true, dataError:'', refreshing:false, lastRemoteAt:null, lastFetchedAt:null, realtimeStatus:'unknown', households:[], membershipRole:null };
   const safe = val => String(val ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const icon = n => `<svg aria-hidden="true"><use href="#ic-${n}"></use></svg>`;
   const dtime = date => {if(!date)return 'Not recorded';const d=new Date(date);if(!Number.isFinite(d.getTime()))return 'Not recorded';return d.toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'});};
@@ -330,12 +330,109 @@ body{background:#140B09;color:#F8EEEA}
   const visibleError=(id,message)=>{$(id).textContent=message||'';};
   const status=(text,color='neutral')=>{$('sync-label').className='tag '+color;$('sync-label').innerHTML=`<span class="dot"></span> ${safe(text)}`;};
   const show = section => { ['loading','auth','shell'].forEach(id=>$(id).classList.toggle('hidden',id!==section)); };
-  const signout = async () => {clearInterval(state.timer);if(state.channel&&state.client){await state.client.removeChannel(state.channel)}state.channel=null;state.value=null;state.household=null;state.rev=0;state.lastRemoteAt=null;await state.client.auth.signOut();state.session=null;show('auth');$('sign-in').classList.remove('hidden');$('household-create').classList.add('hidden');};
+  const signout = async () => {try{sessionStorage.removeItem('naknak_active_household')}catch(_){}const invite=$('ops-invite-token-value');if(invite)invite.textContent='';const issued=$('ops-issued-invite');if(issued)issued.hidden=true;clearInterval(state.timer);if(state.channel&&state.client){await state.client.removeChannel(state.channel)}state.channel=null;state.value=null;state.household=null;state.rev=0;state.lastRemoteAt=null;await state.client.auth.signOut();state.session=null;show('auth');$('sign-in').classList.remove('hidden');$('household-create').classList.add('hidden');};
   const closeMenu = () => {$('sidebar').classList.remove('open');$('shade').classList.remove('show');$('hamb').setAttribute('aria-expanded','false')};
-  function navigate(view){if(!$(`view-${view}`))view='overview';state.currentView=view;const navButton=document.querySelector(`[data-view="${view}"]`);const lbl=$('current-section-label');if(lbl)lbl.textContent=navButton?navButton.textContent.trim():'Overview';document.querySelectorAll('.section-view').forEach(el=>el.classList.toggle('active',el.id===`view-${view}`));document.querySelectorAll('[data-view]').forEach(b=>{let active=b.dataset.view===view;b.classList.toggle('active',active);if(active)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});closeMenu();if(view==='helpdesk')opsLoadSupport();window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});try{history.replaceState({},'',location.pathname+location.search+'#'+view);}catch(_){/* Embedded design previews can have an opaque origin. */}}
-  async function resolve(){const {data:memberships,error:memError}=await state.client.from('naknak_household_members').select('household_id').eq('auth_uid',state.session.user.id).limit(1).maybeSingle();if(memError)throw memError;if(!memberships){$('sign-in').classList.add('hidden');$('household-create').classList.remove('hidden');show('auth');return;}const {data:household,error:hhError}=await state.client.from('naknak_households').select('id,pair_code').eq('id',memberships.household_id).maybeSingle();if(hhError)throw hhError;if(!household)throw Error('Household not found or you do not have permission to view it.');state.household=household;state.rev=0;state.value=null;state.selected=null;show('shell');$('settings-email').textContent=state.session.user.email||'—';$('settings-household').textContent=household.id||'—';$('pair-code').textContent=household.pair_code||'Unavailable';$('top-household').textContent='Connected Family Space';status('Connecting');const requested=decodeURIComponent((location.hash||'#overview').slice(1));navigate(requested);await refresh();listen();}
-  async function refresh(){if(!state.household||state.refreshing)return;state.refreshing=true;status('Checking updates');try{const {data,error}=await state.client.from('naknak_state').select('state,rev,updated_at').eq('household_id',state.household.id).maybeSingle();if(error)throw error;if(data){state.value=data.state||{};state.rev=Number(data.rev)||0;state.dataError='';state.lastRemoteAt=data.updated_at||null;status('Updated '+shortDate(data.updated_at),'ok')}else{state.value={seniors:[]};state.rev=0;state.lastRemoteAt=null;status('No app data yet','caution')}}catch(err){state.dataError=err.message||'Connection failed';status('Sync unavailable','caution');$('top-household').textContent='Could not refresh household data'}finally{state.refreshing=false;render();}}
-  function listen(){if(state.channel)state.client.removeChannel(state.channel);state.channel=state.client.channel('naknak-view-'+state.household.id).on('postgres_changes',{event:'*',schema:'public',table:'naknak_state',filter:'household_id=eq.'+state.household.id},payload=>{const record=payload.new;if(record && Number(record.rev||0)>=state.rev){state.value=record.state||{};state.rev=Number(record.rev||0);state.lastRemoteAt=record.updated_at||null;status('Synced update','ok');render()}}).subscribe();clearInterval(state.timer);state.timer=setInterval(()=>{if(!document.hidden)refresh()},20000)}
+  function navigate(view){
+    if(!$('view-'+view))view='overview';
+    state.currentView=view;
+    const navButton=document.querySelector('[data-view="'+view+'"]'),label=$('current-section-label');
+    if(label)label.textContent=navButton?navButton.textContent.trim():'Overview';
+    document.querySelectorAll('.section-view').forEach(el=>el.classList.toggle('active',el.id==='view-'+view));
+    document.querySelectorAll('[data-view]').forEach(btn=>{
+      const active=btn.dataset.view===view;
+      btn.classList.toggle('active',active);
+      if(active)btn.setAttribute('aria-current','page');else btn.removeAttribute('aria-current');
+    });
+    closeMenu();
+    if(view==='helpdesk')opsLoadSupport();
+    if(view==='access')opsLoadInvites();
+    window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+    try{history.replaceState({},'',location.pathname+location.search+'#'+view)}
+    catch(_){/* Local file preview can have an opaque origin. */}
+  }
+  async function resolve(preferredHouseholdId=null){
+    if(!state.client||!state.session)throw Error('A signed-in account is required.');
+    const {data:membershipRows,error:memError}=await state.client.from('naknak_household_members')
+      .select('household_id,role,joined_at').eq('auth_uid',state.session.user.id).order('joined_at',{ascending:false});
+    if(memError)throw memError;
+    const rows=Array.isArray(membershipRows)?membershipRows:[];
+    state.households=rows;
+    if(!rows.length){
+      state.household=null;state.membershipRole=null;state.value=null;
+      $('sign-in').classList.add('hidden');$('household-create').classList.remove('hidden');show('auth');return;
+    }
+    let stored=null;
+    try{stored=sessionStorage.getItem('naknak_active_household')}catch(_){}
+    const membership=rows.find(m=>m.household_id===preferredHouseholdId)
+      ||rows.find(m=>m.household_id===stored)||rows[0];
+    const {data:household,error:hhError}=await state.client.from('naknak_households')
+      .select('id,pair_code').eq('id',membership.household_id).maybeSingle();
+    if(hhError)throw hhError;
+    if(!household)throw Error('Household not found or you do not have permission to view it.');
+    if(state.channel&&state.client){await state.client.removeChannel(state.channel);state.channel=null;}
+    clearInterval(state.timer);state.timer=null;
+    state.household=household;state.membershipRole=membership.role||'caregiver';
+    state.rev=0;state.value=null;state.selected=null;state.dataError='';state.lastRemoteAt=null;state.lastFetchedAt=null;
+    try{sessionStorage.setItem('naknak_active_household',household.id)}catch(_){}
+    const issued=$('ops-issued-invite');if(issued)issued.hidden=true;
+    const secret=$('ops-invite-token-value');if(secret)secret.textContent='';
+    show('shell');
+    $('settings-email').textContent=state.session.user.email||'—';
+    $('settings-household').textContent=household.id||'—';
+    $('pair-code').textContent=household.pair_code||'Unavailable';
+    $('top-household').textContent='Connected Family Space';
+    status('Connecting');
+    let requested='overview';
+    try{requested=decodeURIComponent((location.hash||'#overview').slice(1))}catch(_){}
+    navigate(requested);
+    await refresh();
+    listen();
+  }
+  async function refresh(){
+    if(!state.household||state.refreshing||!state.client)return;
+    state.refreshing=true;status('Checking updates');
+    try{
+      const {data,error}=await state.client.from('naknak_state')
+        .select('state,rev,updated_at').eq('household_id',state.household.id).maybeSingle();
+      if(error)throw error;
+      state.lastFetchedAt=new Date().toISOString();
+      state.dataError='';
+      if(data){
+        state.value=data.state||{};state.rev=Number(data.rev)||0;
+        state.lastRemoteAt=data.updated_at||null;
+        status('Server read confirmed '+shortDate(state.lastFetchedAt),'ok');
+      }else{
+        state.value={seniors:[]};state.rev=0;state.lastRemoteAt=null;
+        status('No app data yet','caution');
+      }
+    }catch(err){
+      state.dataError=err.message||'Connection failed';
+      status('Sync unavailable','caution');
+      $('top-household').textContent='Could not refresh household data';
+      // Do not clear the last record: show an explicit out-of-date warning instead.
+    }finally{state.refreshing=false;render();}
+  }
+  function listen(){
+    if(state.channel)state.client.removeChannel(state.channel);
+    const channel=state.client.channel('naknak-view-'+state.household.id)
+      .on('postgres_changes',{event:'*',schema:'public',table:'naknak_state',filter:'household_id=eq.'+state.household.id},payload=>{
+        const record=payload.new;
+        if(record&&Number(record.rev||0)>state.rev){
+          state.value=record.state||{};state.rev=Number(record.rev||0);
+          state.lastRemoteAt=record.updated_at||null;state.lastFetchedAt=new Date().toISOString();state.dataError='';
+          status('Server update received','ok');render();
+        }
+      }).subscribe(statusName=>{
+        state.realtimeStatus=statusName;
+        if(statusName==='CHANNEL_ERROR'||statusName==='TIMED_OUT'||statusName==='CLOSED'){
+          // Polling can still succeed; never claim continuous real-time access.
+          opsText('ops-check-result','Realtime channel unavailable. Periodic server refresh may still work.');
+        }
+      });
+    state.channel=channel;
+    clearInterval(state.timer);
+    state.timer=setInterval(()=>{if(!document.hidden)refresh()},20000);
+  }
   function memberState(m){if(!m)return {label:'No information',type:'neutral'};if(m.status==='sos')return {label:'SOS opened',type:'red'};if(m.lastCheckin)return {label:'Check-in recorded',type:'ok'};return {label:'Awaiting check-in',type:'neutral'}}
   function cardMember(m,selected){const n=m.nickname||m.name||'Family member';const st=memberState(m);return `<button type="button" class="member ${selected?'selected':''}" data-member="${safe(m.id||'')}" aria-label="Select ${safe(n)}"><span class="avatar">${safe(String(n).slice(0,1).toUpperCase())}</span><span class="who"><strong>${safe(n)}</strong><span>${safe(m.name&&m.nickname&&m.name!==m.nickname?m.name:dtime(m.lastCheckin))}</span></span><span class="tag ${st.type}">${safe(st.label)}</span></button>`}
   function activityHTML(max){const ev=eventRows().slice(0,max);if(!ev.length)return empty('No recorded activity yet','Pair a phone and sync your first Ayos Ako check-in to see real updates.','clock');return `<div class="activity-list">${ev.map(e=>{let sos=e.type==='sos'||/sos/i.test(e.title||'');let check=e.type==='checkin'||/check.in/i.test(e.title||'');return `<div class="activity"><span class="bubble">${icon(sos?'alert':check?'check':'clock')}</span><div><strong>${safe(e.title||'Activity recorded')}</strong><p>${safe(e.memberName)}${e.detail?' · '+safe(e.detail):''}</p>${sos?'<span class="tag caution">Record only · No automatic dispatch</span>':''}</div><time>${safe(dtime(e.time))}</time></div>`}).join('')}</div>`}
