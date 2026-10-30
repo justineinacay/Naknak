@@ -85,3 +85,13 @@ The `family-dashboard.html` now includes Connection Center, Daily Care Hub, Fami
 The SQL migration `supabase/migrations/20261031090000_household_prep_and_support.sql` has **not been applied to production**. A connected Supabase inspection failed with a read-only database credential error. Have an authorized project administrator review and test its RLS before applying it. Until then, prep uses clearly labeled browser-only drafts; support requests offer email fallback. Review `P0-P2-IMPLEMENTATION.md` for release gates.
 
 Payment, new multi-caregiver invitations, remote push/SMS, native full medication sync, and store releases remain separate unverified development work.
+
+
+## P0–P1 installation and regression checks
+
+1. Review `P0-P1-IMPLEMENTATION.md` and the invitation/subscription migrations before touching production SQL.
+2. Run the temporary PostgreSQL CI job `Caregiver invitation authorization tests`; it checks one-use tokens, owner scope, and subscription read-only RLS.
+3. Repair the NakNak Supabase database credential issue (28P01). An ACTIVE_HEALTHY project status does not prove SQL access.
+4. Add `family-dashboard.html` to Supabase Auth's allowed redirect URLs and test magic-link sign-in.
+5. Verify the Connection Center's selected-member Ayos Ako test using two real devices.
+6. Before activating billing, implement full subscription lifecycle, including verified recurring charges, period expiry, renewals, cancellations, refunds, historical session reconciliation, and entitlement tests. The legacy one-time checkout is blocked in this review branch and must not be redeployed as a recurring product.
