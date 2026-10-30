@@ -264,7 +264,7 @@ body{background:#140B09;color:#F8EEEA}
     <section id="view-carehub" class="section-view"><div id="ops-care-warning" class="ops-sync-warning" role="status" aria-live="polite" hidden></div>
       <div class="header-flex"><div><div class="eyebrow">P1 • EVERYDAY CARE</div><h1>Daily Care Hub</h1><p>See check-ins, recorded medicines, and household activity together without suggesting that a missing record means a missed dose.</p></div><button class="btn" data-go="activity" type="button">Full activity</button></div>
       <div class="ops-grid"><div class="ops-card"><h2>Family check-ins</h2><div id="ops-care-members"></div></div><div class="ops-card"><h2>Medication information</h2><p>Only schedules present in the connected record appear; native reminders remain on the phone.</p><div id="ops-care-meds"></div></div></div>
-      <div class="ops-card"><h2>Recent recorded activity</h2><div id="ops-care-events"></div></div><div class="ops-note">No automatic medication adherence scoring, emergency escalation, or remote notifications are implied by this view.</div>
+      <div class="ops-card"><h2>Seven-day activity summary</h2><p>Count of events actually recorded in the connected household over the past seven days.</p><div id="ops-weekly-summary"></div></div><div class="ops-card" style="margin-top:16px"><h2>Recent recorded activity</h2><div id="ops-care-events"></div></div><div class="ops-note">No automatic medication adherence scoring, emergency escalation, or remote notifications are implied by this view.</div>
     </section>
     <!-- P1: existing authenticated household roles are visible; invitations need backend tests -->
     <section id="view-access" class="section-view">
@@ -523,6 +523,19 @@ body{background:#140B09;color:#F8EEEA}
     $('ops-care-members').innerHTML=mm.length?mm.map(m=>'<div class="ops-item"><div><strong>'+safe(m.nickname||m.name||'Member')+'</strong><p class="ops-copy">Last recorded check-in: '+safe(dtime(m.lastCheckin))+'</p></div><span class="ops-pill neutral">Record only</span></div>').join(''):empty('No connected profiles yet','Create a Family Space and pair a phone to see check-ins.');
     const meds=mm.flatMap(m=>(Array.isArray(m.medications)?m.medications:[]).map(x=>({name:x.name||'Medication',dose:x.dose||'',owner:m.nickname||m.name||'Member'}))).slice(0,12);
     $('ops-care-meds').innerHTML=meds.length?meds.map(m=>'<div class="ops-item"><div><strong>'+safe(m.name)+'</strong><p class="ops-copy">'+safe([m.dose,m.owner].filter(Boolean).join(' · '))+'</p></div><span class="ops-pill neutral">Schedule record</span></div>').join(''):empty('No medicines shared','Native medicine reminders may still be stored only on the phone.','pill');
+    const lastSevenDays=Date.now()-7*86400000;
+    const weekly=eventRows().filter(e=>{
+      const t=new Date(e.time||0).getTime();
+      return Number.isFinite(t)&&t>=lastSevenDays&&t<=Date.now()+60000;
+    });
+    const weeklyCheckins=weekly.filter(e=>e.type==='checkin'&&!/profile|na-create/i.test(String(e.title||'')));
+    const weeklySos=weekly.filter(e=>e.type==='sos'||/SOS.*opened|SOS mula/i.test(String(e.title||'')));
+    const activeMembers=new Set(weeklyCheckins.map(e=>String(e.memberId||''))).size;
+    $('ops-weekly-summary').innerHTML=
+      '<div class="ops-item"><strong>Recorded Ayos Ako check-ins</strong><span>'+weeklyCheckins.length+'</span></div>'+
+      '<div class="ops-item"><strong>Members with a recorded check-in</strong><span>'+activeMembers+'</span></div>'+
+      '<div class="ops-item"><strong>SOS-opened records</strong><span>'+weeklySos.length+'</span></div>'+
+      '<p class="ops-copy">These counts come from the latest fetched household record. They do not measure wellbeing, medication adherence, or whether an emergency notification was delivered.</p>';
     const ev=eventRows().slice(0,8);
     $('ops-care-events').innerHTML=ev.length?ev.map(e=>'<div class="ops-item"><div><strong>'+safe(e.title||e.type||'Activity')+'</strong><p class="ops-copy">'+safe(e.memberName)+' · '+safe(dtime(e.time))+'</p></div><span class="ops-pill neutral">Recorded</span></div>').join(''):empty('No activity in the connected record','Use Ayos Ako from the paired phone and verify delivery.','clock');
   }
@@ -559,7 +572,7 @@ body{background:#140B09;color:#F8EEEA}
       opsCheckinTest.householdId=state.household.id;
       opsCheckinTest.startedAt=new Date().toISOString();
       $('ops-test-verify').disabled=false;
-      opsText('ops-test-result','Baseline saved in this browser. Now press Ayos Ako on the PAIIRED phone, wait for its server confirmation, then select Verify check-in on server.');
+      opsText('ops-test-result','Baseline saved in this browser. Now press Ayos Ako on the paired phone, wait for its server confirmation, then select Verify check-in on server.');
     }catch(err){
       $('ops-test-verify').disabled=true;opsCheckinTest.householdId=null;
       opsText('ops-test-result','Could not start: '+String(err.message||'Server read failed'));
