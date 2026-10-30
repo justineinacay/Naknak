@@ -250,7 +250,14 @@ body{background:#140B09;color:#F8EEEA}
         <div class="ops-card"><h2>Connectivity</h2><div class="ops-item"><strong>Browser network</strong><span id="ops-network">Checking…</span></div><div class="ops-item"><strong>Signed-in session</strong><span id="ops-auth">Checking…</span></div><div class="ops-item"><strong>Household record</strong><span id="ops-record">Checking…</span></div><div class="ops-item"><strong>Last successful server read</strong><span id="ops-last-fetch">Not confirmed</span></div><div class="ops-item"><strong>Last household record change</strong><span id="ops-last">—</span></div></div>
         <div class="ops-card"><h2>Connected phone records</h2><p id="ops-devices">Checking authorized device records is available on the hosted dashboard.</p><div id="ops-device-list"></div><div class="ops-note">A recent server timestamp confirms only a recorded request. It does not confirm that a caregiver received an alert, that the phone has battery power, or that someone is physically safe.</div></div>
       </div><p id="ops-check-result" class="ops-status" aria-live="polite">Use Run connection check to verify accessible server records.</p>
-      <div class="ops-grid"><div class="ops-card"><h2>Connect your household in four steps</h2><div class="ops-timeline"><div><strong>1. Create your Family Space</strong><p>Sign in with your email and confirm the household profile.</p></div><div><strong>2. Connect a NakNak phone</strong><p>Use the private Family Code in the app’s pairing screen.</p></div><div><strong>3. Send a test Ayos Ako</strong><p>From the paired phone, send a check-in and wait for server confirmation.</p></div><div><strong>4. Confirm the event here</strong><p>Refresh Check-ins &amp; SOS and match the member and timestamp.</p></div></div><button class="btn" data-go="pairing" type="button">View pairing code</button></div>
+      <div class="ops-grid"><div class="ops-card"><h2>Connect your household in four steps</h2><div class="ops-timeline"><div><strong>1. Create your Family Space</strong><p>Sign in with your email and confirm the household profile.</p></div><div><strong>2. Connect a NakNak phone</strong><p>Use the private Family Code in the app’s pairing screen.</p></div><div><strong>3. Send a test Ayos Ako</strong><p>From the paired phone, send a check-in and wait for server confirmation.</p></div><div><strong>4. Confirm the event here</strong><p>Refresh Check-ins &amp; SOS and match the member and timestamp.</p></div></div><button class="btn" data-go="pairing" type="button">View pairing code</button>
+        <div class="ops-note" style="margin-top:16px"><strong>Confirm with a real phone:</strong> Start a verification window, send Ayos Ako from the paired NakNak app, and refresh the server record. This does not test push notification delivery.</div>
+        <div class="ops-actions">
+          <button class="btn primary" id="ops-test-start" type="button">Start Ayos Ako test</button>
+          <button class="btn" id="ops-test-verify" type="button" disabled>Verify check-in on server</button>
+        </div>
+        <p class="ops-status" id="ops-test-result" role="status" aria-live="polite">No device test started.</p>
+      </div>
       <div class="ops-card"><h2>Safety capability boundaries</h2><div class="ops-item"><strong>Ayos Ako &amp; SOS-opened records</strong><span>Supported, confirm on server</span></div><div class="ops-item"><strong>Remote caregiver push / SMS</strong><span>Not active</span></div><div class="ops-item"><strong>Automatic emergency calling</strong><span>Not active</span></div><div class="ops-item"><strong>Location sharing / fall detection</strong><span>Not active</span></div><div class="ops-note">For an emergency, use an appropriate emergency service or call a contact directly. This page is not an emergency dispatch service.</div></div></div>
     </section>
     <!-- P1: read-only records until a verified broader device sync is released -->
@@ -309,7 +316,9 @@ body{background:#140B09;color:#F8EEEA}
       <div class="ops-card"><h2>Release requirements</h2><p>Store publication and subscriptions remain gated by real integration tests and provider approval.</p><div class="ops-item"><strong>Device pairing &amp; SOS-opened two-device test</strong><span>Needs physical test</span></div><div class="ops-item"><strong>Medication reminders on iOS/Android</strong><span>Needs physical test</span></div><div class="ops-item"><strong>Billing &amp; webhook activation</strong><span>Not verified</span></div><div class="ops-item"><strong>Privacy, store assets, and approval</strong><span>Before public release</span></div><a class="btn" href="index.html#pricing">View planned Family pricing</a></div>
     </section>
 
-    <section id="view-settings" class="section-view"><div class="header-flex"><div><div class="eyebrow">ACCOUNT &amp; PLANS</div><h1>Family settings</h1><p>Manage your signed-in session and review NakNak's current subscription offering.</p></div></div><div class="plan-card"><div><div class="eyebrow">NAKNAK FAMILY PLANS</div><strong>Free ₱0 <span style="color:var(--muted);font-size:17px">/ Family ₱199 monthly</span></strong><p class="muted">Family annual: ₱1,990. Paid plan activation and billing are not active on this dashboard.</p></div><a href="index.html#pricing" class="btn soft">Compare plans</a></div><div class="panel" style="margin-top:17px"><div class="panel-header"><h2>Account</h2></div><div class="details-grid"><div class="detail"><label>Signed-in email</label><strong id="settings-email">—</strong></div><div class="detail"><label>Connected household</label><strong id="settings-household">—</strong></div></div><div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap"><button id="signout" type="button" class="btn">Sign out</button><a href="https://justineinacay.github.io/Naknak/dashboard.html" class="btn">Advanced dashboard</a><a href="privacy.html" class="btn">Privacy information</a><a href="support.html" class="btn">Support</a></div></div></section>
+    <section id="view-settings" class="section-view"><div class="header-flex"><div><div class="eyebrow">ACCOUNT &amp; PLANS</div><h1>Family settings</h1><p>Manage your signed-in session and review NakNak's current subscription offering.</p></div></div><div class="plan-card"><div><div class="eyebrow">NAKNAK FAMILY PLANS</div><strong>Free ₱0 <span style="color:var(--muted);font-size:17px">/ Family ₱199 monthly</span></strong><p class="muted">Family annual: ₱1,990. These are proposed prices; monthly billing, renewals, and cancellation handling have not been verified.</p>
+      <p class="ops-copy" style="margin-top:7px">Server-reported household plan: <strong id="ops-current-plan">Unknown · Sign in to confirm</strong></p>
+      <p class="ops-copy">A one-time payment is not a recurring subscription. Do not pay until the complete billing lifecycle is ready.</p></div><a href="index.html#pricing" class="btn soft">Compare plans</a></div><div class="panel" style="margin-top:17px"><div class="panel-header"><h2>Account</h2></div><div class="details-grid"><div class="detail"><label>Signed-in email</label><strong id="settings-email">—</strong></div><div class="detail"><label>Connected household</label><strong id="settings-household">—</strong></div></div><div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap"><button id="signout" type="button" class="btn">Sign out</button><a href="https://justineinacay.github.io/Naknak/dashboard.html" class="btn">Advanced dashboard</a><a href="privacy.html" class="btn">Privacy information</a><a href="support.html" class="btn">Support</a></div></div></section>
     <div class="footer-note">NakNak is a household support tool. A failed or delayed sync does not establish anyone's safety. For urgent emergencies, contact appropriate local emergency services directly. <a href="privacy.html">Privacy</a> · <a href="https://justineinacay.github.io/Naknak/dashboard.html">Advanced management</a> · <a href="index.html">Website</a> · <a href="https://justineinacay.github.io/Naknak/app.html">App</a></div>
   </main></div>
 </div>
@@ -373,6 +382,7 @@ body{background:#140B09;color:#F8EEEA}
     clearInterval(state.timer);state.timer=null;
     state.household=household;state.membershipRole=membership.role||'caregiver';
     state.rev=0;state.value=null;state.selected=null;state.dataError='';state.lastRemoteAt=null;state.lastFetchedAt=null;
+    opsCheckinTest.householdId=null;opsCheckinTest.baseline=new Set();$('ops-test-verify').disabled=true;opsText('ops-test-result','No device test started.');
     try{sessionStorage.setItem('naknak_active_household',household.id)}catch(_){}
     const issued=$('ops-issued-invite');if(issued)issued.hidden=true;
     const secret=$('ops-invite-token-value');if(secret)secret.textContent='';
@@ -514,6 +524,64 @@ body{background:#140B09;color:#F8EEEA}
   }
 
   /* P0: record freshness is not proof of physical safety. */
+  const opsCheckinTest={householdId:null,baseline:new Set(),startedAt:null,busy:false};
+  const opsCheckinKeys=(record)=>{
+    const profiles=Array.isArray(record?.seniors)?record.seniors:[];
+    const result=new Set();
+    for(const member of profiles){
+      const events=Array.isArray(member?.eventLog)?member.eventLog:[];
+      for(const e of events){
+        if(!e||e.type!=='checkin'||/profile|na-create/i.test(String(e.title||'')))continue;
+        const key=String(member.id||'')+'|'+String(e.id||e.time||'')+'|'+String(e.title||'');
+        result.add(key);
+      }
+    }
+    return result;
+  };
+  async function opsReadCheckinState(){
+    if(!state.session||!state.client||!state.household)throw Error('Sign in to a hosted Family Space.');
+    const {data,error}=await state.client.from('naknak_state')
+      .select('state,updated_at').eq('household_id',state.household.id).maybeSingle();
+    if(error||!data)throw Error('Cannot verify household state on the server.');
+    return data;
+  }
+  async function opsStartCheckinTest(){
+    if(opsCheckinTest.busy)return;
+    opsCheckinTest.busy=true;$('ops-test-start').disabled=true;
+    opsText('ops-test-result','Reading baseline from the NakNak server…');
+    try{
+      const record=await opsReadCheckinState();
+      opsCheckinTest.baseline=opsCheckinKeys(record.state);
+      opsCheckinTest.householdId=state.household.id;
+      opsCheckinTest.startedAt=new Date().toISOString();
+      $('ops-test-verify').disabled=false;
+      opsText('ops-test-result','Baseline saved in this browser. Now press Ayos Ako on the PAIIRED phone, wait for its server confirmation, then select Verify check-in on server.');
+    }catch(err){
+      $('ops-test-verify').disabled=true;opsCheckinTest.householdId=null;
+      opsText('ops-test-result','Could not start: '+String(err.message||'Server read failed'));
+    }finally{opsCheckinTest.busy=false;$('ops-test-start').disabled=false;}
+  }
+  async function opsVerifyCheckinTest(){
+    if(opsCheckinTest.busy||opsCheckinTest.householdId!==state.household?.id){
+      opsText('ops-test-result','Start a new test for this Family Space.');return;
+    }
+    opsCheckinTest.busy=true;$('ops-test-verify').disabled=true;
+    opsText('ops-test-result','Checking the server for a new Ayos Ako event…');
+    try{
+      const row=await opsReadCheckinState();
+      const latest=opsCheckinKeys(row.state);
+      const newKeys=[...latest].filter(key=>!opsCheckinTest.baseline.has(key));
+      if(newKeys.length){
+        opsText('ops-test-result','A NEW check-in record was confirmed on the NakNak server ('+dtime(row.updated_at)+'). This does not confirm remote push, SMS, or emergency dispatch.');
+        opsCheckinTest.baseline=latest;
+      }else{
+        opsText('ops-test-result','No new Ayos Ako record confirmed. Verify the paired app reported server success, then retry. This does not indicate the member is unsafe.');
+      }
+    }catch(err){
+      opsText('ops-test-result','Unable to check: '+String(err.message||'Server unavailable')+'. No delivery can be confirmed.');
+    }finally{opsCheckinTest.busy=false;$('ops-test-verify').disabled=false;}
+  }
+
   function opsRenderWarnings(){
     const issues=[];
     if(!state.session){
@@ -670,6 +738,8 @@ body{background:#140B09;color:#F8EEEA}
     opsText('ops-last-fetch',state.lastFetchedAt?dtime(state.lastFetchedAt):'Not confirmed');
     opsRenderAccess();
     opsRenderWarnings();
+    const rawPlan=String(state.value?.plan||'free').toLowerCase();
+    opsText('ops-current-plan',state.session?(rawPlan==='family'?'Family (server record)':rawPlan==='essential'?'Legacy Essential (server record)':'Free (server record)'):'Not verified · Local preview');
     opsRenderCare();
     opsRenderPrep();
   }
@@ -813,6 +883,8 @@ body{background:#140B09;color:#F8EEEA}
     if(!document.hidden && state.household && state.client && state.session)refresh();
     else if(state.household)opsRenderWarnings();
   });
+  $('ops-test-start').addEventListener('click',opsStartCheckinTest);
+  $('ops-test-verify').addEventListener('click',opsVerifyCheckinTest);
   $('ops-run-check').addEventListener('click',opsRunConnection);
   $('ops-prep-items').addEventListener('change',e=>{const box=e.target.closest('input[data-prep]');if(box)opsTogglePrep(box.dataset.prep,box.checked);});
   $('ops-support-form').addEventListener('submit',opsSubmitSupport);
