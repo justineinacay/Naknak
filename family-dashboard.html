@@ -335,7 +335,7 @@ body{background:#140B09;color:#F8EEEA}
   const SUPA_URL = 'https://louqshzgqutxydfqgnyz.supabase.co';
   const SUPA_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxvdXFzaHpncXV0eHlkZnFnbnl6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwMjgzMTUsImV4cCI6MjA5ODYwNDMxNX0.tvgCedmaK9OxRqeW1piNNRr4KXT0XFFF5EuJ3692vgU';
   const $ = id => document.getElementById(id);
-  const state = { client:null, session:null, household:null, value:null, rev:0, selected:null, currentView:'overview', channel:null, timer:null, booting:true, dataError:'', refreshing:false, lastRemoteAt:null, lastFetchedAt:null, realtimeStatus:'unknown', households:[], membershipRole:null };
+  const state = { client:null, session:null, household:null, value:null, rev:0, selected:null, currentView:'overview', channel:null, timer:null, booting:true, dataError:'', refreshing:false, lastRemoteAt:null, lastFetchedAt:null, realtimeStatus:'unknown', households:[], membershipRole:null, billingDisplay:null };
   const safe = val => String(val ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const icon = n => `<svg aria-hidden="true"><use href="#ic-${n}"></use></svg>`;
   const dtime = date => {if(!date)return 'Not recorded';const d=new Date(date);if(!Number.isFinite(d.getTime()))return 'Not recorded';return d.toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'});};
@@ -390,7 +390,7 @@ body{background:#140B09;color:#F8EEEA}
     if(state.channel&&state.client){await state.client.removeChannel(state.channel);state.channel=null;}
     clearInterval(state.timer);state.timer=null;
     state.household=household;state.membershipRole=membership.role||'caregiver';
-    state.rev=0;state.value=null;state.selected=null;state.dataError='';state.lastRemoteAt=null;state.lastFetchedAt=null;
+    state.rev=0;state.value=null;state.selected=null;state.dataError='';state.lastRemoteAt=null;state.lastFetchedAt=null;state.billingDisplay=null;
     opsCheckinTest.householdId=null;opsCheckinTest.memberId=null;opsCheckinTest.baseline=new Set();$('ops-test-verify').disabled=true;opsText('ops-test-result','No device test started.');
     try{sessionStorage.setItem('naknak_active_household',household.id)}catch(_){}
     const issued=$('ops-issued-invite');if(issued)issued.hidden=true;
@@ -662,6 +662,8 @@ body{background:#140B09;color:#F8EEEA}
       if(error)throw error;
       if(state.household?.id!==householdId)return;
       if(!data){
+        state.billingDisplay='No active recurring subscription verified';
+        opsText('ops-current-plan',state.billingDisplay);
         opsText('ops-billing-status','No active recurring plan confirmed');
         opsText('ops-billing-end','—');
         opsText('ops-billing-message','Free access remains available. Do not infer a recurring plan from an older one-time payment record.');
@@ -670,13 +672,17 @@ body{background:#140B09;color:#F8EEEA}
       const end=data.period_end?new Date(data.period_end):null;
       const dateValid=end&&Number.isFinite(end.getTime());
       const active=data.status==='active'&&dateValid&&end.getTime()>Date.now();
+      state.billingDisplay=active?'Family · verified '+String(data.billing_cycle||'')+' period':'No current paid entitlement verified';
+      opsText('ops-current-plan',state.billingDisplay);
       opsText('ops-billing-status',active?'Active '+String(data.billing_cycle||'')+' subscription':String(data.status||'unknown')+' · Not active');
       opsText('ops-billing-end',dateValid?dtime(data.period_end):'Not confirmed');
       opsText('ops-billing-message',active
         ?'Current server period is valid until '+dtime(data.period_end)+(data.cancel_at_period_end?' and is set to end at that date.':'.')
         :'No current paid entitlement is verified. This dashboard does not charge or upgrade an account.');
-      if(active)opsText('ops-current-plan','Family · verified subscription period');
+
     }catch(_){
+      state.billingDisplay='Unable to verify paid subscription';
+      opsText('ops-current-plan',state.billingDisplay);
       opsText('ops-billing-status','Subscription service not configured or unavailable');
       opsText('ops-billing-end','Not confirmed');
       opsText('ops-billing-message','The billing read model is not accessible. No subscription activation can be confirmed on this page.');
@@ -805,7 +811,7 @@ body{background:#140B09;color:#F8EEEA}
     opsRenderAccess();
     opsRenderWarnings();
     const rawPlan=String(state.value?.plan||'free').toLowerCase();
-    opsText('ops-current-plan',state.session?(rawPlan==='family'?'Legacy Family flag · subscription requires verification':rawPlan==='essential'?'Legacy Essential record · not a new plan':'Free (household record)'):'Not verified · Local preview');
+    opsText('ops-current-plan',state.billingDisplay||(state.session?(rawPlan==='family'?'Legacy Family flag · subscription requires verification':rawPlan==='essential'?'Legacy Essential record · not a new plan':'Free (household record)'):'Not verified · Local preview'));
     const memberSelector=$('ops-test-member');
     if(memberSelector){
       const current=memberSelector.value;
