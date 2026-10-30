@@ -125,4 +125,39 @@ begin
     raise exception 'Anonymous invite creation permission leaked';
   end if;
 end $$;
-select 'PASS: owner-only, one-use, hashed caregiver invitations, RLS boundaries' as result;
+-- Read-only subscription table: payments cannot be activated by browser users.
+\ir ../supabase/migrations/20261031094500_subscription_read_model.sql
+insert into public.naknak_family_subscriptions(
+  household_id,provider,provider_subscription_id,billing_cycle,status,period_start,period_end
+) values
+('11111111-1111-4111-8111-111111111111','manual','ci-sub-1','monthly','active',now(),now()+interval '30 days'),
+('22222222-2222-4222-8222-222222222222','manual','ci-sub-2','annual','active',now(),now()+interval '365 days');
+
+do $
+begin
+  if has_table_privilege('authenticated','public.naknak_family_subscriptions','INSERT') or
+     has_table_privilege('authenticated','public.naknak_family_subscriptions','UPDATE') or
+     has_table_privilege('anon','public.naknak_family_subscriptions','SELECT') or
+     not has_table_privilege('authenticated','public.naknak_family_subscriptions','SELECT') then
+    raise exception 'Subscription table exposes unsafe client privileges';
+  end if;
+end $;
+
+set role authenticated;
+select set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false);
+do $
+declare n integer;
+begin
+  select count(*) into n from public.naknak_family_subscriptions;
+  if n<>1 then raise exception 'Household A could see another household subscription'; end if;
+end $;
+select set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',false);
+do $
+declare n integer;
+begin
+  select count(*) into n from public.naknak_family_subscriptions;
+  if n<>1 then raise exception 'Household B could see another household subscription'; end if;
+end $;
+
+reset role;
+select 'PASS: one-use owner-only invites; subscription SELECT-only access scoped by RLS' as result;
