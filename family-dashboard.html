@@ -67,6 +67,40 @@ body{background:#140B09;color:#F8EEEA}
 .local-preview-notice{margin:0 0 24px;padding:15px 19px;border:1px solid #e4a38b;border-left:5px solid var(--red);background:#fff2e9;border-radius:14px;display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap;color:#57261f}
 .local-preview-notice[hidden]{display:none!important}.local-preview-notice strong{font-weight:900}.local-preview-notice span{flex:1;min-width:220px;font-size:13px}.local-preview-notice a{color:var(--red-d);font-weight:900;text-decoration:underline;text-underline-offset:3px}
 @media(max-width:650px){.local-preview-notice{display:block}.local-preview-notice span{display:block;margin:7px 0 10px}}
+
+/* NakNak household operations • P0–P2, 2026 */
+.ops-intro{max-width:750px;line-height:1.65;color:var(--muted);margin:0 0 20px}
+.ops-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin:18px 0}
+.ops-card{border:1px solid rgba(122,16,8,.12);background:var(--surface,#fff);border-radius:20px;padding:22px;min-width:0}
+.ops-card h2{font-size:18px;margin:0 0 8px}.ops-card p{font-size:13px;line-height:1.6;color:var(--muted);margin:3px 0 12px}
+.ops-pill{font-size:11px;font-weight:850;display:inline-flex;align-items:center;gap:6px;border-radius:30px;padding:6px 10px;background:#fff1ea;color:#823022}
+.ops-pill.ok{background:#e6f7ea;color:#12633d}.ops-pill.warn{background:#fff0d5;color:#8c4a04}
+.ops-pill.neutral{background:#efeae5;color:#4f463c}
+.ops-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 0;border-bottom:1px solid rgba(122,16,8,.09)}
+.ops-item:last-child{border-bottom:0}.ops-item strong{font-size:14px}.ops-item span{font-size:12px;color:var(--muted)}
+.ops-actions{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0}
+.ops-copy{color:var(--muted);line-height:1.6;font-size:13px}
+.ops-status{font-size:13px;min-height:24px;margin:8px 0;font-weight:750}
+.ops-status[role="alert"]{color:#992118}
+.ops-check-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
+.ops-check{display:flex;align-items:center;gap:11px;border:1px solid rgba(122,16,8,.14);background:rgba(255,255,255,.7);border-radius:13px;padding:14px;cursor:pointer;min-height:56px;font-weight:700;font-size:13px}
+.ops-check input{width:19px;height:19px;accent-color:#C4301E;flex:0 0 auto}
+.ops-check:has(input:checked){border-color:#b0dab7;background:#f1fbf0}
+.ops-check input:disabled{cursor:wait}
+.ops-note{padding:13px 16px;background:#fff4eb;border-radius:14px;color:#643423;line-height:1.55;font-size:13px;margin:14px 0}
+.ops-note strong{font-weight:850}
+.ops-field{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:750;margin:13px 0}
+.ops-field input,.ops-field textarea{width:100%;border:1px solid #dac8bb;background:#fff;color:#33231f;border-radius:12px;padding:13px;min-height:47px;font:inherit}
+.ops-field textarea{min-height:120px;resize:vertical}
+.ops-progress{height:9px;background:#eaded6;border-radius:20px;overflow:hidden;margin:15px 0}
+.ops-progress > div{height:100%;width:0;background:#C4301E;transition:width .3s}
+.ops-timeline{border-left:2px solid #ebd1c8;margin:16px 0 0 12px;padding-left:20px}
+.ops-timeline>div{margin:0 0 16px;position:relative}
+.ops-timeline>div:before{content:"";position:absolute;width:10px;height:10px;left:-26px;top:3px;background:#C4301E;border-radius:50%}
+.ops-timeline strong{display:block;font-size:13px}.ops-timeline p{font-size:12px;margin:4px 0;color:var(--muted)}
+@media(max-width:760px){.ops-grid{grid-template-columns:1fr}.ops-check-list{grid-template-columns:1fr}.ops-card{padding:17px}}
+@media(prefers-reduced-motion:reduce){.ops-progress>div{transition:none}}
+
 </style>
 </head>
 <body>
@@ -121,6 +155,11 @@ body{background:#140B09;color:#F8EEEA}
   <button data-view="medical" type="button"><svg><use href="#ic-id"/></svg> Medical ID</button>
   <button data-view="preparedness" type="button"><svg><use href="#ic-folder"/></svg> Vault &amp; Prep</button>
   <button data-view="pairing" type="button"><svg><use href="#ic-link"/></svg> Pair a device</button>
+  <button data-view="connection" type="button"><svg><use href="#ic-link"/></svg> Connection Center</button>
+  <button data-view="carehub" type="button"><svg><use href="#ic-heart"/></svg> Daily Care Hub</button>
+  <button data-view="access" type="button"><svg><use href="#ic-users"/></svg> Family Access</button>
+  <button data-view="sharedprep" type="button"><svg><use href="#ic-check"/></svg> Shared Prep</button>
+  <button data-view="helpdesk" type="button"><svg><use href="#ic-shield"/></svg> Support &amp; Launch</button>
   <button data-view="settings" type="button"><svg><use href="#ic-settings"/></svg> Settings &amp; plan</button>
   </nav></div>
   <div class="sidebar-bottom"><strong>Safety information, not emergency dispatch.</strong><p style="font-size:12px;margin:10px 0;color:#cbaa9f">SOS-opened status does not confirm a call, SMS, or responder dispatch.</p><a href="https://justineinacay.github.io/Naknak/app.html">Open NakNak app ↗</a><a href="https://justineinacay.github.io/Naknak/dashboard.html">Advanced management ↗</a><a href="index.html">Back to website ↗</a></div>
@@ -178,6 +217,41 @@ body{background:#140B09;color:#F8EEEA}
 </section>
 <section id="view-preparedness" class="section-view"><div class="header-flex"><div><div class="eyebrow">VAULT &amp; PREP</div><h1>Household preparedness</h1><p>These app areas may store sensitive files and checklists locally. This dashboard never assumes on-device documents are already shared.</p></div><a href="https://justineinacay.github.io/Naknak/app.html" class="btn primary">Open NakNak app <svg><use href="#ic-arrow"/></svg></a></div><div class="feature-grid grid"><div class="feature-card"><div class="feature-title"><svg><use href="#ic-folder"/></svg> Document vault</div><span class="tag neutral">Device-first</span><p>Files such as IDs and documents may exist on the member's device without being uploaded. For safety, the website does not attempt to access them or expose private file URLs.</p></div><div class="feature-card"><div class="feature-title"><svg><use href="#ic-check"/></svg> Go-bag preparation</div><span class="tag neutral">Sync varies</span><p>Use Prep in the app for your supplies checklist. Device-only progress may not be available here.</p></div><div class="feature-card"><div class="feature-title"><svg><use href="#ic-shield"/></svg> Emergency readiness</div><span class="tag neutral">Always review</span><p>Confirm contacts and emergency supplies regularly. NakNak supports preparedness but does not replace local emergency services.</p></div></div><div style="margin-top:20px" class="panel"><div class="panel-header"><h2>Synced preparation summary</h2></div><div id="prep-body"></div></div></section>
     <section id="view-pairing" class="section-view"><div class="header-flex"><div><div class="eyebrow">DEVICE CONNECTION</div><h1>Connect your NakNak phone.</h1><p>Your Family Space pairs with the mobile/web app using a code. Pairing and synchronization require an internet connection.</p></div><a class="btn primary" href="https://justineinacay.github.io/Naknak/app.html">Open NakNak app <svg><use href="#ic-arrow"/></svg></a></div><div class="pair-box"><div><div class="eyebrow" style="color:#ffd2c5">FAMILY PAIRING CODE</div><div id="pair-code" class="pair-code">—</div><p>Enter this code in the app's Family Code / Connect screen. Keep it private and avoid sharing screenshots containing it.</p></div><button type="button" class="btn outline" id="copy-code"><svg><use href="#ic-copy"/></svg> Copy code</button></div><div style="margin-top:20px" class="panel"><div class="panel-header"><h2>Connect in three steps</h2></div><div class="list-row"><strong>01 &nbsp; Open the NakNak app</strong><span class="muted">Use your existing phone or web beta</span></div><div class="list-row"><strong>02 &nbsp; Find Family Code pairing</strong><span class="muted">Enter the code shown above</span></div><div class="list-row"><strong>03 &nbsp; Return to Family Dashboard</strong><span class="muted">Use Refresh to confirm synced household activity</span></div><p class="note" style="margin-top:16px">A pairing code is sensitive and may be single-use or time-limited. If it no longer works, use the existing account support and pairing process; don't post it publicly.</p><p id="copy-feedback" class="form-help" aria-live="polite"></p></div></section>
+
+    <!-- P0: supported connection checks, never a proof of physical safety -->
+    <section id="view-connection" class="section-view">
+      <div class="header-flex"><div><div class="eyebrow">P0 • CONNECTIVITY &amp; RELIABILITY</div><h1>Connection Center</h1><p>Know what actually reached the NakNak server. Device silence is never proof that a person is safe.</p></div><button class="btn primary" type="button" id="ops-run-check">Run connection check</button></div>
+      <div class="ops-grid">
+        <div class="ops-card"><h2>Connectivity</h2><div class="ops-item"><strong>Browser network</strong><span id="ops-network">Checking…</span></div><div class="ops-item"><strong>Signed-in session</strong><span id="ops-auth">Checking…</span></div><div class="ops-item"><strong>Household record</strong><span id="ops-record">Checking…</span></div><div class="ops-item"><strong>Last record update</strong><span id="ops-last">—</span></div></div>
+        <div class="ops-card"><h2>Connected phone records</h2><p id="ops-devices">Checking authorized device records is available on the hosted dashboard.</p><div id="ops-device-list"></div><div class="ops-note">A recent server timestamp confirms only a recorded request. It does not confirm that a caregiver received an alert, that the phone has battery power, or that someone is physically safe.</div></div>
+      </div><p id="ops-check-result" class="ops-status" aria-live="polite">Use Run connection check to verify accessible server records.</p>
+      <div class="ops-grid"><div class="ops-card"><h2>Connect your household in four steps</h2><div class="ops-timeline"><div><strong>1. Create your Family Space</strong><p>Sign in with your email and confirm the household profile.</p></div><div><strong>2. Connect a NakNak phone</strong><p>Use the private Family Code in the app’s pairing screen.</p></div><div><strong>3. Send a test Ayos Ako</strong><p>From the paired phone, send a check-in and wait for server confirmation.</p></div><div><strong>4. Confirm the event here</strong><p>Refresh Check-ins &amp; SOS and match the member and timestamp.</p></div></div><button class="btn" data-go="pairing" type="button">View pairing code</button></div>
+      <div class="ops-card"><h2>Safety capability boundaries</h2><div class="ops-item"><strong>Ayos Ako &amp; SOS-opened records</strong><span>Supported, confirm on server</span></div><div class="ops-item"><strong>Remote caregiver push / SMS</strong><span>Not active</span></div><div class="ops-item"><strong>Automatic emergency calling</strong><span>Not active</span></div><div class="ops-item"><strong>Location sharing / fall detection</strong><span>Not active</span></div><div class="ops-note">For an emergency, use an appropriate emergency service or call a contact directly. This page is not an emergency dispatch service.</div></div></div>
+    </section>
+    <!-- P1: read-only records until a verified broader device sync is released -->
+    <section id="view-carehub" class="section-view">
+      <div class="header-flex"><div><div class="eyebrow">P1 • EVERYDAY CARE</div><h1>Daily Care Hub</h1><p>See check-ins, recorded medicines, and household activity together without suggesting that a missing record means a missed dose.</p></div><button class="btn" data-go="activity" type="button">Full activity</button></div>
+      <div class="ops-grid"><div class="ops-card"><h2>Family check-ins</h2><div id="ops-care-members"></div></div><div class="ops-card"><h2>Medication information</h2><p>Only schedules present in the connected record appear; native reminders remain on the phone.</p><div id="ops-care-meds"></div></div></div>
+      <div class="ops-card"><h2>Recent confirmed events</h2><div id="ops-care-events"></div></div><div class="ops-note">No automatic medication adherence scoring, emergency escalation, or remote notifications are implied by this view.</div>
+    </section>
+    <!-- P1: existing authenticated household roles are visible; invitations need backend tests -->
+    <section id="view-access" class="section-view">
+      <div class="header-flex"><div><div class="eyebrow">P1 • ACCESS &amp; PRIVACY</div><h1>Family Access</h1><p>Household membership is controlled by your signed-in account and database security policies.</p></div></div>
+      <div class="ops-grid"><div class="ops-card"><h2>Your access</h2><div class="ops-item"><strong>Email account</strong><span id="ops-access-email">—</span></div><div class="ops-item"><strong>Household membership</strong><span id="ops-access-membership">Checking…</span></div><div class="ops-item"><strong>Role</strong><span id="ops-access-role">—</span></div></div>
+      <div class="ops-card"><h2>Invite other caregivers</h2><span class="ops-pill warn">Pending security validation</span><p>Invitations and role changes must be enforced by the database, not by a browser-only dropdown. Until that workflow passes cross-household authorization tests, do not share your account or pairing code as a substitute for a caregiver invitation.</p><a class="btn" href="privacy.html">Privacy information</a></div></div>
+    </section>
+    <!-- P2: household-shared checklist only after RLS migration succeeds; draft fallback explicit -->
+    <section id="view-sharedprep" class="section-view">
+      <div class="header-flex"><div><div class="eyebrow">P2 • HOUSEHOLD READINESS</div><h1>Preparedness checklist</h1><p>Review a practical go-bag checklist. Shared progress is available only after the secured database table has been configured.</p></div></div>
+      <div class="ops-card"><div class="ops-item"><strong id="ops-prep-mode">Checking checklist storage…</strong><span id="ops-prep-count">0 of 8 checked</span></div><div class="ops-progress"><div id="ops-prep-progress"></div></div><div id="ops-prep-items" class="ops-check-list"></div><p id="ops-prep-message" class="ops-status" aria-live="polite"></p><div class="ops-note">This is a planning list, not proof that supplies are physically present. Vault and medical IDs are not transferred or displayed here.</div></div>
+    </section>
+    <!-- P2: request tickets use RLS when available, otherwise a transparent email fallback -->
+    <section id="view-helpdesk" class="section-view">
+      <div class="header-flex"><div><div class="eyebrow">P2 • SUPPORT &amp; RELEASE</div><h1>NakNak Support Center</h1><p>Report account and technical concerns. This is not an emergency help channel.</p></div><a class="btn" href="support.html">Support information</a></div>
+      <div class="ops-grid"><div class="ops-card"><h2>Contact support</h2><form id="ops-support-form"><label class="ops-field">Subject<input id="ops-support-subject" maxlength="120" minlength="5" required placeholder="Example: Family Code will not pair"></label><label class="ops-field">How can we help?<textarea id="ops-support-message" maxlength="2000" minlength="10" required placeholder="Explain the problem without sending sensitive medical records or device secrets."></textarea></label><button class="btn primary" type="submit">Submit support request</button><p id="ops-support-result" class="ops-status" aria-live="polite"></p></form></div><div class="ops-card"><h2>My support requests</h2><div id="ops-support-history"><p class="ops-copy">Load the hosted dashboard to view requests.</p></div></div></div>
+      <div class="ops-card"><h2>Release requirements</h2><p>Store publication and subscriptions remain gated by real integration tests and provider approval.</p><div class="ops-item"><strong>Device pairing &amp; SOS-opened two-device test</strong><span>Needs physical test</span></div><div class="ops-item"><strong>Medication reminders on iOS/Android</strong><span>Needs physical test</span></div><div class="ops-item"><strong>Billing &amp; webhook activation</strong><span>Not verified</span></div><div class="ops-item"><strong>Privacy, store assets, and approval</strong><span>Before public release</span></div><a class="btn" href="index.html#pricing">View planned Family pricing</a></div>
+    </section>
+
     <section id="view-settings" class="section-view"><div class="header-flex"><div><div class="eyebrow">ACCOUNT &amp; PLANS</div><h1>Family settings</h1><p>Manage your signed-in session and review NakNak's current subscription offering.</p></div></div><div class="plan-card"><div><div class="eyebrow">NAKNAK FAMILY PLANS</div><strong>Free ₱0 <span style="color:var(--muted);font-size:17px">/ Family ₱199 monthly</span></strong><p class="muted">Family annual: ₱1,990. Paid plan activation and billing are not active on this dashboard.</p></div><a href="index.html#pricing" class="btn soft">Compare plans</a></div><div class="panel" style="margin-top:17px"><div class="panel-header"><h2>Account</h2></div><div class="details-grid"><div class="detail"><label>Signed-in email</label><strong id="settings-email">—</strong></div><div class="detail"><label>Connected household</label><strong id="settings-household">—</strong></div></div><div style="margin-top:22px;display:flex;gap:10px;flex-wrap:wrap"><button id="signout" type="button" class="btn">Sign out</button><a href="https://justineinacay.github.io/Naknak/dashboard.html" class="btn">Advanced dashboard</a><a href="privacy.html" class="btn">Privacy information</a><a href="support.html" class="btn">Support</a></div></div></section>
     <div class="footer-note">NakNak is a household support tool. A failed or delayed sync does not establish anyone's safety. For urgent emergencies, contact appropriate local emergency services directly. <a href="privacy.html">Privacy</a> · <a href="https://justineinacay.github.io/Naknak/dashboard.html">Advanced management</a> · <a href="index.html">Website</a> · <a href="https://justineinacay.github.io/Naknak/app.html">App</a></div>
   </main></div>
