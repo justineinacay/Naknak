@@ -252,6 +252,11 @@ body{background:#140B09;color:#F8EEEA}
       </div><p id="ops-check-result" class="ops-status" aria-live="polite">Use Run connection check to verify accessible server records.</p>
       <div class="ops-grid"><div class="ops-card"><h2>Connect your household in four steps</h2><div class="ops-timeline"><div><strong>1. Create your Family Space</strong><p>Sign in with your email and confirm the household profile.</p></div><div><strong>2. Connect a NakNak phone</strong><p>Use the private Family Code in the app’s pairing screen.</p></div><div><strong>3. Send a test Ayos Ako</strong><p>From the paired phone, send a check-in and wait for server confirmation.</p></div><div><strong>4. Confirm the event here</strong><p>Refresh Check-ins &amp; SOS and match the member and timestamp.</p></div></div><button class="btn" data-go="pairing" type="button">View pairing code</button>
         <div class="ops-note" style="margin-top:16px"><strong>Confirm with a real phone:</strong> Start a verification window, send Ayos Ako from the paired NakNak app, and refresh the server record. This does not test push notification delivery.</div>
+        <label class="ops-field" style="max-width:370px">Choose the member you are testing
+          <select id="ops-test-member" aria-label="Member to verify" style="width:100%;min-height:46px;padding:10px;border-radius:12px;border:1px solid #decabf">
+            <option value="">No linked members yet</option>
+          </select>
+        </label>
         <div class="ops-actions">
           <button class="btn primary" id="ops-test-start" type="button">Start Ayos Ako test</button>
           <button class="btn" id="ops-test-verify" type="button" disabled>Verify check-in on server</button>
@@ -386,7 +391,7 @@ body{background:#140B09;color:#F8EEEA}
     clearInterval(state.timer);state.timer=null;
     state.household=household;state.membershipRole=membership.role||'caregiver';
     state.rev=0;state.value=null;state.selected=null;state.dataError='';state.lastRemoteAt=null;state.lastFetchedAt=null;
-    opsCheckinTest.householdId=null;opsCheckinTest.baseline=new Set();$('ops-test-verify').disabled=true;opsText('ops-test-result','No device test started.');
+    opsCheckinTest.householdId=null;opsCheckinTest.memberId=null;opsCheckinTest.baseline=new Set();$('ops-test-verify').disabled=true;opsText('ops-test-result','No device test started.');
     try{sessionStorage.setItem('naknak_active_household',household.id)}catch(_){}
     const issued=$('ops-issued-invite');if(issued)issued.hidden=true;
     const secret=$('ops-invite-token-value');if(secret)secret.textContent='';
@@ -541,7 +546,7 @@ body{background:#140B09;color:#F8EEEA}
   }
 
   /* P0: record freshness is not proof of physical safety. */
-  const opsCheckinTest={householdId:null,baseline:new Set(),startedAt:null,busy:false};
+  const opsCheckinTest={householdId:null,memberId:null,baseline:new Set(),startedAt:null,busy:false};
   const opsCheckinKeys=(record)=>{
     const profiles=Array.isArray(record?.seniors)?record.seniors:[];
     const result=new Set();
@@ -564,12 +569,17 @@ body{background:#140B09;color:#F8EEEA}
   }
   async function opsStartCheckinTest(){
     if(opsCheckinTest.busy)return;
+    const memberId=$('ops-test-member')?.value;
+    if(!memberId||!members().some(m=>String(m.id)===memberId)){
+      opsText('ops-test-result','Select the connected family member whose phone you will test.');return;
+    }
     opsCheckinTest.busy=true;$('ops-test-start').disabled=true;
     opsText('ops-test-result','Reading baseline from the NakNak server…');
     try{
       const record=await opsReadCheckinState();
       opsCheckinTest.baseline=opsCheckinKeys(record.state);
       opsCheckinTest.householdId=state.household.id;
+      opsCheckinTest.memberId=memberId;
       opsCheckinTest.startedAt=new Date().toISOString();
       $('ops-test-verify').disabled=false;
       opsText('ops-test-result','Baseline saved in this browser. Now press Ayos Ako on the paired phone, wait for its server confirmation, then select Verify check-in on server.');
@@ -587,7 +597,7 @@ body{background:#140B09;color:#F8EEEA}
     try{
       const row=await opsReadCheckinState();
       const latest=opsCheckinKeys(row.state);
-      const newKeys=[...latest].filter(key=>!opsCheckinTest.baseline.has(key));
+      const newKeys=[...latest].filter(key=>key.startsWith(opsCheckinTest.memberId+'|')&&!opsCheckinTest.baseline.has(key));
       if(newKeys.length){
         opsText('ops-test-result','A NEW check-in record was confirmed on the NakNak server ('+dtime(row.updated_at)+'). This does not confirm remote push, SMS, or emergency dispatch.');
         opsCheckinTest.baseline=latest;
@@ -796,6 +806,16 @@ body{background:#140B09;color:#F8EEEA}
     opsRenderWarnings();
     const rawPlan=String(state.value?.plan||'free').toLowerCase();
     opsText('ops-current-plan',state.session?(rawPlan==='family'?'Legacy Family flag · subscription requires verification':rawPlan==='essential'?'Legacy Essential record · not a new plan':'Free (household record)'):'Not verified · Local preview');
+    const memberSelector=$('ops-test-member');
+    if(memberSelector){
+      const current=memberSelector.value;
+      const choices=members();
+      memberSelector.innerHTML=choices.length?choices.map(m=>
+        '<option value="'+safe(m.id||'')+'">'+safe(m.nickname||m.name||'Member')+'</option>'
+      ).join(''):'<option value="">No linked members yet</option>';
+      if(choices.some(m=>String(m.id)===current))memberSelector.value=current;
+      memberSelector.disabled=choices.length===0;
+    }
     opsRenderCare();
     opsRenderPrep();
   }
