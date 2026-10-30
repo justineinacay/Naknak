@@ -111,3 +111,10 @@ node scripts/verify-web.mjs
 ## P0–P2 review phase
 
 The new household operations rollout is documented in [P0-P2-IMPLEMENTATION.md](P0-P2-IMPLEMENTATION.md). These dashboard modules should not be treated as production-complete until their required migration, access policy tests, device tests, and provider integrations pass. The secure native sync currently covers confirmed Ayos Ako and SOS-opened events only.
+
+
+## P0–P1 reliability and caregiver invitations
+
+The family-first dashboard now includes multi-household switching, an explicit server-baseline Ayos Ako test, fresh-record warnings, actual seven-day activity counts, and an owner-gated invitation UI. See [P0-P1-IMPLEMENTATION.md](P0-P1-IMPLEMENTATION.md).
+
+The caregiver invitation and subscription read model database migrations are staged for security review; **not deployed**. Recurring Family checkout is disabled in the review branch until the billing lifecycle is verified. Native remote push/SMS and full medicine synchronization are not implemented.
