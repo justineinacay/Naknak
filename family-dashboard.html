@@ -101,6 +101,19 @@ body{background:#140B09;color:#F8EEEA}
 @media(max-width:760px){.ops-grid{grid-template-columns:1fr}.ops-check-list{grid-template-columns:1fr}.ops-card{padding:17px}}
 @media(prefers-reduced-motion:reduce){.ops-progress>div{transition:none}}
 
+
+/* P0 reliability and P1 one-time caregiver invitations */
+.ops-sync-warning{margin:14px 0 20px;padding:14px 17px;border:1px solid #d8a072;background:#fff2e4;border-radius:14px;color:#6f340d;font-size:13px;line-height:1.5;font-weight:800}
+.ops-sync-warning[hidden]{display:none}
+.ops-sync-warning.danger{border-color:#d18880;background:#fff0ef;color:#811d19}
+.ops-invite-token{background:#fff;border:1px dashed #c17a5c;padding:14px 12px;overflow-wrap:anywhere;border-radius:12px;font-size:13px;letter-spacing:.04em;font-weight:800;color:#792d19}
+.ops-form-line{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.ops-form-line .ops-field{flex:1 1 200px;min-width:0}
+.ops-form-line button{min-height:46px}
+.ops-access-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;margin-bottom:16px}
+.ops-join-help{font-size:12px;color:var(--muted);line-height:1.55}
+@media(max-width:760px){.ops-access-layout{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -140,7 +153,19 @@ body{background:#140B09;color:#F8EEEA}
     </div>
     <div id="household-create" class="hidden"><div class="eyebrow">GET STARTED</div><h2>Create your Family Space.</h2><p class="lede">Choose a first member name, then connect the NakNak app using your pairing code.</p>
       <form id="create-form"><div class="form-field"><label for="first-name">First member's name or nickname</label><input id="first-name" maxlength="60" placeholder="e.g. Nanay, Tatay, Alex" required></div><button id="create-btn" class="btn primary" type="submit">Create Family Space <svg><use href="#ic-arrow"/></svg></button></form>
-      <p id="create-error" class="form-error" role="alert"></p><button class="btn small" id="create-signout" type="button" style="margin-top:20px">Sign out</button>
+      
+      <div class="ops-card" style="margin-top:20px">
+        <h2>Already invited to a Family Space?</h2>
+        <p class="ops-copy">Sign in first, then enter the one-time caregiver invitation token supplied by the household owner. This is different from a phone pairing code.</p>
+        <form id="ops-auth-join-form" autocomplete="off">
+          <label class="ops-field">Caregiver invitation token
+            <input id="ops-auth-invite-token" type="text" maxlength="48" minlength="48" pattern="[a-fA-F0-9]{48}" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="48-character invitation token" required>
+          </label>
+          <button class="btn" type="submit">Join Family Space</button>
+        </form>
+        <p class="ops-status" id="ops-auth-join-message" role="status" aria-live="polite"></p>
+      </div>
+<p id="create-error" class="form-error" role="alert"></p><button class="btn small" id="create-signout" type="button" style="margin-top:20px">Sign out</button>
     </div>
     <a class="auth-back" href="index.html">Back to NakNak website</a>
   </div></div>
@@ -168,7 +193,7 @@ body{background:#140B09;color:#F8EEEA}
   <div class="main"><header class="topbar"><div class="topbar-left"><button class="hamb" id="hamb" type="button" aria-label="Open dashboard menu" aria-expanded="false"><svg><use href="#ic-menu"/></svg></button><div><div class="topbar-title">Family Dashboard <span class="topbar-crumb">/ <span id="current-section-label">Overview</span></span></div><div class="topbar-sub" id="top-household">Your private household</div></div></div><div class="topbar-actions"><label class="mini-select-wrap" for="top-member-select">Member <select id="top-member-select" aria-label="Choose active member"><option value="">No members yet</option></select></label><span class="tag neutral" id="sync-label"><span class="dot"></span> Loading</span><button id="refresh" class="btn small" type="button"><svg><use href="#ic-refresh"/></svg> Refresh</button><a class="btn primary small" href="https://justineinacay.github.io/Naknak/app.html">Open App <svg><use href="#ic-arrow"/></svg></a></div></header>
   <main class="main-content">
 <div id="local-preview-notice" class="local-preview-notice" hidden role="status"><strong>Local design preview — no household data</strong><span>Sign-in, pairing, and live synchronization require publishing these pages over HTTPS. This preview does not show real family information or send alerts.</span><a href="https://justineinacay.github.io/Naknak/">Existing NakNak site ↗</a></div>
-    <section id="view-overview" class="section-view active">
+    <section id="view-overview" class="section-view active"><div id="ops-overview-warning" class="ops-sync-warning" role="status" aria-live="polite" hidden></div>
   <div class="family-hero">
     <div class="family-hero-content">
       <div class="hero-overline"><span class="pulse-dot"></span> NAKNAK FAMILY SPACE <span class="hero-overline-end">CARE THAT NEVER SLEEPS</span></div>
@@ -229,7 +254,7 @@ body{background:#140B09;color:#F8EEEA}
       <div class="ops-card"><h2>Safety capability boundaries</h2><div class="ops-item"><strong>Ayos Ako &amp; SOS-opened records</strong><span>Supported, confirm on server</span></div><div class="ops-item"><strong>Remote caregiver push / SMS</strong><span>Not active</span></div><div class="ops-item"><strong>Automatic emergency calling</strong><span>Not active</span></div><div class="ops-item"><strong>Location sharing / fall detection</strong><span>Not active</span></div><div class="ops-note">For an emergency, use an appropriate emergency service or call a contact directly. This page is not an emergency dispatch service.</div></div></div>
     </section>
     <!-- P1: read-only records until a verified broader device sync is released -->
-    <section id="view-carehub" class="section-view">
+    <section id="view-carehub" class="section-view"><div id="ops-care-warning" class="ops-sync-warning" role="status" aria-live="polite" hidden></div>
       <div class="header-flex"><div><div class="eyebrow">P1 • EVERYDAY CARE</div><h1>Daily Care Hub</h1><p>See check-ins, recorded medicines, and household activity together without suggesting that a missing record means a missed dose.</p></div><button class="btn" data-go="activity" type="button">Full activity</button></div>
       <div class="ops-grid"><div class="ops-card"><h2>Family check-ins</h2><div id="ops-care-members"></div></div><div class="ops-card"><h2>Medication information</h2><p>Only schedules present in the connected record appear; native reminders remain on the phone.</p><div id="ops-care-meds"></div></div></div>
       <div class="ops-card"><h2>Recent confirmed events</h2><div id="ops-care-events"></div></div><div class="ops-note">No automatic medication adherence scoring, emergency escalation, or remote notifications are implied by this view.</div>
@@ -237,8 +262,40 @@ body{background:#140B09;color:#F8EEEA}
     <!-- P1: existing authenticated household roles are visible; invitations need backend tests -->
     <section id="view-access" class="section-view">
       <div class="header-flex"><div><div class="eyebrow">P1 • ACCESS &amp; PRIVACY</div><h1>Family Access</h1><p>Household membership is controlled by your signed-in account and database security policies.</p></div></div>
-      <div class="ops-grid"><div class="ops-card"><h2>Your access</h2><div class="ops-item"><strong>Email account</strong><span id="ops-access-email">—</span></div><div class="ops-item"><strong>Household membership</strong><span id="ops-access-membership">Checking…</span></div><div class="ops-item"><strong>Role</strong><span id="ops-access-role">—</span></div></div>
-      <div class="ops-card"><h2>Invite other caregivers</h2><span class="ops-pill warn">Pending security validation</span><p>Invitations and role changes must be enforced by the database, not by a browser-only dropdown. Until that workflow passes cross-household authorization tests, do not share your account or pairing code as a substitute for a caregiver invitation.</p><a class="btn" href="privacy.html">Privacy information</a></div></div>
+      <div class="ops-access-layout">
+        <div class="ops-card"><h2>Your access</h2>
+          <div class="ops-item"><strong>Email account</strong><span id="ops-access-email">—</span></div>
+          <div class="ops-item"><strong>Household membership</strong><span id="ops-access-membership">Checking…</span></div>
+          <div class="ops-item"><strong>Role</strong><span id="ops-access-role">—</span></div>
+          <label class="ops-field">Current Family Space
+            <select id="ops-household-switch" aria-label="Switch Family Space" style="width:100%;min-height:46px;padding:8px;border:1px solid #decabf;border-radius:12px"></select>
+          </label><p class="ops-join-help">You can access only households to which your signed-in account belongs. Switching does not merge household records.</p>
+        </div>
+        <div class="ops-card"><h2>Invite a caregiver</h2>
+          <span class="ops-pill warn" id="ops-invite-mode">Checking owner permissions…</span>
+          <p>Only a household owner can issue a one-time caregiver invitation. Tokens expire after 24 hours and can be used once. Share privately with the invited caregiver, not publicly.</p>
+          <button class="btn primary" id="ops-create-invite" type="button" disabled>Create one-time invitation</button>
+          <p id="ops-invite-create-message" class="ops-status" role="status" aria-live="polite"></p>
+          <div id="ops-issued-invite" hidden>
+            <div class="ops-invite-token" id="ops-invite-token-value"></div>
+            <div class="ops-actions"><button type="button" class="btn" id="ops-copy-invite">Copy token</button></div>
+            <p class="ops-copy" id="ops-invite-expiry"></p>
+          </div>
+          <h3 style="font-size:14px;margin:18px 0 8px">Recent invitations</h3>
+          <div id="ops-invite-list"><p class="ops-copy">Available to household owners after server validation.</p></div>
+        </div>
+      </div>
+      <div class="ops-card"><h2>Join another Family Space</h2>
+        <p>Have an invitation from a household owner? Enter its token while signed in. Never use a phone pairing code here.</p>
+        <form id="ops-join-form" class="ops-form-line" autocomplete="off">
+          <label class="ops-field">One-time invitation token
+            <input id="ops-join-token" type="text" maxlength="48" minlength="48" pattern="[a-fA-F0-9]{48}" spellcheck="false" autocapitalize="off" autocomplete="off" placeholder="48-character invitation token" required>
+          </label>
+          <button class="btn" type="submit">Join household</button>
+        </form>
+        <p class="ops-status" id="ops-join-result" role="status" aria-live="polite"></p>
+        <div class="ops-note">Household owner controls who can issue invitations. Role changes and invitations are separate from NakNak's emergency phone pairing.</div>
+      </div>
     </section>
     <!-- P2: household-shared checklist only after RLS migration succeeds; draft fallback explicit -->
     <section id="view-sharedprep" class="section-view">
