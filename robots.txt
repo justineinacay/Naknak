@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /Naknak/dashboard.html
+Disallow: /Naknak/family-dashboard.html
+Disallow: /Naknak/app-v11-beta.html
+Disallow: /Naknak/app-v12.html
+Disallow: /Naknak/app-v13.html
+Disallow: /Naknak/app-v14.html
+Sitemap: https://justineinacay.github.io/Naknak/sitemap.xml
