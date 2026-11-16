@@ -308,3 +308,33 @@ begin
 end $audit$;
 reset role;
 select 'PASS: pairing entropy/expiry, owner rotation, and honest unknown initial state' as result;
+
+
+-- Privacy requests: a signed-in user may submit only for their households.
+\ir ../supabase/migrations/20261116094000_privacy_rights_requests.sql
+set role authenticated;
+select set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false);
+insert into public.naknak_data_rights_requests(requester_id,household_id,request_type,note)
+values('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa','11111111-1111-4111-8111-111111111111','export','Please provide a copy.');
+do $audit$
+declare denied boolean:=false;
+begin
+  begin
+    insert into public.naknak_data_rights_requests(requester_id,household_id,request_type,note)
+    values('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      '22222222-2222-4222-8222-222222222222','delete_household','Unauthorized attempt');
+  exception when others then denied:=true; end;
+  if not denied then raise exception 'Cross-household privacy request permitted'; end if;
+end $audit$;
+select set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',false);
+do $audit$
+begin
+  if (select count(*) from public.naknak_data_rights_requests)<>0 then
+    raise exception 'Another user can see the request';
+  end if;
+  if has_table_privilege('authenticated','public.naknak_data_rights_requests','UPDATE') then
+    raise exception 'User could self-mark request as completed';
+  end if;
+end $audit$;
+reset role;
+select 'PASS: RLS privacy intake authorizes own household only' as result;
