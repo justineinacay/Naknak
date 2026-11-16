@@ -265,6 +265,7 @@ alter table public.naknak_state add column state jsonb not null default '{}'::js
 set role authenticated;
 select set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false);
 select household_id,pair_code from public.create_household('Test Family Member') \gset
+select set_config('naknak.ci_new_hh',:'household_id',false);
 do $audit$
 declare
   v_code text;
@@ -272,9 +273,9 @@ declare
   v_profile jsonb;
 begin
   select h.pair_code,h.pair_code_expires_at into v_code,v_expiry
-    from public.naknak_households h where h.id=:'household_id'::uuid;
+    from public.naknak_households h where h.id=current_setting('naknak.ci_new_hh')::uuid;
   select state->'seniors'->0 into v_profile
-    from public.naknak_state where household_id=:'household_id'::uuid;
+    from public.naknak_state where household_id=current_setting('naknak.ci_new_hh')::uuid;
   if length(v_code)<>6 or v_code !~ '^[A-Z2-9]{6}$' then
     raise exception 'Family Code format invalid';
   end if;
@@ -287,10 +288,10 @@ begin
   end if;
 end $audit$;
 select set_config('naknak.ci_old_code',:'pair_code',false);
-select public.regenerate_pair_code(:'household_id'::uuid);
+select public.regenerate_pair_code(current_setting('naknak.ci_new_hh')::uuid);
 do $audit$
 begin
-  if (select pair_code from public.naknak_households where id=:'household_id'::uuid)
+  if (select pair_code from public.naknak_households where id=current_setting('naknak.ci_new_hh')::uuid)
        = current_setting('naknak.ci_old_code') then
     raise exception 'Pair code rotation reused old code';
   end if;
@@ -300,7 +301,7 @@ do $audit$
 declare denied boolean:=false;
 begin
   begin
-    perform public.regenerate_pair_code(:'household_id'::uuid);
+    perform public.regenerate_pair_code(current_setting('naknak.ci_new_hh')::uuid);
   exception when others then denied:=true; end;
   if not denied then raise exception 'Non-owner rotated another household code'; end if;
 end $audit$;
