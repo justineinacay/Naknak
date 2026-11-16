@@ -71,17 +71,35 @@ export async function checkFamilyConnection(credentials: FamilyCredentials): Pro
   };
 }
 
+export type FamilyEventReceipt = {
+  delivered:boolean;
+  duplicate:boolean;
+  serverReceivedAt:string;
+};
+
 export async function reportNativeEvent(
   credentials: FamilyCredentials,
   event: 'check_in_ok' | 'sos_opened',
-  clientTime: string,
-): Promise<boolean> {
-  const rows = await rpc<{ delivered: boolean }[]>('native_device_report', {
+  eventId: string,
+): Promise<FamilyEventReceipt> {
+  // The v2 RPC is idempotent by device + event ID. A phone-supplied timestamp
+  // is never an authoritative "received at" value.
+  const rows = await rpc<{
+    delivered:boolean; duplicate:boolean; server_received_at:string; rev:number;
+  }[]>('native_device_report_once', {
     p_secret: credentials.deviceSecret,
     p_event: event,
-    p_client_time: clientTime,
+    p_event_id: eventId,
   });
-  return rows?.[0]?.delivered === true;
+  const row=rows?.[0];
+  if(!row?.delivered||!row.server_received_at) {
+    throw new Error('NakNak server has not confirmed this event.');
+  }
+  return {
+    delivered:true,
+    duplicate:row.duplicate===true,
+    serverReceivedAt:row.server_received_at,
+  };
 }
 
 export async function disconnectNativeDevice(credentials: FamilyCredentials): Promise<boolean> {
