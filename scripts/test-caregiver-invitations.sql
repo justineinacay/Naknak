@@ -259,6 +259,7 @@ alter table public.naknak_households
   add column pair_code_expires_at timestamptz,
   add column max_devices integer default 4,
   add column created_by uuid references auth.users(id);
+alter table public.naknak_households alter column id set default pg_catalog.gen_random_uuid();
 alter table public.naknak_state add column state jsonb not null default '{}'::jsonb;
 \ir ../supabase/migrations/20261116092000_secure_short_lived_family_codes.sql
 
