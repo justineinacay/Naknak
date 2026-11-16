@@ -52,7 +52,7 @@ begin
   values(v_hh_id,(select auth.uid()),'owner');
 
   v_senior := jsonb_build_object(
-    'id',extensions.gen_random_uuid()::text,
+    'id',pg_catalog.gen_random_uuid()::text,
     'name',v_name,'nickname',split_part(v_name,' ',1),
     'battery',null,'status','unknown','location','',
     'lastCheckin',null,'checkedIn',false,'gpsLocation',null,
