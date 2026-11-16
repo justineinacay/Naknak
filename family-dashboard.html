@@ -243,7 +243,7 @@ body{background:#140B09;color:#F8EEEA}
   </div><aside class="medical-side"><section class="panel"><h2>Medication schedule</h2><p class="rail-explain">A record of scheduled medication, not proof of consumption.</p><div id="medical-medications"></div><button class="btn small" type="button" data-go="medications">See Gamot ↗</button></section><section class="panel medical-privacy"><h2>Private by design</h2><p>Medical details only appear after sign-in and a valid household membership. This view does not assume the app is online or automatically share private document files.</p><a href="privacy.html">Read privacy information ↗</a></section></aside></div>
 </section>
 <section id="view-preparedness" class="section-view"><div class="header-flex"><div><div class="eyebrow">VAULT &amp; PREP</div><h1>Household preparedness</h1><p>These app areas may store sensitive files and checklists locally. This dashboard never assumes on-device documents are already shared.</p></div><a href="https://justineinacay.github.io/Naknak/app.html" class="btn primary">Open NakNak app <svg><use href="#ic-arrow"/></svg></a></div><div class="feature-grid grid"><div class="feature-card"><div class="feature-title"><svg><use href="#ic-folder"/></svg> Document vault</div><span class="tag neutral">Device-first</span><p>Files such as IDs and documents may exist on the member's device without being uploaded. For safety, the website does not attempt to access them or expose private file URLs.</p></div><div class="feature-card"><div class="feature-title"><svg><use href="#ic-check"/></svg> Go-bag preparation</div><span class="tag neutral">Sync varies</span><p>Use Prep in the app for your supplies checklist. Device-only progress may not be available here.</p></div><div class="feature-card"><div class="feature-title"><svg><use href="#ic-shield"/></svg> Emergency readiness</div><span class="tag neutral">Always review</span><p>Confirm contacts and emergency supplies regularly. NakNak supports preparedness but does not replace local emergency services.</p></div></div><div style="margin-top:20px" class="panel"><div class="panel-header"><h2>Synced preparation summary</h2></div><div id="prep-body"></div></div></section>
-    <section id="view-pairing" class="section-view"><div class="header-flex"><div><div class="eyebrow">DEVICE CONNECTION</div><h1>Connect your NakNak phone.</h1><p>Your Family Space pairs with the mobile/web app using a code. Pairing and synchronization require an internet connection.</p></div><a class="btn primary" href="https://justineinacay.github.io/Naknak/app.html">Open NakNak app <svg><use href="#ic-arrow"/></svg></a></div><div class="pair-box"><div><div class="eyebrow" style="color:#ffd2c5">FAMILY PAIRING CODE</div><div id="pair-code" class="pair-code">—</div><p>Enter this code in the app's Family Code / Connect screen. Keep it private and avoid sharing screenshots containing it.</p></div><button type="button" class="btn outline" id="copy-code"><svg><use href="#ic-copy"/></svg> Copy code</button></div><div style="margin-top:20px" class="panel"><div class="panel-header"><h2>Connect in three steps</h2></div><div class="list-row"><strong>01 &nbsp; Open the NakNak app</strong><span class="muted">Use your existing phone or web beta</span></div><div class="list-row"><strong>02 &nbsp; Find Family Code pairing</strong><span class="muted">Enter the code shown above</span></div><div class="list-row"><strong>03 &nbsp; Return to Family Dashboard</strong><span class="muted">Use Refresh to confirm synced household activity</span></div><p class="note" style="margin-top:16px">A pairing code is sensitive and may be single-use or time-limited. If it no longer works, use the existing account support and pairing process; don't post it publicly.</p><p id="copy-feedback" class="form-help" aria-live="polite"></p></div></section>
+    <section id="view-pairing" class="section-view"><div class="header-flex"><div><div class="eyebrow">DEVICE CONNECTION</div><h1>Connect your NakNak phone.</h1><p>Your Family Space pairs with the mobile/web app using a code. Pairing and synchronization require an internet connection.</p></div><a class="btn primary" href="https://justineinacay.github.io/Naknak/app.html">Open NakNak app <svg><use href="#ic-arrow"/></svg></a></div><div class="pair-box"><div><div class="eyebrow" style="color:#ffd2c5">FAMILY PAIRING CODE</div><div id="pair-code" class="pair-code">—</div><p id="ops-pair-expiry" class="ops-copy" role="status" aria-live="polite">Sign in to view code expiry.</p><p>Enter this code in the app's Family Code / Connect screen. Keep it private and avoid sharing screenshots containing it.</p></div><div class="ops-actions"><button type="button" class="btn outline" id="copy-code"><svg><use href="#ic-copy"/></svg> Copy code</button><button type="button" class="btn outline" id="ops-rotate-code" disabled>Generate new code</button></div></div><div style="margin-top:20px" class="panel"><div class="panel-header"><h2>Connect in three steps</h2></div><div class="list-row"><strong>01 &nbsp; Open the NakNak app</strong><span class="muted">Use your existing phone or web beta</span></div><div class="list-row"><strong>02 &nbsp; Find Family Code pairing</strong><span class="muted">Enter the code shown above</span></div><div class="list-row"><strong>03 &nbsp; Return to Family Dashboard</strong><span class="muted">Use Refresh to confirm synced household activity</span></div><p class="note" style="margin-top:16px">A pairing code is sensitive and may be single-use or time-limited. If it no longer works, use the existing account support and pairing process; don't post it publicly.</p><p id="copy-feedback" class="form-help" aria-live="polite"></p></div></section>
 
     <!-- P0: supported connection checks, never a proof of physical safety -->
     <section id="view-connection" class="section-view">
@@ -386,7 +386,7 @@ body{background:#140B09;color:#F8EEEA}
     const membership=rows.find(m=>m.household_id===preferredHouseholdId)
       ||rows.find(m=>m.household_id===stored)||rows[0];
     const {data:household,error:hhError}=await state.client.from('naknak_households')
-      .select('id,pair_code').eq('id',membership.household_id).maybeSingle();
+      .select('id,pair_code,pair_code_expires_at').eq('id',membership.household_id).maybeSingle();
     if(hhError)throw hhError;
     if(!household)throw Error('Household not found or you do not have permission to view it.');
     if(state.channel&&state.client){await state.client.removeChannel(state.channel);state.channel=null;}
@@ -611,6 +611,45 @@ body{background:#140B09;color:#F8EEEA}
     }finally{opsCheckinTest.busy=false;$('ops-test-verify').disabled=false;}
   }
 
+
+  /* P0 Family Code management. A private code is not a caregiver invitation. */
+  function opsRenderPairing(){
+    const household=state.household;
+    const expires=household?.pair_code_expires_at?new Date(household.pair_code_expires_at):null;
+    const dateValid=expires && Number.isFinite(expires.getTime());
+    const expired=Boolean(dateValid && expires.getTime()<=Date.now());
+    const active=Boolean(state.session&&household?.pair_code&&dateValid&&!expired);
+    $('pair-code').textContent=active?household.pair_code:'Unavailable';
+    $('copy-code').disabled=!active;
+    $('ops-rotate-code').disabled=!(state.session&&state.membershipRole==='owner');
+    opsText('ops-pair-expiry',!state.session?'Local preview only. No Family Code can be used.'
+      :expired?'Family Code expired. Household owner must generate a new code.'
+      :dateValid?'Code expires '+dtime(household.pair_code_expires_at)+'. Keep it private.'
+      :'Code expiry unavailable. Ask the owner to rotate this code.');
+  }
+  async function opsRotateCode(){
+    if(!state.client||!state.session||!state.household||state.membershipRole!=='owner'){
+      opsText('copy-feedback','Only the signed-in household owner can generate a new code.');
+      return;
+    }
+    if(!window.confirm('Rotate the Family Code? The previous code will stop pairing new phones. Already paired devices remain connected.'))return;
+    const button=$('ops-rotate-code');button.disabled=true;
+    opsText('copy-feedback','Generating a new code with the server…');
+    try{
+      const householdId=state.household.id;
+      const {data,error}=await state.client.rpc('regenerate_pair_code',{p_household_id:householdId});
+      if(error||typeof data!=='string')throw Error('Code rotation not confirmed.');
+      const {data:row,error:rowError}=await state.client.from('naknak_households')
+        .select('pair_code,pair_code_expires_at').eq('id',householdId).maybeSingle();
+      if(rowError||!row||row.pair_code!==data)throw Error('Updated code could not be verified.');
+      if(state.household?.id!==householdId)return;
+      state.household={...state.household,...row};
+      opsRenderPairing();
+      opsText('copy-feedback','New code verified on the server. The previous code cannot pair new devices.');
+    }catch(_){
+      opsText('copy-feedback','New code was not verified. Refresh and check with the household owner.');
+    }finally{opsRenderPairing();}
+  }
   function opsRenderWarnings(){
     const issues=[];
     if(!state.session){
@@ -812,6 +851,7 @@ body{background:#140B09;color:#F8EEEA}
     opsText('ops-last-fetch',state.lastFetchedAt?dtime(state.lastFetchedAt):'Not confirmed');
     opsRenderAccess();
     opsRenderWarnings();
+    opsRenderPairing();
     const rawPlan=String(state.value?.plan||'free').toLowerCase();
     opsText('ops-current-plan',state.billingDisplay||(state.session?(rawPlan==='family'?'Legacy Family flag · subscription requires verification':rawPlan==='essential'?'Legacy Essential record · not a new plan':'Free (household record)'):'Not verified · Local preview'));
     const memberSelector=$('ops-test-member');
@@ -939,7 +979,8 @@ body{background:#140B09;color:#F8EEEA}
     let bag=m.goBag&&typeof m.goBag==='object'?Object.entries(m.goBag):[];let done=bag.filter(([,v])=>v===true).length;$('prep-body').innerHTML=`<div class="list-row"><div><strong>Selected member</strong><p>${safe(name)}</p></div><span class="tag neutral">App-linked record</span></div><div class="list-row"><div><strong>Go-bag checklist data</strong><p>${bag.length?'Progress values found in connected record':'No checklist entries were sent to the dashboard'}</p></div><strong>${bag.length?done+' / '+bag.length:'—'}</strong></div><p class="note" style="margin-top:13px">Vault documents are not displayed here. Review sensitive IDs in the member's own app.</p>`;
   }
   function initEvents(){document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.view)));document.addEventListener('click',e=>{let g=e.target.closest('[data-go]');if(g){navigate(g.dataset.go)}let m=e.target.closest('[data-member]');if(m){state.selected=m.dataset.member;render();}});for(const id of ['top-member-select','medical-member-select']){$(id).addEventListener('change',e=>{const selected=members().find(m=>String(m.id)===String(e.target.value));if(selected){state.selected=selected.id;render();}})};$('hamb').addEventListener('click',()=>{let open=$('sidebar').classList.toggle('open');$('shade').classList.toggle('show',open);$('hamb').setAttribute('aria-expanded',String(open))});$('shade').addEventListener('click',closeMenu);document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMenu()});$('refresh').addEventListener('click',refresh);$('activity-refresh').addEventListener('click',refresh);$('signout').addEventListener('click',signout);$('create-signout').addEventListener('click',signout);
-  $('copy-code').addEventListener('click',async()=>{try{if(!navigator.clipboard)throw Error('Clipboard unavailable');await navigator.clipboard.writeText(state.household?.pair_code||'');$('copy-feedback').textContent='Pairing code copied. Keep it private.';}catch(e){$('copy-feedback').textContent='Copy is not available here. Select and enter the code manually.';}});
+  $('copy-code').addEventListener('click',async()=>{try{if($('copy-code').disabled)throw Error('Unavailable');if(!navigator.clipboard)throw Error('Clipboard unavailable');await navigator.clipboard.writeText(state.household?.pair_code||'');$('copy-feedback').textContent='Pairing code copied. Keep it private.';}catch(e){$('copy-feedback').textContent='Copy is not available here. Select and enter the code manually.';}});
+  $('ops-rotate-code').addEventListener('click',opsRotateCode);
   $('ops-create-invite').addEventListener('click',opsCreateInvite);
   $('ops-copy-invite').addEventListener('click',async()=>{
     const token=$('ops-invite-token-value').textContent;
