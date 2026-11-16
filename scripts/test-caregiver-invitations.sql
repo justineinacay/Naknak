@@ -260,6 +260,20 @@ alter table public.naknak_households
   add column max_devices integer default 4,
   add column created_by uuid references auth.users(id);
 alter table public.naknak_households alter column id set default pg_catalog.gen_random_uuid();
+-- Match production household/state read grants and RLS for test actors.
+alter table public.naknak_households enable row level security;
+grant select on public.naknak_households to authenticated;
+create policy "member can read household in test" on public.naknak_households
+ for select to authenticated using (id in
+   (select household_id from public.naknak_household_members
+    where auth_uid=(select auth.uid())));
+alter table public.naknak_state enable row level security;
+grant select on public.naknak_state to authenticated;
+create policy "member can read state in test" on public.naknak_state
+ for select to authenticated using (household_id in
+   (select household_id from public.naknak_household_members
+    where auth_uid=(select auth.uid())));
+
 alter table public.naknak_state add column state jsonb not null default '{}'::jsonb;
 \ir ../supabase/migrations/20261116092000_secure_short_lived_family_codes.sql
 
