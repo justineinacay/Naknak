@@ -132,48 +132,37 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ received: true, warning: "missing or invalid metadata" }), { status: 200 });
   }
 
-  const { data: current } = await supabase
-    .from("naknak_state")
-    .select("state")
-    .eq("household_id", householdId)
-    .maybeSingle();
+  // Legacy Checkout Sessions represent one-time payments. They cannot
+  // activate a renewable monthly or annual subscription safely.
+  // Preserve verified signed events for reconciliation without granting
+  // paid access. A new subscription lifecycle must handle entitlements
+  // with server-verified amount, currency, period, renewal and cancellation.
+  const amount = Number(paymentAttrs.amount ?? session?.attributes?.amount ?? 0);
+  const currency = String(paymentAttrs.currency ?? session?.attributes?.currency ?? '').toUpperCase();
+  const legacyPrice = plan === 'family' ? 19900 : 10000;
+  const amountMatches = amount === legacyPrice && currency === 'PHP';
 
-  if (!current) {
-    console.error(`No household found for id ${householdId}`);
-    return new Response(JSON.stringify({ received: true, warning: "household not found" }), { status: 200 });
-  }
-
-  const nextState = { ...current.state, plan };
-  const { error: updateError } = await supabase
-    .from("naknak_state")
-    .update({ state: nextState, rev: Date.now(), updated_at: new Date().toISOString() })
-    .eq("household_id", householdId);
-
-  if (updateError) {
-    console.error("Failed to activate plan:", updateError.message);
-    return new Response("Failed to activate plan", { status: 500 });
-  }
-
-  // Log only after a successful activation. If this insert has a transient
-  // failure, PayMongo can retry safely: the plan update is idempotent and the
-  // event is still absent, so the next delivery will record it.
-  const { error: logError } = await supabase.from("naknak_payment_events").insert({
+  const { error: logError } = await supabase.from('naknak_payment_events').insert({
     processor_event_id: eventId,
     household_id: householdId,
     plan,
-    amount_total: paymentAttrs.amount ?? null,
-    currency: paymentAttrs.currency ?? "PHP",
-    status: "activated",
+    amount_total: Number.isFinite(amount) ? amount : null,
+    currency: currency || null,
+    status: 'needs_review',
     raw_event: payload,
   });
-  if (logError) {
-    if (logError.code === "23505") {
-      return new Response(JSON.stringify({ received: true, duplicate: true }), { status: 200 });
-    }
-    console.error("Failed to log activated payment event:", logError.message);
-    return new Response("Failed to log event", { status: 500 });
+  if(logError){
+    if(logError.code==='23505')
+      return new Response(JSON.stringify({received:true,duplicate:true}),{status:200});
+    console.error('Failed to preserve payment for review:',logError.message);
+    return new Response('Unable to record payment safely',{status:500});
   }
-
-  console.log(`Activated "${plan}" plan for household ${householdId} via PayMongo session ${session?.id}`);
-  return new Response(JSON.stringify({ received: true, activated: plan }), { status: 200 });
+  if(!amountMatches){
+    console.error('Legacy payment needs amount/currency reconciliation:',eventId);
+  }
+  // DO NOT mark an account paid based on a return URL or a one-time
+  // checkout. Customer support must reconcile any already paid session.
+  return new Response(JSON.stringify({
+    received:true,requires_manual_reconciliation:true,activated:false
+  }),{status:200});
 });

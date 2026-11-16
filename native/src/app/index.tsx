@@ -15,13 +15,13 @@ const LANGUAGES: { id: Language; label: string }[] = [
   { id: 'ceb', label: 'Bisaya' },
 ];
 
-const FAMILY_DASHBOARD_URL = 'https://justineinacay.github.io/Naknak/dashboard.html';
+const FAMILY_DASHBOARD_URL = 'https://justineinacay.github.io/Naknak/family-dashboard.html';
 
 const TEXT = {
   tl: {
-    eyebrow: 'NakNak para sa Senior / PWD',
-    title: 'Safety app na simple gamitin kapag kailangan mo ng tulong.',
-    body: 'Ang mobile app na ito ay para sa Senior/PWD. Ang Caregiver / Anak tools ay nasa hiwalay na Family Dashboard para hindi maging magulo ang emergency screen.',
+    eyebrow: 'NakNak para sa bawat pamilya',
+    title: 'Simple at maaasahang safety support para sa pamilya.',
+    body: 'Para sa bawat kapamilyang gustong manatiling handa. Ang safety app sa phone ay simple gamitin, habang ang family setup at updates ay nasa hiwalay na Family Dashboard.',
     setup: 'I-set up ang phone na ito',
     setupDetail: 'SOS, Ayos Ako, tawag, contacts, gamot, at accessibility settings',
     caregiver: 'Caregiver / Anak ka ba?',
@@ -30,9 +30,9 @@ const TEXT = {
     footer: 'LIGTAS · SIMPLE · PANG-PAMILYA',
   },
   en: {
-    eyebrow: 'NakNak for Senior / PWD',
-    title: 'A safety app designed to stay simple when you need help.',
-    body: 'This mobile app is for the Senior/PWD user. Caregiver / Anak tools live in a separate Family Dashboard so the emergency experience stays uncluttered.',
+    eyebrow: 'NakNak for every household',
+    title: 'Everyday care and safety support, made for family.',
+    body: 'For any family member who wants a simpler safety experience. Phone controls stay focused, while household setup and connected records live in a separate Family Dashboard.',
     setup: 'Set up this phone',
     setupDetail: 'SOS, I’m Okay, calling, contacts, medicine, and accessibility settings',
     caregiver: 'Are you a Caregiver / Anak?',
@@ -41,9 +41,9 @@ const TEXT = {
     footer: 'SAFE · SIMPLE · FOR FAMILY',
   },
   ceb: {
-    eyebrow: 'NakNak para sa Senior / PWD',
-    title: 'Safety app nga sayon gamiton kung kinahanglan ka ug tabang.',
-    body: 'Kini nga mobile app para sa Senior/PWD. Ang Caregiver / Anak tools naa sa lahi nga Family Dashboard aron dili maghuot ang emergency screen.',
+    eyebrow: 'NakNak para sa matag pamilya',
+    title: 'Sayon nga safety support alang sa matag pamilya.',
+    body: 'Para sa matag miyembro sa pamilya nga nanginahanglan og sayon nga safety support. Ang family setup ug mga konektadong update anaa sa lahi nga Family Dashboard.',
     setup: 'I-set up kini nga phone',
     setupDetail: 'SOS, Okay Ra Ko, tawag, contacts, tambal, ug accessibility settings',
     caregiver: 'Caregiver / Anak ka?',

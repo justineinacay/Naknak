@@ -93,3 +93,10 @@ the signature, logs the event, and activates the plan → the dashboard's
 existing realtime sync picks up the change automatically. There is no
 self-activation button. Delayed webhooks and manual GCash payments go
 through support verification.
+
+
+## IMPORTANT: Recurring Family checkout is not ready
+
+The historical PayMongo Checkout Session code charges a one-time amount. Charging ₱199 once and labeling it `/month` does not implement a subscription, renewal, cancellation, or expiry. The P0–P1 review branch now **blocks new charges** in `create-checkout-session` and hides new-purchase actions in `dashboard.html`.
+
+This documentation describes historical integration only, not an instruction to enable live sales. Before enabling billing: implement and verify a provider-supported recurring lifecycle, run real test-mode transactions, require matching currency and amount/provider identifiers in signed events, introduce server-controlled current-period end and cancellation, reconcile existing payments, and verify Apple/Google rules for in-app digital purchases. Do not simply flip a feature flag or reuse an old one-time link.

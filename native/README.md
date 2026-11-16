@@ -70,3 +70,13 @@ pnpm exec eas build --platform android --profile preview
 Before public release, test calling, reminders, notification cancellation, offline relaunch, pairing, Ayos Ako, SOS-opened delivery, disconnect/revocation, accessibility scaling, and reset behavior on physical iOS and Android devices.
 
 Apple and Google developer accounts, signing credentials, production privacy disclosures, store listings, review notes, screenshots, and approval remain required.
+
+## P0 durable event outbox (review branch)
+
+The native app now writes paired `Ayos Ako` and `SOS opened` events to the SQLite `naknak_family_outbox` before attempting the network RPC. While the app is **active**, it retries pending events on startup/resume and on a 30-second interval, with backoff after failures. This is **not** guaranteed background execution or remote caregiver notification.
+
+The new RPC `native_device_report_once` is idempotent by paired device and event ID and returns a server receipt timestamp. A successful response means the event was recorded in the household state, **not** that another person was notified or acknowledged it.
+
+**Critical compatibility gate:** The RPC must exist and be tested on Supabase staging **before installing this build**. If it is unavailable, events remain queued; do not advertise server delivery. The local app state is a separate local record. Disconnect/reset clears paired credentials and the pending outbox; warn users before disconnect.
+
+The native dependency manifest still has Expo SDK 57 patch drift; align versions and regenerate the lockfile on a trusted development machine before release. See `../RELEASE-READINESS.md` and the CI logs.

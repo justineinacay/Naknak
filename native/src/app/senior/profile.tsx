@@ -19,8 +19,11 @@ export default function ProfileScreen() {
   const privacyLabel = state.profile.language === 'en' ? 'Privacy & data' : state.profile.language === 'ceb' ? 'Privacy ug data' : 'Privacy at data';
   const supportLabel = state.profile.language === 'en' ? 'NakNak support' : state.profile.language === 'ceb' ? 'NakNak support' : 'NakNak support';
   const dataTitle = state.profile.language === 'en' ? 'Data & support' : state.profile.language === 'ceb' ? 'Data ug support' : 'Data at support';
-  const remoteTitle = familyConnection.status === 'connected'
-    ? state.profile.language === 'en' ? 'Connected to caregiver dashboard' : 'Connected sa caregiver dashboard'
+  const pendingFamilyEvents=familyConnection.pendingEvents??0;
+  const remoteTitle = pendingFamilyEvents>0
+    ? (state.profile.language === 'en' ? 'Updates waiting to sync' : 'May update na naghihintay maipadala')
+    : familyConnection.status === 'connected'
+    ? state.profile.language === 'en' ? 'Server connection confirmed' : 'Nakumpirma ang koneksiyon sa server'
     : state.profile.language === 'en' ? 'Needs a connection' : state.profile.language === 'ceb' ? 'Kinahanglan ug koneksyon' : 'Kailangan ng koneksyon';
 
   const restart = async () => {
@@ -31,7 +34,7 @@ export default function ProfileScreen() {
   const confirmDisconnect = () => {
     Alert.alert(
       'I-disconnect ang family dashboard?',
-      'Mananatili sa phone ang local contacts at gamot, pero hindi na maipapadala ang Ayos Ako at SOS status.',
+      'Mananatili sa phone ang local contacts at gamot. Ang mga Ayos Ako o SOS-opened event na hindi pa naipapadala ay hindi na masi-sync pagkatapos mag-disconnect.',
       [
         { text: 'Kanselahin', style: 'cancel' },
         { text: 'I-disconnect', style: 'destructive', onPress: () => void disconnectFamily() },
@@ -91,15 +94,17 @@ export default function ProfileScreen() {
 
         <InfoPanel
           title={remoteTitle}
-          tone={familyConnection.status === 'connected' ? 'green' : 'amber'}
-          icon={<MaterialCommunityIcons color={familyConnection.status === 'connected' ? colors.greenDark : colors.amberDark} name={familyConnection.status === 'connected' ? 'cloud-check' : 'cloud-alert'} size={22} />}
+          tone={familyConnection.status === 'connected' && pendingFamilyEvents===0 ? 'green' : 'amber'}
+          icon={<MaterialCommunityIcons color={familyConnection.status === 'connected' && pendingFamilyEvents===0 ? colors.greenDark : colors.amberDark} name={familyConnection.status === 'connected' && pendingFamilyEvents===0 ? 'cloud-check' : 'cloud-alert'} size={22} />}
         >
-          {familyConnection.status === 'connected'
-            ? `Nakatalaga ang phone na ito kay ${familyConnection.seniorName || state.profile.name}. Ang Ayos Ako at SOS status ay ipinapadala lamang kapag kinumpirma ng server.`
+          {pendingFamilyEvents>0
+            ? `${pendingFamilyEvents} update(s) ang naka-save sa phone at naghihintay ng kumpirmasyon sa server. Awtomatikong susubukan muli habang aktibo ang NakNak at may koneksiyon. Walang patunay na nakatanggap ng caregiver alert.`
+            : familyConnection.status === 'connected'
+            ? `Nakatalaga ang phone na ito kay ${familyConnection.seniorName || state.profile.name}. Ang Ayos Ako at SOS-opened status ay nakumpirma lamang kapag tinanggap ng server, hindi bilang caregiver notification.`
             : familyConnection.message || copy.caregiverNotSentDetail}
         </InfoPanel>
 
-        {familyConnection.status === 'connected' ? (
+        {(familyConnection.status === 'connected' || Boolean(familyConnection.seniorName)) ? (
           <SecondaryButton label="I-disconnect ang family dashboard" onPress={confirmDisconnect} tone="danger" />
         ) : (
           <SecondaryButton label="Ikonekta gamit ang Family Code" onPress={() => router.push('/onboarding/pairing' as Href)} />

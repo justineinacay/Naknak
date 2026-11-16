@@ -14,6 +14,7 @@ A paired native phone can currently send server-confirmed **Ayos Ako** and **SOS
 
 - Website: `index.html`
 - Caregiver / Anak dashboard: `dashboard.html`
+- Family-first Dashboard: `family-dashboard.html` — connected household records, setup, connection checks, daily care, prep (shared after migration), support (after migration)
 - Web safety beta: `app.html`
 - Privacy & data notice: `privacy.html`
 - Support: `support.html`
@@ -105,3 +106,21 @@ node scripts/verify-web.mjs
 ## License
 
 © 2026 NakNak. All rights reserved.
+
+
+## P0–P2 review phase
+
+The new household operations rollout is documented in [P0-P2-IMPLEMENTATION.md](P0-P2-IMPLEMENTATION.md). These dashboard modules should not be treated as production-complete until their required migration, access policy tests, device tests, and provider integrations pass. The secure native sync currently covers confirmed Ayos Ako and SOS-opened events only.
+
+
+## P0–P1 reliability and caregiver invitations
+
+The family-first dashboard now includes multi-household switching, an explicit server-baseline Ayos Ako test, fresh-record warnings, actual seven-day activity counts, and an owner-gated invitation UI. See [P0-P1-IMPLEMENTATION.md](P0-P1-IMPLEMENTATION.md).
+
+The caregiver invitation and subscription read model database migrations are staged for security review; **not deployed**. Recurring Family checkout is disabled in the review branch until the billing lifecycle is verified. Native remote push/SMS and full medicine synchronization are not implemented.
+
+## November 2026 P0–P2 review implementation
+
+**Do not treat PR #13 as deployed or certified.** It adds a durable native SQLite event queue, new idempotent server-receipt RPC, restricted caregiver access to device credentials, short-lived secure Family Codes, expiry/rotation UX, Privacy Center requests, PWA offline-cache hardening, privacy/support brand alignment, and fail-closed legacy PayMongo handling.
+
+Read [RELEASE-READINESS.md](RELEASE-READINESS.md) before deployment. The native app must not be distributed until `native_device_report_once` exists on the destination Supabase project. Connected database access is still blocked by PostgreSQL 28P01; physical-device safety testing remains pending. See [issues #14–#21](https://github.com/justineinacay/Naknak/issues) for implementation blockers and [STORE-LISTING-DRAFT.md](STORE-LISTING-DRAFT.md) for accurate launch copy. `supabase/release-gates/retire_legacy_shared_state_rpcs.sql` is a manual cutover step, not an automatic migration.

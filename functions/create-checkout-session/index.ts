@@ -57,6 +57,16 @@ Deno.serve(async (req) => {
   if (origin && !allowedOrigins.has(origin)) {
     return new Response(JSON.stringify({ error: "Origin not allowed" }), { status: 403, headers });
   }
+  // Paid monthly/annual Family plans require a real recurring billing lifecycle.
+  // This legacy Checkout Session charges only once and cannot truthfully sell
+  // a recurring subscription. Fail closed until subscription creation,
+  // renewals, cancellations, refunds, and entitlements have been verified.
+  // Historical payment webhook obligations must be reconciled separately.
+  return new Response(JSON.stringify({
+    error: "NakNak Family subscriptions are not accepting payments yet. Free access remains available.",
+    code: "RECURRING_BILLING_NOT_READY",
+  }), { status: 503, headers });
+
   if (!PAYMONGO_SECRET_KEY || !SUPABASE_URL || !SUPABASE_PUBLIC_KEY) {
     console.error("Missing required checkout function configuration");
     return new Response(JSON.stringify({ error: "Checkout is temporarily unavailable" }), { status: 503, headers });

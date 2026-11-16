@@ -44,12 +44,12 @@ export default function SeniorHomeScreen() {
             ? 'Nakumpirma ang check-in sa caregiver dashboard.'
             : 'Nakumpirma ang check-in sa caregiver dashboard.'
         : state.profile.language === 'en'
-          ? 'Check-in saved on this phone.'
+          ? 'Check-in recorded locally. If paired, NakNak will retry delivery while active. Server receipt is not confirmed.'
         : state.profile.language === 'ceb'
-          ? 'Naka-save niini nga phone ang imong check-in.'
-          : 'Naka-save sa phone ang check-in mo.',
+          ? 'Narekord sa phone ang check-in. Kung naka-pair, sulayan pag-usab ang pagpadala. Wala pa makumpirma sa server.'
+          : 'Narekord sa phone ang check-in. Kung naka-pair, susubukang ipadala muli habang aktibo ang NakNak. Hindi pa ito kumpirmado sa server.',
     );
-    await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => undefined);
+    await Haptics.notificationAsync(delivered?Haptics.NotificationFeedbackType.Success:Haptics.NotificationFeedbackType.Warning).catch(() => undefined);
   };
 
   return (

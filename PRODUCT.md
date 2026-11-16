@@ -90,3 +90,9 @@ Not implemented:
 - fall detection
 
 These boundaries must remain visible in marketing, support, privacy, and store-review materials until implementation changes.
+
+## Family-inclusive positioning for the next milestone
+
+NakNak is for Filipino families and households, not exclusively for Senior/PWD users. The phone safety home remains accessibility-first and intentionally simple for anyone who benefits from large controls; the management dashboard is a separate Family Space experience. Role identifiers retained for backward compatibility do not define who may use the product.
+
+Avoid false claims about guaranteed safety, remote notifications, medicine adherence, GPS or emergency dispatch. Connected statuses must be based on the server receipt, while locally pending events remain explicitly pending. All health and care information should be shared only with informed consent and narrowly scoped authorization.
