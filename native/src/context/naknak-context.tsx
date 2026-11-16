@@ -230,6 +230,10 @@ export function NakNakProvider({ children }: PropsWithChildren) {
         }
       }
     } finally {
+      try {
+        const count=await familyOutboxCount(credentials.householdId);
+        setFamilyConnection(current=>({...current,pendingEvents:count}));
+      } catch { /* The outbox state remains unknown rather than claiming delivery. */ }
       sendingRef.current=false;
     }
   },[familyCredentials]);
@@ -259,6 +263,7 @@ export function NakNakProvider({ children }: PropsWithChildren) {
         id:eventId,event,occurredAt,
         householdId:credentials.householdId,memberId:credentials.seniorId,
       });
+      setFamilyConnection(current=>({...current,pendingEvents:(current.pendingEvents??0)+1}));
       await flushFamilyOutbox();
       return !(await isFamilyEventPending(eventId));
     } catch(error) {
