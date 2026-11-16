@@ -251,3 +251,58 @@ reset role;
 
 select 'PASS: caregiver invitations, subscription RLS, private device secrets and idempotent event receipts' as result;
 
+
+
+-- P0 pairing: cryptographic code, 30-minute expiry and no fake initial "OK".
+alter table public.naknak_households
+  add column pair_code text,
+  add column pair_code_expires_at timestamptz,
+  add column max_devices integer default 4,
+  add column created_by uuid references auth.users(id);
+alter table public.naknak_state add column state jsonb not null default '{}'::jsonb;
+\ir ../supabase/migrations/20261116092000_secure_short_lived_family_codes.sql
+
+set role authenticated;
+select set_config('request.jwt.claim.sub','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',false);
+select household_id,pair_code from public.create_household('Test Family Member') \gset
+do $audit$
+declare
+  v_code text;
+  v_expiry timestamptz;
+  v_profile jsonb;
+begin
+  select h.pair_code,h.pair_code_expires_at into v_code,v_expiry
+    from public.naknak_households h where h.id=:'household_id'::uuid;
+  select state->'seniors'->0 into v_profile
+    from public.naknak_state where household_id=:'household_id'::uuid;
+  if length(v_code)<>6 or v_code !~ '^[A-Z2-9]{6}$' then
+    raise exception 'Family Code format invalid';
+  end if;
+  if v_expiry>now()+interval '35 minutes' or v_expiry<now() then
+    raise exception 'Family Code has unexpected expiry';
+  end if;
+  if v_profile->>'status'<>'unknown' or v_profile->>'battery' is not null
+     or jsonb_array_length(v_profile->'eventLog')<>0 then
+    raise exception 'New household starts with fake safety or check-in data';
+  end if;
+end $audit$;
+select set_config('naknak.ci_old_code',:'pair_code',false);
+select public.regenerate_pair_code(:'household_id'::uuid);
+do $audit$
+begin
+  if (select pair_code from public.naknak_households where id=:'household_id'::uuid)
+       = current_setting('naknak.ci_old_code') then
+    raise exception 'Pair code rotation reused old code';
+  end if;
+end $audit$;
+select set_config('request.jwt.claim.sub','bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',false);
+do $audit$
+declare denied boolean:=false;
+begin
+  begin
+    perform public.regenerate_pair_code(:'household_id'::uuid);
+  exception when others then denied:=true; end;
+  if not denied then raise exception 'Non-owner rotated another household code'; end if;
+end $audit$;
+reset role;
+select 'PASS: pairing entropy/expiry, owner rotation, and honest unknown initial state' as result;
