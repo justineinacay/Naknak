@@ -5,8 +5,10 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from 'react';
+import { AppState } from 'react-native';
 
 import { clearState, loadState, saveState } from '@/lib/storage';
 import { cancelMedicationReminders } from '@/lib/notifications';
@@ -19,6 +21,10 @@ import {
   reportNativeEvent,
 } from '@/lib/family-sync';
 import { clearFamilyCredentials, loadFamilyCredentials, saveFamilyCredentials } from '@/lib/sync-storage';
+import {
+  enqueueFamilyEvent, listDueFamilyEvents, removeFamilyEvent, retryFamilyEvent,
+  familyOutboxCount, isFamilyEventPending, clearFamilyOutbox,
+} from '@/lib/family-outbox';
 import {
   AccessibilityNeed,
   EmergencyContact,
@@ -60,6 +66,7 @@ export function NakNakProvider({ children }: PropsWithChildren) {
   const [loading, setLoading] = useState(true);
   const [familyCredentials, setFamilyCredentials] = useState<FamilyCredentials | null>(null);
   const [familyConnection, setFamilyConnection] = useState<FamilyConnection>({ status: 'local' });
+  const sendingRef = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -190,27 +197,78 @@ export function NakNakProvider({ children }: PropsWithChildren) {
     [appendEvent, state.medications],
   );
 
-  const reportToFamily = useCallback(async (event: 'check_in_ok' | 'sos_opened', at: string) => {
-    if (!familyCredentials) return false;
+  // Retry loop is backed by SQLite so an app process crash cannot erase the
+  // pending event. A server receipt confirms recording, not caregiver delivery.
+  const flushFamilyOutbox = useCallback(async () => {
+    const credentials=familyCredentials;
+    if(!credentials||sendingRef.current)return;
+    sendingRef.current=true;
     try {
-      const delivered = await reportNativeEvent(familyCredentials, event, at);
-      if (delivered) {
-        setFamilyConnection({
-          status: 'connected',
-          seniorName: familyCredentials.seniorName,
-          lastConfirmedAt: new Date().toISOString(),
-        });
+      const due=await listDueFamilyEvents(credentials.householdId);
+      for(const entry of due) {
+        // Never send a prior household/member's event with newly paired credentials.
+        if(entry.memberId!==credentials.seniorId) continue;
+        try {
+          const receipt=await reportNativeEvent(credentials,entry.event,entry.id);
+          if(!receipt.delivered)throw new Error('No server receipt');
+          await removeFamilyEvent(entry.id);
+          setFamilyConnection({
+            status:'connected',
+            seniorName:credentials.seniorName,
+            lastConfirmedAt:receipt.serverReceivedAt,
+          });
+        } catch(error) {
+          await retryFamilyEvent(entry.id,entry.attempts);
+          setFamilyConnection({
+            status:'error',
+            seniorName:credentials.seniorName,
+            message:error instanceof Error
+              ? 'Naka-queue para ipadala kapag may koneksiyon: '+error.message
+              : 'Naka-queue para sa susunod na koneksiyon.',
+          });
+          break;
+        }
       }
-      return delivered;
-    } catch (error) {
+    } finally {
+      sendingRef.current=false;
+    }
+  },[familyCredentials]);
+
+  // Resume and periodic active-app retries. The background OS is not
+  // guaranteed to execute timers; this is not a background monitoring service.
+  useEffect(()=>{
+    if(loading||!familyCredentials)return;
+    void flushFamilyOutbox().catch(()=>undefined);
+    const subscription=AppState.addEventListener('change',status=>{
+      if(status==='active')void flushFamilyOutbox().catch(()=>undefined);
+    });
+    const interval=setInterval(()=>{
+      if(AppState.currentState==='active')void flushFamilyOutbox().catch(()=>undefined);
+    },30_000);
+    return ()=>{subscription.remove();clearInterval(interval);};
+  },[familyCredentials,flushFamilyOutbox,loading]);
+
+  const queueAndReportToFamily = useCallback(async (
+    event:'check_in_ok'|'sos_opened',eventId:string,occurredAt:string,
+  )=>{
+    const credentials=familyCredentials;
+    if(!credentials)return false;
+    try {
+      // Write to durable storage before making a network attempt.
+      await enqueueFamilyEvent({
+        id:eventId,event,occurredAt,
+        householdId:credentials.householdId,memberId:credentials.seniorId,
+      });
+      await flushFamilyOutbox();
+      return !(await isFamilyEventPending(eventId));
+    } catch(error) {
       setFamilyConnection({
-        status: 'error',
-        seniorName: familyCredentials.seniorName,
-        message: error instanceof Error ? error.message : 'Naka-save sa phone pero hindi naipadala.',
+        status:'error',seniorName:credentials.seniorName,
+        message:'Hindi makumpirma ang pag-save/padala. Suriin ang NakNak storage at koneksiyon.',
       });
       return false;
     }
-  }, [familyCredentials]);
+  },[familyCredentials,flushFamilyOutbox]);
 
   const pairWithFamilyCode = useCallback(async (code: string) => {
     setFamilyConnection({ status: 'checking' });
@@ -243,6 +301,7 @@ export function NakNakProvider({ children }: PropsWithChildren) {
       }
     }
     await clearFamilyCredentials();
+    await clearFamilyOutbox();
     setFamilyCredentials(null);
     setFamilyConnection(remotelyRevoked
       ? { status: 'local' }
@@ -253,23 +312,22 @@ export function NakNakProvider({ children }: PropsWithChildren) {
   }, [familyCredentials]);
 
   const recordCheckIn = useCallback(async () => {
-    const now = new Date().toISOString();
-    setState((current) => ({
-      ...current,
-      lastCheckInAt: now,
-      events: [
-        { id: createId('event'), type: 'check_in_ok' as const, createdAt: now },
-        ...current.events,
-      ].slice(0, 100),
+    const now=new Date().toISOString(),eventId=createId('event');
+    setState(current=>({
+      ...current,lastCheckInAt:now,
+      events:[{id:eventId,type:'check_in_ok' as const,createdAt:now},...current.events].slice(0,100),
     }));
-    return reportToFamily('check_in_ok', now);
-  }, [reportToFamily]);
+    return queueAndReportToFamily('check_in_ok',eventId,now);
+  },[queueAndReportToFamily]);
 
   const recordSosOpened = useCallback(async () => {
-    const now = new Date().toISOString();
-    appendEvent({ type: 'sos_opened', detail: 'Emergency screen opened locally' });
-    return reportToFamily('sos_opened', now);
-  }, [appendEvent, reportToFamily]);
+    const now=new Date().toISOString(),eventId=createId('event');
+    setState(current=>({
+      ...current,
+      events:[{id:eventId,type:'sos_opened' as const,createdAt:now,detail:'Emergency screen opened locally'},...current.events].slice(0,100),
+    }));
+    return queueAndReportToFamily('sos_opened',eventId,now);
+  },[queueAndReportToFamily]);
 
   const resetApp = useCallback(async () => {
     const notificationIds = state.medications.flatMap((medication) => medication.notificationIds);
@@ -282,6 +340,7 @@ export function NakNakProvider({ children }: PropsWithChildren) {
       }
     }
     await clearFamilyCredentials();
+    await clearFamilyOutbox();
     await clearState();
     setFamilyCredentials(null);
     setFamilyConnection({ status: 'local' });
