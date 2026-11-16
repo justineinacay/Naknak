@@ -181,29 +181,3 @@ jobs:
           PGPASSWORD: postgres
           PGDATABASE: naknak_ci
         run: psql -v ON_ERROR_STOP=1 -f scripts/test-caregiver-invitations.sql
-
-
-  generate-native-lockfile-review:
-    name: Regenerate native lockfile (temporary audit)
-    if: github.event_name == 'pull_request' && github.event.pull_request.number == 13
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Checkout PR branch
-        uses: actions/checkout@v4
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-      - name: Enable Corepack
-        run: corepack enable
-      - name: Recalculate pnpm lockfile for the committed package manifest
-        working-directory: native
-        run: pnpm install --lockfile-only --no-frozen-lockfile --ignore-scripts
-      - name: Emit reviewable lockfile for a separate verified commit
-        working-directory: native
-        run: |
-          echo "BEGIN_NAKNAK_LOCKFILE_BASE64"
-          base64 -w4096 pnpm-lock.yaml
-          echo
-          echo "END_NAKNAK_LOCKFILE_BASE64"
