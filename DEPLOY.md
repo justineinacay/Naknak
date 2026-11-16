@@ -95,3 +95,15 @@ Payment, new multi-caregiver invitations, remote push/SMS, native full medicatio
 4. Add `family-dashboard.html` to Supabase Auth's allowed redirect URLs and test magic-link sign-in.
 5. Verify the Connection Center's selected-member Ayos Ako test using two real devices.
 6. Before activating billing, implement full subscription lifecycle, including verified recurring charges, period expiry, renewals, cancellations, refunds, historical session reconciliation, and entitlement tests. The legacy one-time checkout is blocked in this review branch and must not be redeployed as a recurring product.
+
+## IMPORTANT — P0–P2 staged migration prerequisites
+
+The November 2026 PR adds `native_device_report_once`. **Apply and validate its staging migration before distributing any newly built native client**; otherwise events will remain queued and the app cannot confirm delivery. Follow [RELEASE-READINESS.md](RELEASE-READINESS.md) for exact SQL order, RLS and physical-device tests.
+
+The connected NakNak Supabase project is currently ACTIVE_HEALTHY but API SQL access returns database authentication failure 28P01. Do not apply schema changes until an authorized project owner resolves that problem and verifies backups/migration history.
+
+`naknak-sw.js` now serves `offline.html` for offline authenticated dashboard navigation instead of replaying an unrelated app page or caching external connected household data. Keep `offline.html`, `robots.txt`, and `sitemap.xml` with the deployed files.
+
+**Existing native clients and PWA compatibility:** Do not revoke legacy full-state device RPCs until legacy web beta clients are migrated and physical regression checks pass. The manual retirement SQL intentionally lives under `supabase/release-gates/`.
+
+**Payments:** The reviewed PayMongo checkout function denies new recurring-plan sales and the reviewed webhook logs existing signed payment events for manual reconciliation instead of activating subscriptions. These changes are not live until separately deployed; do not deploy them without reconciling outstanding payment sessions and arranging customer support.
