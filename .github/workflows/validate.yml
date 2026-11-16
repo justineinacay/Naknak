@@ -129,19 +129,21 @@ jobs:
         working-directory: native
         run: pnpm lint
 
-      - name: Expo Doctor
-        if: steps.scope.outputs.native == 'true'
-        working-directory: native
-        run: pnpm dlx expo-doctor
+      - name: Verify web safety build
+        if: steps.scope.outputs.web_safety == 'true'
+        run: node scripts/verify-web.mjs
 
       - name: Export Expo web build
         if: steps.scope.outputs.native == 'true'
         working-directory: native
         run: pnpm exec expo export --platform web
 
-      - name: Verify web safety build
-        if: steps.scope.outputs.web_safety == 'true'
-        run: node scripts/verify-web.mjs
+      - name: Expo Doctor
+        if: steps.scope.outputs.native == 'true'
+        working-directory: native
+        run: pnpm dlx expo-doctor
+
+
 
 
   invitation-db-test:
