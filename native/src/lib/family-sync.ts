@@ -13,6 +13,7 @@ export type FamilyConnection = {
   status: 'local' | 'checking' | 'connected' | 'error';
   seniorName?: string;
   lastConfirmedAt?: string;
+  pendingEvents?: number; // durable app-side events not yet acknowledged by server
   message?: string;
 };
 
