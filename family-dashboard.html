@@ -186,6 +186,7 @@ body{background:#140B09;color:#F8EEEA}
   <button data-view="carehub" type="button"><svg><use href="#ic-heart"/></svg> Daily Care Hub</button>
   <button data-view="access" type="button"><svg><use href="#ic-users"/></svg> Family Access</button>
   <button data-view="sharedprep" type="button"><svg><use href="#ic-check"/></svg> Shared Prep</button>
+  <button data-view="privacy" type="button"><svg><use href="#ic-shield"/></svg> Privacy &amp; Data Rights</button>
   <button data-view="helpdesk" type="button"><svg><use href="#ic-shield"/></svg> Support &amp; Launch</button>
   <button data-view="settings" type="button"><svg><use href="#ic-settings"/></svg> Settings &amp; plan</button>
   </nav></div>
@@ -317,6 +318,39 @@ body{background:#140B09;color:#F8EEEA}
       <div class="ops-card"><div class="ops-item"><strong id="ops-prep-mode">Checking checklist storage…</strong><span id="ops-prep-count">0 of 8 checked</span></div><div class="ops-progress"><div id="ops-prep-progress"></div></div><div id="ops-prep-items" class="ops-check-list"></div><p id="ops-prep-message" class="ops-status" aria-live="polite"></p><div class="ops-note">This is a planning list, not proof that supplies are physically present. Vault and medical IDs are not transferred or displayed here.</div></div>
     </section>
     <!-- P2: request tickets use RLS when available, otherwise a transparent email fallback -->
+
+    <!-- Privacy rights requests are intake only, NOT automatic deletion. -->
+    <section id="view-privacy" class="section-view">
+      <div class="header-flex"><div><div class="eyebrow">FAMILY PRIVACY</div>
+        <h1>Privacy &amp; Data Rights</h1>
+        <p>Request access, export, correction or deletion through an authenticated workflow. Requesting deletion does not immediately erase another member’s information.</p>
+      </div><a class="btn" href="privacy.html">Read the privacy notice</a></div>
+      <div class="ops-grid">
+        <div class="ops-card"><h2>Submit a data rights request</h2>
+          <form id="ops-rights-form">
+            <label class="ops-field">What would you like to request?
+              <select id="ops-rights-type" required style="min-height:48px;border:1px solid #decabf;border-radius:12px;padding:10px">
+                <option value="access">Access my information</option>
+                <option value="export">Export my authorized records</option>
+                <option value="correction">Correct inaccurate information</option>
+                <option value="delete_account">Delete my account (subject to verification)</option>
+                <option value="delete_household">Delete this Family Space (owner verification required)</option>
+              </select>
+            </label>
+            <label class="ops-field">Notes (optional; do not include secrets or medical documents)
+              <textarea id="ops-rights-note" maxlength="1200" placeholder="Describe the request without sharing passwords, pairing codes or sensitive medical data."></textarea>
+            </label>
+            <button class="btn primary" type="submit">Submit request</button>
+            <p id="ops-rights-result" class="ops-status" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+        <div class="ops-card"><h2>My requests</h2>
+          <div id="ops-rights-history"><p class="ops-copy">Sign in to check your requests.</p></div>
+          <div class="ops-note">NakNak must verify identity and account ownership before making changes. The server does not delete records simply because a browser button was pressed. Requests are not emergency support.</div>
+        </div>
+      </div>
+    </section>
+
     <section id="view-helpdesk" class="section-view">
       <div class="header-flex"><div><div class="eyebrow">P2 • SUPPORT &amp; RELEASE</div><h1>NakNak Support Center</h1><p>Report account and technical concerns. This is not an emergency help channel.</p></div><a class="btn" href="support.html">Support information</a></div>
       <div class="ops-grid"><div class="ops-card"><h2>Contact support</h2><form id="ops-support-form"><label class="ops-field">Subject<input id="ops-support-subject" maxlength="120" minlength="5" required placeholder="Example: Family Code will not pair"></label><label class="ops-field">How can we help?<textarea id="ops-support-message" maxlength="2000" minlength="10" required placeholder="Explain the problem without sending sensitive medical records or device secrets."></textarea></label><button class="btn primary" type="submit">Submit support request</button><p id="ops-support-result" class="ops-status" aria-live="polite"></p></form></div><div class="ops-card"><h2>My support requests</h2><div id="ops-support-history"><p class="ops-copy">Load the hosted dashboard to view requests.</p></div></div></div>
@@ -364,6 +398,7 @@ body{background:#140B09;color:#F8EEEA}
     });
     closeMenu();
     if(view==='helpdesk')opsLoadSupport();
+    if(view==='privacy')opsLoadRights();
     if(view==='access')opsLoadInvites();
     if(view==='settings')opsLoadBilling();
     window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
@@ -650,6 +685,60 @@ body{background:#140B09;color:#F8EEEA}
       opsText('copy-feedback','New code was not verified. Refresh and check with the household owner.');
     }finally{opsRenderPairing();}
   }
+
+  /* Privacy requests use RLS; no browser may mark a request completed. */
+  async function opsLoadRights(){
+    if(!state.client||!state.session){
+      $('ops-rights-history').textContent='Sign in to see your privacy requests.';return;
+    }
+    $('ops-rights-history').textContent='Checking privacy requests…';
+    try{
+      const {data,error}=await state.client.from('naknak_data_rights_requests')
+        .select('id,request_type,status,created_at')
+        .eq('requester_id',state.session.user.id).order('created_at',{ascending:false}).limit(20);
+      if(error)throw error;
+      $('ops-rights-history').innerHTML=(data||[]).length?data.map(r=>
+        '<div class="ops-item"><div><strong>'+safe(r.request_type||'Request')+'</strong>'+
+        '<p class="ops-copy">'+safe(dtime(r.created_at))+'</p></div>'+
+        '<span class="ops-pill neutral">'+safe(r.status||'Unknown')+'</span></div>'
+      ).join(''):'<p class="ops-copy">No requests have been submitted.</p>';
+    }catch(_){
+      $('ops-rights-history').innerHTML='<div class="ops-note">Secure request history is not available. Use the email option below; no server record was confirmed.</div>';
+    }
+  }
+  async function opsSubmitRights(event){
+    event.preventDefault();
+    const output=$('ops-rights-result');
+    const requestType=$('ops-rights-type').value;
+    const note=$('ops-rights-note').value.trim();
+    const allowed=new Set(['access','export','correction','delete_account','delete_household']);
+    if(!allowed.has(requestType)||note.length>1200){
+      output.textContent='Select a valid request and limit notes to 1200 characters.';return;
+    }
+    if(!state.client||!state.session||!state.household){
+      output.textContent='Please sign in to the hosted Family Dashboard to submit.';
+      return;
+    }
+    const button=$('ops-rights-form').querySelector('button[type="submit"]');
+    button.disabled=true;output.textContent='Submitting request securely…';
+    try{
+      const {error}=await state.client.from('naknak_data_rights_requests').insert({
+        requester_id:state.session.user.id,household_id:state.household.id,
+        request_type:requestType,note,status:'received',
+      });
+      if(error)throw error;
+      output.textContent='Request received by the NakNak server. Records have not been changed or deleted.';
+      $('ops-rights-note').value='';await opsLoadRights();
+    }catch(_){
+      output.textContent='Secure request storage is unavailable. No request was submitted.';
+      let link=$('ops-rights-email');
+      if(!link){link=document.createElement('a');link.id='ops-rights-email';link.className='btn';link.textContent='Prepare an email request';output.after(link);}
+      link.hidden=false;
+      link.href='mailto:naknak@gmail.com?subject='+encodeURIComponent('NakNak Data Rights Request: '+requestType)
+        +'&body='+encodeURIComponent(note.slice(0,1000));
+    }finally{button.disabled=false;}
+  }
+
   function opsRenderWarnings(){
     const issues=[];
     if(!state.session){
@@ -1013,6 +1102,7 @@ body{background:#140B09;color:#F8EEEA}
   $('ops-run-check').addEventListener('click',opsRunConnection);
   $('ops-prep-items').addEventListener('change',e=>{const box=e.target.closest('input[data-prep]');if(box)opsTogglePrep(box.dataset.prep,box.checked);});
   $('ops-support-form').addEventListener('submit',opsSubmitSupport);
+  $('ops-rights-form').addEventListener('submit',opsSubmitRights);
   window.addEventListener('online',()=>opsText('ops-network','Browser reports online'));
   window.addEventListener('offline',()=>opsText('ops-network','Browser reports offline'));
   $('sign-in-form').addEventListener('submit',async e=>{e.preventDefault();visibleError('auth-error','');$('auth-sent').textContent='';const email=$('email').value.trim();if(!email||!$('email').checkValidity()){visibleError('auth-error','Please enter a valid email address.');return}let b=$('send-link');b.disabled=true;try{const redirect=new URL('family-dashboard.html',location.href).href;const {error}=await state.client.auth.signInWithOtp({email,options:{emailRedirectTo:redirect}});if(error)throw error;$('auth-sent').textContent='Check your inbox for a secure sign-in link. You can safely close this tab.';}catch(err){visibleError('auth-error',err.message||'Unable to send email. Try again.')}finally{b.disabled=false}});
