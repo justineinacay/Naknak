@@ -188,7 +188,7 @@ grant select on public.naknak_devices to authenticated;
 create or replace function public.native_device_report(
   p_secret text,p_event text,p_client_time timestamptz default now()
 ) returns table(delivered boolean,rev bigint)
-language plpgsql security definer set search_path='' as $
+language plpgsql security definer set search_path='' as $$
 declare v_rev bigint;
 begin
   update public.naknak_state set rev=naknak_state.rev+1
@@ -196,12 +196,12 @@ begin
     returning naknak_state.rev into v_rev;
   if v_rev is null then raise exception 'Bad credential'; end if;
   return query select true,v_rev;
-end $;
+end $$;
 revoke all on function public.native_device_report(text,text,timestamptz) from public,anon,authenticated;
 grant execute on function public.native_device_report(text,text,timestamptz) to anon;
 \ir ../supabase/migrations/20261116090000_native_outbox_event_receipts.sql
 
-do $
+do $$
 begin
   if has_column_privilege('authenticated','public.naknak_devices','device_secret','SELECT') then
     raise exception 'Device secret is readable by caregiver';
@@ -215,7 +215,7 @@ begin
   if has_function_privilege('authenticated','public.native_device_report_once(text,text,text)','EXECUTE') then
     raise exception 'Authenticated users must not call device-secret report API';
   end if;
-end $;
+end $$;
 
 set role anon;
 select delivered,duplicate,rev from public.native_device_report_once(
@@ -225,7 +225,7 @@ select delivered,duplicate,rev from public.native_device_report_once(
   repeat('a',48),'check_in_ok','event-1700000000000-abc123'
 );
 reset role;
-do $
+do $$
 declare c bigint;
 begin
   select rev into c from public.naknak_state
@@ -234,10 +234,10 @@ begin
   if (select count(*) from public.naknak_native_event_receipts)<>1 then
     raise exception 'Duplicate event created a second receipt';
   end if;
-end $;
+end $$;
 
 set role anon;
-do $
+do $$
 declare denied boolean:=false;
 begin
   begin
@@ -246,7 +246,7 @@ begin
     );
   exception when others then denied:=true; end;
   if not denied then raise exception 'Invalid device credential accepted'; end if;
-end $;
+end $$;
 reset role;
 
 select 'PASS: caregiver invitations, subscription RLS, private device secrets and idempotent event receipts' as result;
