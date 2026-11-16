@@ -165,4 +165,89 @@ begin
 end $$;
 
 reset role;
-select 'PASS: one-use owner-only invites; subscription SELECT-only access scoped by RLS' as result;
+
+-- P0: native idempotent receipt and device bearer-secret privacy tests.
+create table public.naknak_devices (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid not null references public.naknak_households(id),
+  device_secret text not null unique,
+  device_label text,senior_id text,
+  paired_at timestamptz default now(),last_seen_at timestamptz default now()
+);
+create table public.naknak_state (
+  household_id uuid primary key references public.naknak_households(id),
+  rev bigint not null default 0
+);
+insert into public.naknak_state(household_id) values
+('11111111-1111-4111-8111-111111111111');
+insert into public.naknak_devices(household_id,device_secret,senior_id)
+values
+('11111111-1111-4111-8111-111111111111',repeat('a',48),'alice');
+
+grant select on public.naknak_devices to authenticated;
+create or replace function public.native_device_report(
+  p_secret text,p_event text,p_client_time timestamptz default now()
+) returns table(delivered boolean,rev bigint)
+language plpgsql security definer set search_path='' as $
+declare v_rev bigint;
+begin
+  update public.naknak_state set rev=naknak_state.rev+1
+    where household_id=(select household_id from public.naknak_devices where device_secret=p_secret)
+    returning naknak_state.rev into v_rev;
+  if v_rev is null then raise exception 'Bad credential'; end if;
+  return query select true,v_rev;
+end $;
+revoke all on function public.native_device_report(text,text,timestamptz) from public,anon,authenticated;
+grant execute on function public.native_device_report(text,text,timestamptz) to anon;
+\ir ../supabase/migrations/20261116090000_native_outbox_event_receipts.sql
+
+do $
+begin
+  if has_column_privilege('authenticated','public.naknak_devices','device_secret','SELECT') then
+    raise exception 'Device secret is readable by caregiver';
+  end if;
+  if not has_column_privilege('authenticated','public.naknak_devices','device_label','SELECT') then
+    raise exception 'Device metadata should remain readable';
+  end if;
+  if has_table_privilege('anon','public.naknak_native_event_receipts','SELECT') then
+    raise exception 'Anonymous receipts are exposed';
+  end if;
+  if has_function_privilege('authenticated','public.native_device_report_once(text,text,text)','EXECUTE') then
+    raise exception 'Authenticated users must not call device-secret report API';
+  end if;
+end $;
+
+set role anon;
+select delivered,duplicate,rev from public.native_device_report_once(
+  repeat('a',48),'check_in_ok','event-1700000000000-abc123'
+);
+select delivered,duplicate,rev from public.native_device_report_once(
+  repeat('a',48),'check_in_ok','event-1700000000000-abc123'
+);
+reset role;
+do $
+declare c bigint;
+begin
+  select rev into c from public.naknak_state
+    where household_id='11111111-1111-4111-8111-111111111111';
+  if c<>1 then raise exception 'Duplicate report incremented revision'; end if;
+  if (select count(*) from public.naknak_native_event_receipts)<>1 then
+    raise exception 'Duplicate event created a second receipt';
+  end if;
+end $;
+
+set role anon;
+do $
+declare denied boolean:=false;
+begin
+  begin
+    perform public.native_device_report_once(
+      repeat('b',48),'check_in_ok','event-1700000000001-abc123'
+    );
+  exception when others then denied:=true; end;
+  if not denied then raise exception 'Invalid device credential accepted'; end if;
+end $;
+reset role;
+
+select 'PASS: caregiver invitations, subscription RLS, private device secrets and idempotent event receipts' as result;
+
